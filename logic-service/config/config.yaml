@@ -1,0 +1,10 @@
+# FamilyOS Logic Service 配置文件
+
+server:
+  grpc_port: 50051
+
+database:
+  dsn: "root:20020208@tcp(127.0.0.1:3306)/familyos_logic?charset=utf8mb4&parseTime=true"
+
+jwt:
+  secret: "your-secret-key"

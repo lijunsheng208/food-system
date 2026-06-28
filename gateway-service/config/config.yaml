@@ -1,0 +1,7 @@
+# FamilyOS Gateway Service 配置文件
+
+server:
+  http_port: 8080
+
+grpc:
+  target: "localhost:50051"
