@@ -14,6 +14,7 @@ import (
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
 
 	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
+	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/mysql"
@@ -42,6 +43,10 @@ func main() {
 	authSvc := service.NewAuthService(userRepo, cfg.JWT.Secret)
 	authServer := server.NewAuthServer(authSvc)
 
+	dishRepo := repository.NewDishRepo(db)
+	dishSvc := service.NewDishService(dishRepo)
+	dishServer := server.NewDishServer(dishSvc)
+
 	// 4. 启动 gRPC Server
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPCPort))
 	if err != nil {
@@ -50,6 +55,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	authv1.RegisterAuthServiceServer(grpcServer, authServer)
+	dishv1.RegisterDishServiceServer(grpcServer, dishServer)
 
 	// 注册反射服务（方便 grpcurl 调试）
 	reflection.Register(grpcServer)

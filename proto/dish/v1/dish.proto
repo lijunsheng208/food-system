@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package dish.v1;
+
+option go_package = "github.com/lijunsheng/familyos/proto/gen/dish/v1;dishv1";
+
+// DishService 菜谱服务
+service DishService {
+  // ListCategories 查询所有启用的分类列表
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
+  // ListDishesByCategory 根据分类查询菜谱列表
+  rpc ListDishesByCategory(ListDishesByCategoryRequest) returns (ListDishesByCategoryResponse);
+}
+
+// ========== Category ==========
+
+message CategoryInfo {
+  int64  id   = 1; // 分类ID
+  string name = 2; // 分类名称
+  int32  sort = 3; // 排序
+}
+
+message ListCategoriesRequest {}
+
+message ListCategoriesResponse {
+  int32                 code       = 1;
+  string                message    = 2;
+  repeated CategoryInfo categories = 3;
+}
+
+// ========== Dish ==========
+
+message DishInfo {
+  int64  id          = 1;  // 菜谱ID
+  int64  category_id = 2;  // 所属分类ID
+  string name        = 3;  // 菜名
+  string description = 4;  // 描述
+  string image_key   = 5;  // OSS图片key
+  int32  sort        = 6;  // 排序
+  string created_at  = 7;  // 创建时间
+  string updated_at  = 8;  // 更新时间
+}
+
+message ListDishesByCategoryRequest {
+  int64 category_id = 1; // 分类ID
+}
+
+message ListDishesByCategoryResponse {
+  int32             code    = 1;
+  string            message = 2;
+  repeated DishInfo dishes  = 3;
+}

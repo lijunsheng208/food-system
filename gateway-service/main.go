@@ -45,6 +45,7 @@ func main() {
 
 	// 4. 注册路由
 	authHandler := handler.NewAuthHandler(conn)
+	dishHandler := handler.NewDishHandler(conn)
 
 	api := r.Group("/api/v1")
 	{
@@ -52,6 +53,12 @@ func main() {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+		}
+
+		dish := api.Group("/dish")
+		{
+			dish.GET("/categories", dishHandler.ListCategories)
+			dish.GET("/dishes", dishHandler.ListDishesByCategory)
 		}
 	}
 
