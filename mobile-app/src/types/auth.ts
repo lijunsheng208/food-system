@@ -54,6 +54,7 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   Main: undefined;
+  ProfileDetail: undefined;
 };
 
 export type MainTabParamList = {

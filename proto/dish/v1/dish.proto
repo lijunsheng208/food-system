@@ -10,6 +10,8 @@ service DishService {
   rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse);
   // ListDishesByCategory 根据分类查询菜谱列表
   rpc ListDishesByCategory(ListDishesByCategoryRequest) returns (ListDishesByCategoryResponse);
+  // SearchDishes 按标题关键字搜索菜谱
+  rpc SearchDishes(SearchDishesRequest) returns (SearchDishesResponse);
 }
 
 // ========== Category ==========
@@ -46,6 +48,18 @@ message ListDishesByCategoryRequest {
 }
 
 message ListDishesByCategoryResponse {
+  int32             code    = 1;
+  string            message = 2;
+  repeated DishInfo dishes  = 3;
+}
+
+// ========== Search ==========
+
+message SearchDishesRequest {
+  string keyword = 1; // 搜索关键字
+}
+
+message SearchDishesResponse {
   int32             code    = 1;
   string            message = 2;
   repeated DishInfo dishes  = 3;

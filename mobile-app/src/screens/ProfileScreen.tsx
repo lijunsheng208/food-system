@@ -6,6 +6,7 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,6 +22,10 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+
+  const handleGoProfileDetail = () => {
+    navigation.navigate('ProfileDetail');
+  };
 
   const nickname = user?.nickname ?? '未设置昵称';
   const avatarLetter = nickname.charAt(0).toUpperCase();
@@ -57,10 +62,18 @@ export default function ProfileScreen() {
         <Text style={styles.pageTitle}>我的</Text>
 
         {/* 个人信息卡片 */}
-        <View style={styles.profileCard}>
+        <TouchableOpacity
+          style={styles.profileCard}
+          activeOpacity={0.7}
+          onPress={handleGoProfileDetail}
+        >
           {/* 头像 */}
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{avatarLetter}</Text>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>{avatarLetter}</Text>
+            )}
           </View>
 
           {/* 用户名 + 家庭 */}
@@ -87,7 +100,7 @@ export default function ProfileScreen() {
             size={20}
             color={colors.textSecondary}
           />
-        </View>
+        </TouchableOpacity>
 
         {/* 菜单卡片 */}
         <View style={styles.menuCard}>
@@ -174,6 +187,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: colors.primary,
+  },
+  avatarImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   userInfo: {
     flex: 1,

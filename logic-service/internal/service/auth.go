@@ -90,6 +90,50 @@ func (s *AuthService) Register(ctx context.Context, phone, plainPassword, nickna
 	}, nil
 }
 
+// GetProfileResult 个人信息结果
+type GetProfileResult struct {
+	User       *model.User
+	FamilyName string
+}
+
+// GetProfile 查询用户个人信息
+func (s *AuthService) GetProfile(ctx context.Context, userID uint64) (*GetProfileResult, error) {
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, ErrUserNotFound
+	}
+
+	// TODO: 查询用户所属家庭，目前返回空
+	return &GetProfileResult{
+		User:       user,
+		FamilyName: "",
+	}, nil
+}
+
+// UpdateProfile 更新用户个人信息
+func (s *AuthService) UpdateProfile(ctx context.Context, userID uint64, nickname, avatar string, gender int32) error {
+	updates := make(map[string]interface{})
+
+	if nickname != "" {
+		updates["nickname"] = nickname
+	}
+	if avatar != "" {
+		updates["avatar"] = avatar
+	}
+	if gender >= 0 {
+		updates["gender"] = int8(gender)
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	return s.userRepo.UpdateProfile(ctx, userID, updates)
+}
+
 // LoginResult 登录结果
 type LoginResult struct {
 	User  *model.User

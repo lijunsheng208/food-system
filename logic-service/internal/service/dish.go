@@ -32,3 +32,8 @@ func (s *DishService) ListCategories(ctx context.Context) ([]model.DishCategory,
 func (s *DishService) ListDishesByCategory(ctx context.Context, categoryID uint64) ([]model.Dish, error) {
 	return s.dishRepo.ListDishesByCategory(ctx, categoryID)
 }
+
+// SearchDishes 按关键字搜索菜谱
+func (s *DishService) SearchDishes(ctx context.Context, keyword string) ([]model.Dish, error) {
+	return s.dishRepo.SearchDishes(ctx, keyword)
+}

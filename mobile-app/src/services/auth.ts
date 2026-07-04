@@ -46,6 +46,72 @@ export async function registerAndSaveToken(
   return resp;
 }
 
+interface ProfileResponse {
+  code: number;
+  message: string;
+  user: import('../types/auth').UserInfo;
+  family_name: string;
+}
+
+/**
+ * 查询用户个人信息
+ */
+export async function getProfile(userId: number) {
+  const { data } = await api.get<ProfileResponse>('/auth/profile', {
+    params: { user_id: userId },
+  });
+  if (data.code !== 0) {
+    throw new Error(data.message || '查询失败');
+  }
+  return data;
+}
+
+/**
+ * 更新用户个人信息
+ */
+export async function updateProfile(params: {
+  user_id: number;
+  nickname?: string;
+  avatar?: string;
+  gender?: number;
+}) {
+  const { data } = await api.put<{ code: number; message: string }>(
+    '/auth/profile',
+    params,
+  );
+  if (data.code !== 0) {
+    throw new Error(data.message || '更新失败');
+  }
+  return data;
+}
+
+/**
+ * 上传头像到 OSS，返回 URL
+ */
+export async function uploadAvatar(
+  userId: number,
+  uri: string,
+  filename: string,
+): Promise<string> {
+  const formData = new FormData();
+  formData.append('user_id', String(userId));
+  formData.append('file', {
+    uri,
+    name: filename,
+    type: 'image/jpeg',
+  } as any);
+
+  const { data } = await api.post<{ code: number; message: string; url: string }>(
+    '/upload/avatar',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  );
+  if (data.code !== 0) {
+    throw new Error(data.message || '上传失败');
+  }
+  return data.url;
+}
+
 /**
  * 登录成功后自动保存 Token
  */

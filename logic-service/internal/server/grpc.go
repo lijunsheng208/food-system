@@ -69,6 +69,40 @@ func (s *AuthServer) Login(ctx context.Context, req *authv1.LoginRequest) (*auth
 	}, nil
 }
 
+// GetProfile 实现查询个人信息接口
+func (s *AuthServer) GetProfile(ctx context.Context, req *authv1.GetProfileRequest) (*authv1.GetProfileResponse, error) {
+	result, err := s.svc.GetProfile(ctx, uint64(req.UserId))
+	if err != nil {
+		return &authv1.GetProfileResponse{
+			Code:    mapErrorCode(err),
+			Message: err.Error(),
+		}, nil
+	}
+
+	return &authv1.GetProfileResponse{
+		Code:       CodeSuccess,
+		Message:    "查询成功",
+		User:       toUserInfo(result.User),
+		FamilyName: result.FamilyName,
+	}, nil
+}
+
+// UpdateProfile 实现更新个人信息接口
+func (s *AuthServer) UpdateProfile(ctx context.Context, req *authv1.UpdateProfileRequest) (*authv1.UpdateProfileResponse, error) {
+	err := s.svc.UpdateProfile(ctx, uint64(req.UserId), req.Nickname, req.Avatar, req.Gender)
+	if err != nil {
+		return &authv1.UpdateProfileResponse{
+			Code:    CodeInternalError,
+			Message: err.Error(),
+		}, nil
+	}
+
+	return &authv1.UpdateProfileResponse{
+		Code:    CodeSuccess,
+		Message: "更新成功",
+	}, nil
+}
+
 // mapErrorCode 将业务错误映射为状态码
 func mapErrorCode(err error) int32 {
 	switch {

@@ -63,6 +63,28 @@ func (s *DishServer) ListDishesByCategory(ctx context.Context, req *dishv1.ListD
 	}, nil
 }
 
+// SearchDishes 实现搜索菜谱接口
+func (s *DishServer) SearchDishes(ctx context.Context, req *dishv1.SearchDishesRequest) (*dishv1.SearchDishesResponse, error) {
+	dishes, err := s.svc.SearchDishes(ctx, req.Keyword)
+	if err != nil {
+		return &dishv1.SearchDishesResponse{
+			Code:    CodeInternalError,
+			Message: "搜索菜谱失败",
+		}, nil
+	}
+
+	dishInfos := make([]*dishv1.DishInfo, 0, len(dishes))
+	for _, d := range dishes {
+		dishInfos = append(dishInfos, toDishInfo(&d))
+	}
+
+	return &dishv1.SearchDishesResponse{
+		Code:    CodeSuccess,
+		Message: "搜索成功",
+		Dishes:  dishInfos,
+	}, nil
+}
+
 // toCategoryInfo 将 model.DishCategory 转为 proto CategoryInfo
 func toCategoryInfo(c *model.DishCategory) *dishv1.CategoryInfo {
 	return &dishv1.CategoryInfo{

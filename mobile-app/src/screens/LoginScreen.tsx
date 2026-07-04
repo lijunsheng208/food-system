@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../theme';
 import { validateLogin } from '../utils/validation';
 import { loginAndSaveToken } from '../services/auth';
+import { saveUserId } from '../services/api';
 import { ErrorMessages } from '../types/auth';
 import type { AuthStackParamList } from '../types/auth';
 import { useUser } from '../contexts/UserContext';
@@ -46,6 +47,7 @@ export default function LoginScreen({ navigation }: Props) {
       const resp = await loginAndSaveToken(phone, password);
       if (resp.code === 0) {
         setUser(resp.user);
+        saveUserId(resp.user.id);
         navigation.reset({
           index: 0,
           routes: [{ name: 'Main' }],

@@ -36,3 +36,13 @@ func (r *DishRepo) ListDishesByCategory(ctx context.Context, categoryID uint64) 
 		Find(&dishes).Error
 	return dishes, err
 }
+
+// SearchDishes 按关键字搜索上架菜谱名称
+func (r *DishRepo) SearchDishes(ctx context.Context, keyword string) ([]model.Dish, error) {
+	var dishes []model.Dish
+	err := r.db.WithContext(ctx).
+		Where("name LIKE ? AND status = ?", "%"+keyword+"%", model.DishStatusOnSale).
+		Order("sort ASC, id ASC").
+		Find(&dishes).Error
+	return dishes, err
+}

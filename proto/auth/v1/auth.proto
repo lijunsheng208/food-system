@@ -10,6 +10,10 @@ service AuthService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   // Login 用户登录
   rpc Login(LoginRequest) returns (LoginResponse);
+  // GetProfile 查询用户个人信息
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  // UpdateProfile 更新用户个人信息
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
 }
 
 // ========== Register ==========
@@ -39,6 +43,33 @@ message LoginResponse {
   string   message = 2;
   string   token   = 3;
   UserInfo user    = 4;
+}
+
+// ========== GetProfile ==========
+
+message GetProfileRequest {
+  int64 user_id = 1; // 用户ID
+}
+
+message GetProfileResponse {
+  int32    code        = 1;
+  string   message     = 2;
+  UserInfo user        = 3;
+  string   family_name = 4; // 当前家庭名称（空表示未加入）
+}
+
+// ========== UpdateProfile ==========
+
+message UpdateProfileRequest {
+  int64  user_id  = 1;
+  string nickname = 2; // 昵称（空则不更新）
+  string avatar   = 3; // 头像（空则不更新）
+  int32  gender   = 4; // 性别 -1=不更新, 0=未知, 1=男, 2=女
+}
+
+message UpdateProfileResponse {
+  int32  code    = 1;
+  string message = 2;
 }
 
 // ========== UserInfo ==========

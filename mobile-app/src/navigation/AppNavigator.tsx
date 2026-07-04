@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { getToken } from '../services/api';
+import { getToken, getUserId } from '../services/api';
+import { getProfile } from '../services/auth';
+import { useUser } from '../contexts/UserContext';
 import { colors } from '../theme';
 import type { AuthStackParamList, MainTabParamList } from '../types/auth';
 
@@ -11,6 +13,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RecipeScreen from '../screens/RecipeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ProfileDetailScreen from '../screens/ProfileDetailScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -74,11 +77,31 @@ export default function AppNavigator() {
   const [initialRoute, setInitialRoute] =
     useState<keyof AuthStackParamList>('Login');
   const [isLoading, setIsLoading] = useState(true);
+  const { setUser } = useUser();
 
   useEffect(() => {
     (async () => {
       const token = await getToken();
-      setInitialRoute(token ? 'Main' : 'Login');
+      if (!token) {
+        setInitialRoute('Login');
+        setIsLoading(false);
+        return;
+      }
+
+      // 有 token，尝试从服务端拉取最新用户数据
+      const userId = await getUserId();
+      if (userId) {
+        try {
+          const profile = await getProfile(userId);
+          if (profile.user) {
+            setUser(profile.user);
+          }
+        } catch {
+          // 获取失败不影响导航，使用本地缓存数据
+        }
+      }
+
+      setInitialRoute('Main');
       setIsLoading(false);
     })();
   }, []);
@@ -93,6 +116,11 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen
+        name="ProfileDetail"
+        component={ProfileDetailScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
     </Stack.Navigator>
   );
 }

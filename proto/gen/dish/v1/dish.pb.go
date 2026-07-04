@@ -381,6 +381,110 @@ func (x *ListDishesByCategoryResponse) GetDishes() []*DishInfo {
 	return nil
 }
 
+type SearchDishesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Keyword       string                 `protobuf:"bytes,1,opt,name=keyword,proto3" json:"keyword,omitempty"` // 搜索关键字
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchDishesRequest) Reset() {
+	*x = SearchDishesRequest{}
+	mi := &file_dish_v1_dish_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchDishesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchDishesRequest) ProtoMessage() {}
+
+func (x *SearchDishesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchDishesRequest.ProtoReflect.Descriptor instead.
+func (*SearchDishesRequest) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *SearchDishesRequest) GetKeyword() string {
+	if x != nil {
+		return x.Keyword
+	}
+	return ""
+}
+
+type SearchDishesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Dishes        []*DishInfo            `protobuf:"bytes,3,rep,name=dishes,proto3" json:"dishes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchDishesResponse) Reset() {
+	*x = SearchDishesResponse{}
+	mi := &file_dish_v1_dish_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchDishesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchDishesResponse) ProtoMessage() {}
+
+func (x *SearchDishesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchDishesResponse.ProtoReflect.Descriptor instead.
+func (*SearchDishesResponse) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *SearchDishesResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *SearchDishesResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *SearchDishesResponse) GetDishes() []*DishInfo {
+	if x != nil {
+		return x.Dishes
+	}
+	return nil
+}
+
 var File_dish_v1_dish_proto protoreflect.FileDescriptor
 
 const file_dish_v1_dish_proto_rawDesc = "" +
@@ -415,10 +519,17 @@ const file_dish_v1_dish_proto_rawDesc = "" +
 	"\x1cListDishesByCategoryResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12)\n" +
-	"\x06dishes\x18\x03 \x03(\v2\x11.dish.v1.DishInfoR\x06dishes2\xc5\x01\n" +
+	"\x06dishes\x18\x03 \x03(\v2\x11.dish.v1.DishInfoR\x06dishes\"/\n" +
+	"\x13SearchDishesRequest\x12\x18\n" +
+	"\akeyword\x18\x01 \x01(\tR\akeyword\"o\n" +
+	"\x14SearchDishesResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12)\n" +
+	"\x06dishes\x18\x03 \x03(\v2\x11.dish.v1.DishInfoR\x06dishes2\x92\x02\n" +
 	"\vDishService\x12Q\n" +
 	"\x0eListCategories\x12\x1e.dish.v1.ListCategoriesRequest\x1a\x1f.dish.v1.ListCategoriesResponse\x12c\n" +
-	"\x14ListDishesByCategory\x12$.dish.v1.ListDishesByCategoryRequest\x1a%.dish.v1.ListDishesByCategoryResponseB9Z7github.com/lijunsheng/familyos/proto/gen/dish/v1;dishv1b\x06proto3"
+	"\x14ListDishesByCategory\x12$.dish.v1.ListDishesByCategoryRequest\x1a%.dish.v1.ListDishesByCategoryResponse\x12K\n" +
+	"\fSearchDishes\x12\x1c.dish.v1.SearchDishesRequest\x1a\x1d.dish.v1.SearchDishesResponseB9Z7github.com/lijunsheng/familyos/proto/gen/dish/v1;dishv1b\x06proto3"
 
 var (
 	file_dish_v1_dish_proto_rawDescOnce sync.Once
@@ -432,7 +543,7 @@ func file_dish_v1_dish_proto_rawDescGZIP() []byte {
 	return file_dish_v1_dish_proto_rawDescData
 }
 
-var file_dish_v1_dish_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_dish_v1_dish_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_dish_v1_dish_proto_goTypes = []any{
 	(*CategoryInfo)(nil),                 // 0: dish.v1.CategoryInfo
 	(*ListCategoriesRequest)(nil),        // 1: dish.v1.ListCategoriesRequest
@@ -440,19 +551,24 @@ var file_dish_v1_dish_proto_goTypes = []any{
 	(*DishInfo)(nil),                     // 3: dish.v1.DishInfo
 	(*ListDishesByCategoryRequest)(nil),  // 4: dish.v1.ListDishesByCategoryRequest
 	(*ListDishesByCategoryResponse)(nil), // 5: dish.v1.ListDishesByCategoryResponse
+	(*SearchDishesRequest)(nil),          // 6: dish.v1.SearchDishesRequest
+	(*SearchDishesResponse)(nil),         // 7: dish.v1.SearchDishesResponse
 }
 var file_dish_v1_dish_proto_depIdxs = []int32{
 	0, // 0: dish.v1.ListCategoriesResponse.categories:type_name -> dish.v1.CategoryInfo
 	3, // 1: dish.v1.ListDishesByCategoryResponse.dishes:type_name -> dish.v1.DishInfo
-	1, // 2: dish.v1.DishService.ListCategories:input_type -> dish.v1.ListCategoriesRequest
-	4, // 3: dish.v1.DishService.ListDishesByCategory:input_type -> dish.v1.ListDishesByCategoryRequest
-	2, // 4: dish.v1.DishService.ListCategories:output_type -> dish.v1.ListCategoriesResponse
-	5, // 5: dish.v1.DishService.ListDishesByCategory:output_type -> dish.v1.ListDishesByCategoryResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 2: dish.v1.SearchDishesResponse.dishes:type_name -> dish.v1.DishInfo
+	1, // 3: dish.v1.DishService.ListCategories:input_type -> dish.v1.ListCategoriesRequest
+	4, // 4: dish.v1.DishService.ListDishesByCategory:input_type -> dish.v1.ListDishesByCategoryRequest
+	6, // 5: dish.v1.DishService.SearchDishes:input_type -> dish.v1.SearchDishesRequest
+	2, // 6: dish.v1.DishService.ListCategories:output_type -> dish.v1.ListCategoriesResponse
+	5, // 7: dish.v1.DishService.ListDishesByCategory:output_type -> dish.v1.ListDishesByCategoryResponse
+	7, // 8: dish.v1.DishService.SearchDishes:output_type -> dish.v1.SearchDishesResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_dish_v1_dish_proto_init() }
@@ -466,7 +582,7 @@ func file_dish_v1_dish_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dish_v1_dish_proto_rawDesc), len(file_dish_v1_dish_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

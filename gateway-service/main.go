@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lijunsheng/familyos/gateway-service/config"
 	"github.com/lijunsheng/familyos/gateway-service/internal/handler"
+	"github.com/lijunsheng/familyos/pkg/oss"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -35,7 +36,26 @@ func main() {
 	defer conn.Close()
 	log.Printf("已连接到 gRPC 服务: %s", cfg.GRPC.Target)
 
-	// 3. 创建 Gin 引擎
+	// 3. 初始化 OSS 客户端（配置为空则跳过）
+	var ossClient *oss.Client
+	if cfg.OSS.Endpoint != "" && cfg.OSS.AccessKeyID != "" {
+		ossClient, err = oss.NewClient(oss.Config{
+			Endpoint:        cfg.OSS.Endpoint,
+			AccessKeyID:     cfg.OSS.AccessKeyID,
+			AccessKeySecret: cfg.OSS.AccessKeySecret,
+			BucketName:      cfg.OSS.BucketName,
+			CustomDomain:    cfg.OSS.CustomDomain,
+		})
+		if err != nil {
+			log.Printf("OSS 初始化失败（上传功能不可用）: %v", err)
+		} else {
+			log.Println("OSS 客户端初始化成功")
+		}
+	} else {
+		log.Println("OSS 未配置，上传功能不可用")
+	}
+
+	// 4. 创建 Gin 引擎
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 
@@ -43,9 +63,10 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	// 4. 注册路由
+	// 5. 注册路由
 	authHandler := handler.NewAuthHandler(conn)
 	dishHandler := handler.NewDishHandler(conn)
+	uploadHandler := handler.NewUploadHandler(ossClient)
 
 	api := r.Group("/api/v1")
 	{
@@ -53,12 +74,20 @@ func main() {
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
+			auth.GET("/profile", authHandler.GetProfile)
+			auth.PUT("/profile", authHandler.UpdateProfile)
 		}
 
 		dish := api.Group("/dish")
 		{
 			dish.GET("/categories", dishHandler.ListCategories)
 			dish.GET("/dishes", dishHandler.ListDishesByCategory)
+			dish.GET("/search", dishHandler.SearchDishes)
+		}
+
+		upload := api.Group("/upload")
+		{
+			upload.POST("/avatar", uploadHandler.UploadAvatar)
 		}
 	}
 

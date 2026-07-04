@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	DishService_ListCategories_FullMethodName       = "/dish.v1.DishService/ListCategories"
 	DishService_ListDishesByCategory_FullMethodName = "/dish.v1.DishService/ListDishesByCategory"
+	DishService_SearchDishes_FullMethodName         = "/dish.v1.DishService/SearchDishes"
 )
 
 // DishServiceClient is the client API for DishService service.
@@ -33,6 +34,8 @@ type DishServiceClient interface {
 	ListCategories(ctx context.Context, in *ListCategoriesRequest, opts ...grpc.CallOption) (*ListCategoriesResponse, error)
 	// ListDishesByCategory 根据分类查询菜谱列表
 	ListDishesByCategory(ctx context.Context, in *ListDishesByCategoryRequest, opts ...grpc.CallOption) (*ListDishesByCategoryResponse, error)
+	// SearchDishes 按标题关键字搜索菜谱
+	SearchDishes(ctx context.Context, in *SearchDishesRequest, opts ...grpc.CallOption) (*SearchDishesResponse, error)
 }
 
 type dishServiceClient struct {
@@ -63,6 +66,16 @@ func (c *dishServiceClient) ListDishesByCategory(ctx context.Context, in *ListDi
 	return out, nil
 }
 
+func (c *dishServiceClient) SearchDishes(ctx context.Context, in *SearchDishesRequest, opts ...grpc.CallOption) (*SearchDishesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchDishesResponse)
+	err := c.cc.Invoke(ctx, DishService_SearchDishes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DishServiceServer is the server API for DishService service.
 // All implementations must embed UnimplementedDishServiceServer
 // for forward compatibility.
@@ -73,6 +86,8 @@ type DishServiceServer interface {
 	ListCategories(context.Context, *ListCategoriesRequest) (*ListCategoriesResponse, error)
 	// ListDishesByCategory 根据分类查询菜谱列表
 	ListDishesByCategory(context.Context, *ListDishesByCategoryRequest) (*ListDishesByCategoryResponse, error)
+	// SearchDishes 按标题关键字搜索菜谱
+	SearchDishes(context.Context, *SearchDishesRequest) (*SearchDishesResponse, error)
 	mustEmbedUnimplementedDishServiceServer()
 }
 
@@ -88,6 +103,9 @@ func (UnimplementedDishServiceServer) ListCategories(context.Context, *ListCateg
 }
 func (UnimplementedDishServiceServer) ListDishesByCategory(context.Context, *ListDishesByCategoryRequest) (*ListDishesByCategoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListDishesByCategory not implemented")
+}
+func (UnimplementedDishServiceServer) SearchDishes(context.Context, *SearchDishesRequest) (*SearchDishesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchDishes not implemented")
 }
 func (UnimplementedDishServiceServer) mustEmbedUnimplementedDishServiceServer() {}
 func (UnimplementedDishServiceServer) testEmbeddedByValue()                     {}
@@ -146,6 +164,24 @@ func _DishService_ListDishesByCategory_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DishService_SearchDishes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchDishesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DishServiceServer).SearchDishes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DishService_SearchDishes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DishServiceServer).SearchDishes(ctx, req.(*SearchDishesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DishService_ServiceDesc is the grpc.ServiceDesc for DishService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -160,6 +196,10 @@ var DishService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListDishesByCategory",
 			Handler:    _DishService_ListDishesByCategory_Handler,
+		},
+		{
+			MethodName: "SearchDishes",
+			Handler:    _DishService_SearchDishes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

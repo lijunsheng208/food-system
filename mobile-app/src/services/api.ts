@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from '../config';
 
 const TOKEN_KEY = 'auth_token';
+const USER_ID_KEY = 'auth_user_id';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -67,8 +68,26 @@ export async function getToken(): Promise<string | null> {
 export async function removeToken(): Promise<void> {
   try {
     await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(USER_ID_KEY);
   } catch {
     // ignore
+  }
+}
+
+export async function saveUserId(userId: number): Promise<void> {
+  try {
+    await SecureStore.setItemAsync(USER_ID_KEY, String(userId));
+  } catch {
+    // ignore
+  }
+}
+
+export async function getUserId(): Promise<number | null> {
+  try {
+    const val = await SecureStore.getItemAsync(USER_ID_KEY);
+    return val ? Number(val) : null;
+  } catch {
+    return null;
   }
 }
 

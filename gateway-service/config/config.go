@@ -8,13 +8,23 @@ import (
 
 // Config 网关配置
 type Config struct {
-	Server   ServerConfig `mapstructure:"server"`
-	GRPC     GRPCConfig   `mapstructure:"grpc"`
+	Server ServerConfig `mapstructure:"server"`
+	GRPC   GRPCConfig   `mapstructure:"grpc"`
+	OSS    OSSConfig    `mapstructure:"oss"`
 }
 
 // ServerConfig HTTP 服务配置
 type ServerConfig struct {
 	HTTPPort int `mapstructure:"http_port"`
+}
+
+// OSSConfig 阿里云 OSS 配置
+type OSSConfig struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	AccessKeyID     string `mapstructure:"access_key_id"`
+	AccessKeySecret string `mapstructure:"access_key_secret"`
+	BucketName      string `mapstructure:"bucket_name"`
+	CustomDomain    string `mapstructure:"custom_domain"`
 }
 
 // GRPCConfig gRPC 连接配置
