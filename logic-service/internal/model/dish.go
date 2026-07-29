@@ -9,6 +9,10 @@ type Dish struct {
 	Name        string    `gorm:"column:name;type:varchar(100);not null" json:"name"`
 	Description *string   `gorm:"column:description;type:varchar(500)" json:"description"`
 	ImageKey    string    `gorm:"column:image_key;type:varchar(255);not null" json:"image_key"`
+	CookMinutes int       `gorm:"column:cook_minutes;type:int;not null;default:0" json:"cook_minutes"`
+	Difficulty  int8      `gorm:"column:difficulty;type:tinyint;not null;default:1" json:"difficulty"`
+	Servings    int       `gorm:"column:servings;type:int;not null;default:2" json:"servings"`
+	Tips        *string   `gorm:"column:tips;type:text" json:"tips"`
 	Status      int8      `gorm:"column:status;type:tinyint;default:1" json:"status"`
 	Sort        int       `gorm:"column:sort;type:int;default:0" json:"sort"`
 	CreatedAt   time.Time `gorm:"column:created_at;not null" json:"created_at"`

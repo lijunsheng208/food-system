@@ -12,6 +12,8 @@ service DishService {
   rpc ListDishesByCategory(ListDishesByCategoryRequest) returns (ListDishesByCategoryResponse);
   // SearchDishes 按标题关键字搜索菜谱
   rpc SearchDishes(SearchDishesRequest) returns (SearchDishesResponse);
+  // GetDishDetail 查询菜谱详情
+  rpc GetDishDetail(GetDishDetailRequest) returns (GetDishDetailResponse);
 }
 
 // ========== Category ==========
@@ -63,4 +65,51 @@ message SearchDishesResponse {
   int32             code    = 1;
   string            message = 2;
   repeated DishInfo dishes  = 3;
+}
+
+// ========== Detail ==========
+
+message GetDishDetailRequest {
+  int64 dish_id = 1; // 菜谱ID
+}
+
+message IngredientInfo {
+  int64 id           = 1; // 食材ID
+  string name        = 2; // 食材名称
+  optional double amount = 3; // 数值用量
+  string amount_text = 4; // 文字用量，例如适量
+  string unit        = 5; // 单位
+  int32 sort         = 6; // 组内排序
+}
+
+message IngredientGroup {
+  string name                         = 1; // 分组名称
+  repeated IngredientInfo ingredients = 2;
+}
+
+message DishStepInfo {
+  int64 id          = 1; // 步骤ID
+  int32 step_no     = 2; // 步骤序号
+  string description = 3; // 步骤说明
+  string image_key  = 4; // 步骤图片OSS key
+}
+
+message DishDetailInfo {
+  int64 id                              = 1;
+  int64 category_id                     = 2;
+  string name                           = 3;
+  string description                    = 4;
+  string image_key                      = 5;
+  int32 cook_minutes                    = 6;
+  int32 difficulty                      = 7;
+  int32 servings                        = 8;
+  string tips                           = 9;
+  repeated IngredientGroup ingredient_groups = 10;
+  repeated DishStepInfo steps           = 11;
+}
+
+message GetDishDetailResponse {
+  int32 code          = 1;
+  string message      = 2;
+  DishDetailInfo dish = 3;
 }

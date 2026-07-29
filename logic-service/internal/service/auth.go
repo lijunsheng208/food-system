@@ -23,15 +23,17 @@ var (
 
 // AuthService 认证业务逻辑
 type AuthService struct {
-	userRepo  *repository.UserRepo
-	jwtSecret string
+	userRepo   *repository.UserRepo
+	familyRepo *repository.FamilyRepo
+	jwtSecret  string
 }
 
 // NewAuthService 创建 AuthService
-func NewAuthService(userRepo *repository.UserRepo, jwtSecret string) *AuthService {
+func NewAuthService(userRepo *repository.UserRepo, familyRepo *repository.FamilyRepo, jwtSecret string) *AuthService {
 	return &AuthService{
-		userRepo:  userRepo,
-		jwtSecret: jwtSecret,
+		userRepo:   userRepo,
+		familyRepo: familyRepo,
+		jwtSecret:  jwtSecret,
 	}
 }
 
@@ -106,10 +108,21 @@ func (s *AuthService) GetProfile(ctx context.Context, userID uint64) (*GetProfil
 		return nil, ErrUserNotFound
 	}
 
-	// TODO: 查询用户所属家庭，目前返回空
+	// 查询用户所属家庭
+	familyName := ""
+	if s.familyRepo != nil {
+		member, err := s.familyRepo.GetMemberByUserID(ctx, userID)
+		if err == nil && member != nil {
+			family, err := s.familyRepo.GetFamilyByID(ctx, member.FamilyID)
+			if err == nil && family != nil && family.Status == model.FamilyStatusNormal {
+				familyName = family.Name
+			}
+		}
+	}
+
 	return &GetProfileResult{
 		User:       user,
-		FamilyName: "",
+		FamilyName: familyName,
 	}, nil
 }
 

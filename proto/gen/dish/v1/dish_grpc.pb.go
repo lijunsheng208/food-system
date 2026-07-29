@@ -22,6 +22,7 @@ const (
 	DishService_ListCategories_FullMethodName       = "/dish.v1.DishService/ListCategories"
 	DishService_ListDishesByCategory_FullMethodName = "/dish.v1.DishService/ListDishesByCategory"
 	DishService_SearchDishes_FullMethodName         = "/dish.v1.DishService/SearchDishes"
+	DishService_GetDishDetail_FullMethodName        = "/dish.v1.DishService/GetDishDetail"
 )
 
 // DishServiceClient is the client API for DishService service.
@@ -36,6 +37,8 @@ type DishServiceClient interface {
 	ListDishesByCategory(ctx context.Context, in *ListDishesByCategoryRequest, opts ...grpc.CallOption) (*ListDishesByCategoryResponse, error)
 	// SearchDishes 按标题关键字搜索菜谱
 	SearchDishes(ctx context.Context, in *SearchDishesRequest, opts ...grpc.CallOption) (*SearchDishesResponse, error)
+	// GetDishDetail 查询菜谱详情
+	GetDishDetail(ctx context.Context, in *GetDishDetailRequest, opts ...grpc.CallOption) (*GetDishDetailResponse, error)
 }
 
 type dishServiceClient struct {
@@ -76,6 +79,16 @@ func (c *dishServiceClient) SearchDishes(ctx context.Context, in *SearchDishesRe
 	return out, nil
 }
 
+func (c *dishServiceClient) GetDishDetail(ctx context.Context, in *GetDishDetailRequest, opts ...grpc.CallOption) (*GetDishDetailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDishDetailResponse)
+	err := c.cc.Invoke(ctx, DishService_GetDishDetail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DishServiceServer is the server API for DishService service.
 // All implementations must embed UnimplementedDishServiceServer
 // for forward compatibility.
@@ -88,6 +101,8 @@ type DishServiceServer interface {
 	ListDishesByCategory(context.Context, *ListDishesByCategoryRequest) (*ListDishesByCategoryResponse, error)
 	// SearchDishes 按标题关键字搜索菜谱
 	SearchDishes(context.Context, *SearchDishesRequest) (*SearchDishesResponse, error)
+	// GetDishDetail 查询菜谱详情
+	GetDishDetail(context.Context, *GetDishDetailRequest) (*GetDishDetailResponse, error)
 	mustEmbedUnimplementedDishServiceServer()
 }
 
@@ -106,6 +121,9 @@ func (UnimplementedDishServiceServer) ListDishesByCategory(context.Context, *Lis
 }
 func (UnimplementedDishServiceServer) SearchDishes(context.Context, *SearchDishesRequest) (*SearchDishesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SearchDishes not implemented")
+}
+func (UnimplementedDishServiceServer) GetDishDetail(context.Context, *GetDishDetailRequest) (*GetDishDetailResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDishDetail not implemented")
 }
 func (UnimplementedDishServiceServer) mustEmbedUnimplementedDishServiceServer() {}
 func (UnimplementedDishServiceServer) testEmbeddedByValue()                     {}
@@ -182,6 +200,24 @@ func _DishService_SearchDishes_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DishService_GetDishDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDishDetailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DishServiceServer).GetDishDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DishService_GetDishDetail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DishServiceServer).GetDishDetail(ctx, req.(*GetDishDetailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DishService_ServiceDesc is the grpc.ServiceDesc for DishService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -200,6 +236,10 @@ var DishService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchDishes",
 			Handler:    _DishService_SearchDishes_Handler,
+		},
+		{
+			MethodName: "GetDishDetail",
+			Handler:    _DishService_GetDishDetail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

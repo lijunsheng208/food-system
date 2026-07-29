@@ -67,6 +67,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(conn)
 	dishHandler := handler.NewDishHandler(conn)
 	uploadHandler := handler.NewUploadHandler(ossClient)
+	familyHandler := handler.NewFamilyHandler(conn)
 
 	api := r.Group("/api/v1")
 	{
@@ -83,11 +84,26 @@ func main() {
 			dish.GET("/categories", dishHandler.ListCategories)
 			dish.GET("/dishes", dishHandler.ListDishesByCategory)
 			dish.GET("/search", dishHandler.SearchDishes)
+			dish.GET("/:id", dishHandler.GetDishDetail)
 		}
 
 		upload := api.Group("/upload")
 		{
 			upload.POST("/avatar", uploadHandler.UploadAvatar)
+		}
+
+		family := api.Group("/family")
+		{
+			family.GET("/my", familyHandler.GetMyFamily)
+			family.POST("/create", familyHandler.CreateFamily)
+			family.PUT("/:family_id", familyHandler.UpdateFamily)
+			family.DELETE("/:family_id", familyHandler.DissolveFamily)
+			family.POST("/join", familyHandler.JoinFamily)
+			family.POST("/leave", familyHandler.LeaveFamily)
+			family.GET("/:family_id/members", familyHandler.ListMembers)
+			family.PUT("/:family_id/members/:member_user_id", familyHandler.UpdateMember)
+			family.DELETE("/:family_id/members/:member_user_id", familyHandler.RemoveMember)
+			family.POST("/:family_id/invite-code/reset", familyHandler.ResetInviteCode)
 		}
 	}
 

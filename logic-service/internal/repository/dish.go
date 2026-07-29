@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"gorm.io/gorm"
@@ -45,4 +46,39 @@ func (r *DishRepo) SearchDishes(ctx context.Context, keyword string) ([]model.Di
 		Order("sort ASC, id ASC").
 		Find(&dishes).Error
 	return dishes, err
+}
+
+// GetDishByID 查询已上架的菜谱详情基础信息
+func (r *DishRepo) GetDishByID(ctx context.Context, dishID uint64) (*model.Dish, error) {
+	var dish model.Dish
+	err := r.db.WithContext(ctx).
+		Where("id = ? AND status = ?", dishID, model.DishStatusOnSale).
+		First(&dish).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &dish, nil
+}
+
+// ListIngredientsByDishID 查询菜谱食材，按分组和组内顺序排列
+func (r *DishRepo) ListIngredientsByDishID(ctx context.Context, dishID uint64) ([]model.DishIngredient, error) {
+	var ingredients []model.DishIngredient
+	err := r.db.WithContext(ctx).
+		Where("dish_id = ?", dishID).
+		Order("group_sort ASC, sort ASC, id ASC").
+		Find(&ingredients).Error
+	return ingredients, err
+}
+
+// ListStepsByDishID 查询菜谱制作步骤
+func (r *DishRepo) ListStepsByDishID(ctx context.Context, dishID uint64) ([]model.DishStep, error) {
+	var steps []model.DishStep
+	err := r.db.WithContext(ctx).
+		Where("dish_id = ?", dishID).
+		Order("step_no ASC, id ASC").
+		Find(&steps).Error
+	return steps, err
 }

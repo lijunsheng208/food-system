@@ -485,6 +485,438 @@ func (x *SearchDishesResponse) GetDishes() []*DishInfo {
 	return nil
 }
 
+type GetDishDetailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DishId        int64                  `protobuf:"varint,1,opt,name=dish_id,json=dishId,proto3" json:"dish_id,omitempty"` // 菜谱ID
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDishDetailRequest) Reset() {
+	*x = GetDishDetailRequest{}
+	mi := &file_dish_v1_dish_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDishDetailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDishDetailRequest) ProtoMessage() {}
+
+func (x *GetDishDetailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDishDetailRequest.ProtoReflect.Descriptor instead.
+func (*GetDishDetailRequest) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetDishDetailRequest) GetDishId() int64 {
+	if x != nil {
+		return x.DishId
+	}
+	return 0
+}
+
+type IngredientInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                  // 食材ID
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                               // 食材名称
+	Amount        *float64               `protobuf:"fixed64,3,opt,name=amount,proto3,oneof" json:"amount,omitempty"`                   // 数值用量
+	AmountText    string                 `protobuf:"bytes,4,opt,name=amount_text,json=amountText,proto3" json:"amount_text,omitempty"` // 文字用量，例如适量
+	Unit          string                 `protobuf:"bytes,5,opt,name=unit,proto3" json:"unit,omitempty"`                               // 单位
+	Sort          int32                  `protobuf:"varint,6,opt,name=sort,proto3" json:"sort,omitempty"`                              // 组内排序
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IngredientInfo) Reset() {
+	*x = IngredientInfo{}
+	mi := &file_dish_v1_dish_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IngredientInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IngredientInfo) ProtoMessage() {}
+
+func (x *IngredientInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IngredientInfo.ProtoReflect.Descriptor instead.
+func (*IngredientInfo) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *IngredientInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *IngredientInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IngredientInfo) GetAmount() float64 {
+	if x != nil && x.Amount != nil {
+		return *x.Amount
+	}
+	return 0
+}
+
+func (x *IngredientInfo) GetAmountText() string {
+	if x != nil {
+		return x.AmountText
+	}
+	return ""
+}
+
+func (x *IngredientInfo) GetUnit() string {
+	if x != nil {
+		return x.Unit
+	}
+	return ""
+}
+
+func (x *IngredientInfo) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+type IngredientGroup struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"` // 分组名称
+	Ingredients   []*IngredientInfo      `protobuf:"bytes,2,rep,name=ingredients,proto3" json:"ingredients,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IngredientGroup) Reset() {
+	*x = IngredientGroup{}
+	mi := &file_dish_v1_dish_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IngredientGroup) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IngredientGroup) ProtoMessage() {}
+
+func (x *IngredientGroup) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IngredientGroup.ProtoReflect.Descriptor instead.
+func (*IngredientGroup) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *IngredientGroup) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IngredientGroup) GetIngredients() []*IngredientInfo {
+	if x != nil {
+		return x.Ingredients
+	}
+	return nil
+}
+
+type DishStepInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                            // 步骤ID
+	StepNo        int32                  `protobuf:"varint,2,opt,name=step_no,json=stepNo,proto3" json:"step_no,omitempty"`      // 步骤序号
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`           // 步骤说明
+	ImageKey      string                 `protobuf:"bytes,4,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"` // 步骤图片OSS key
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DishStepInfo) Reset() {
+	*x = DishStepInfo{}
+	mi := &file_dish_v1_dish_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DishStepInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DishStepInfo) ProtoMessage() {}
+
+func (x *DishStepInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DishStepInfo.ProtoReflect.Descriptor instead.
+func (*DishStepInfo) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DishStepInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DishStepInfo) GetStepNo() int32 {
+	if x != nil {
+		return x.StepNo
+	}
+	return 0
+}
+
+func (x *DishStepInfo) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *DishStepInfo) GetImageKey() string {
+	if x != nil {
+		return x.ImageKey
+	}
+	return ""
+}
+
+type DishDetailInfo struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CategoryId       int64                  `protobuf:"varint,2,opt,name=category_id,json=categoryId,proto3" json:"category_id,omitempty"`
+	Name             string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description      string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	ImageKey         string                 `protobuf:"bytes,5,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"`
+	CookMinutes      int32                  `protobuf:"varint,6,opt,name=cook_minutes,json=cookMinutes,proto3" json:"cook_minutes,omitempty"`
+	Difficulty       int32                  `protobuf:"varint,7,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Servings         int32                  `protobuf:"varint,8,opt,name=servings,proto3" json:"servings,omitempty"`
+	Tips             string                 `protobuf:"bytes,9,opt,name=tips,proto3" json:"tips,omitempty"`
+	IngredientGroups []*IngredientGroup     `protobuf:"bytes,10,rep,name=ingredient_groups,json=ingredientGroups,proto3" json:"ingredient_groups,omitempty"`
+	Steps            []*DishStepInfo        `protobuf:"bytes,11,rep,name=steps,proto3" json:"steps,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *DishDetailInfo) Reset() {
+	*x = DishDetailInfo{}
+	mi := &file_dish_v1_dish_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DishDetailInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DishDetailInfo) ProtoMessage() {}
+
+func (x *DishDetailInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DishDetailInfo.ProtoReflect.Descriptor instead.
+func (*DishDetailInfo) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *DishDetailInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DishDetailInfo) GetCategoryId() int64 {
+	if x != nil {
+		return x.CategoryId
+	}
+	return 0
+}
+
+func (x *DishDetailInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DishDetailInfo) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *DishDetailInfo) GetImageKey() string {
+	if x != nil {
+		return x.ImageKey
+	}
+	return ""
+}
+
+func (x *DishDetailInfo) GetCookMinutes() int32 {
+	if x != nil {
+		return x.CookMinutes
+	}
+	return 0
+}
+
+func (x *DishDetailInfo) GetDifficulty() int32 {
+	if x != nil {
+		return x.Difficulty
+	}
+	return 0
+}
+
+func (x *DishDetailInfo) GetServings() int32 {
+	if x != nil {
+		return x.Servings
+	}
+	return 0
+}
+
+func (x *DishDetailInfo) GetTips() string {
+	if x != nil {
+		return x.Tips
+	}
+	return ""
+}
+
+func (x *DishDetailInfo) GetIngredientGroups() []*IngredientGroup {
+	if x != nil {
+		return x.IngredientGroups
+	}
+	return nil
+}
+
+func (x *DishDetailInfo) GetSteps() []*DishStepInfo {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+type GetDishDetailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Dish          *DishDetailInfo        `protobuf:"bytes,3,opt,name=dish,proto3" json:"dish,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDishDetailResponse) Reset() {
+	*x = GetDishDetailResponse{}
+	mi := &file_dish_v1_dish_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDishDetailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDishDetailResponse) ProtoMessage() {}
+
+func (x *GetDishDetailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_dish_v1_dish_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDishDetailResponse.ProtoReflect.Descriptor instead.
+func (*GetDishDetailResponse) Descriptor() ([]byte, []int) {
+	return file_dish_v1_dish_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetDishDetailResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *GetDishDetailResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *GetDishDetailResponse) GetDish() *DishDetailInfo {
+	if x != nil {
+		return x.Dish
+	}
+	return nil
+}
+
 var File_dish_v1_dish_proto protoreflect.FileDescriptor
 
 const file_dish_v1_dish_proto_rawDesc = "" +
@@ -525,11 +957,51 @@ const file_dish_v1_dish_proto_rawDesc = "" +
 	"\x14SearchDishesResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12)\n" +
-	"\x06dishes\x18\x03 \x03(\v2\x11.dish.v1.DishInfoR\x06dishes2\x92\x02\n" +
+	"\x06dishes\x18\x03 \x03(\v2\x11.dish.v1.DishInfoR\x06dishes\"/\n" +
+	"\x14GetDishDetailRequest\x12\x17\n" +
+	"\adish_id\x18\x01 \x01(\x03R\x06dishId\"\xa5\x01\n" +
+	"\x0eIngredientInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
+	"\x06amount\x18\x03 \x01(\x01H\x00R\x06amount\x88\x01\x01\x12\x1f\n" +
+	"\vamount_text\x18\x04 \x01(\tR\n" +
+	"amountText\x12\x12\n" +
+	"\x04unit\x18\x05 \x01(\tR\x04unit\x12\x12\n" +
+	"\x04sort\x18\x06 \x01(\x05R\x04sortB\t\n" +
+	"\a_amount\"`\n" +
+	"\x0fIngredientGroup\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\vingredients\x18\x02 \x03(\v2\x17.dish.v1.IngredientInfoR\vingredients\"v\n" +
+	"\fDishStepInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\astep_no\x18\x02 \x01(\x05R\x06stepNo\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
+	"\timage_key\x18\x04 \x01(\tR\bimageKey\"\xfb\x02\n" +
+	"\x0eDishDetailInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
+	"\vcategory_id\x18\x02 \x01(\x03R\n" +
+	"categoryId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1b\n" +
+	"\timage_key\x18\x05 \x01(\tR\bimageKey\x12!\n" +
+	"\fcook_minutes\x18\x06 \x01(\x05R\vcookMinutes\x12\x1e\n" +
+	"\n" +
+	"difficulty\x18\a \x01(\x05R\n" +
+	"difficulty\x12\x1a\n" +
+	"\bservings\x18\b \x01(\x05R\bservings\x12\x12\n" +
+	"\x04tips\x18\t \x01(\tR\x04tips\x12E\n" +
+	"\x11ingredient_groups\x18\n" +
+	" \x03(\v2\x18.dish.v1.IngredientGroupR\x10ingredientGroups\x12+\n" +
+	"\x05steps\x18\v \x03(\v2\x15.dish.v1.DishStepInfoR\x05steps\"r\n" +
+	"\x15GetDishDetailResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12+\n" +
+	"\x04dish\x18\x03 \x01(\v2\x17.dish.v1.DishDetailInfoR\x04dish2\xe2\x02\n" +
 	"\vDishService\x12Q\n" +
 	"\x0eListCategories\x12\x1e.dish.v1.ListCategoriesRequest\x1a\x1f.dish.v1.ListCategoriesResponse\x12c\n" +
 	"\x14ListDishesByCategory\x12$.dish.v1.ListDishesByCategoryRequest\x1a%.dish.v1.ListDishesByCategoryResponse\x12K\n" +
-	"\fSearchDishes\x12\x1c.dish.v1.SearchDishesRequest\x1a\x1d.dish.v1.SearchDishesResponseB9Z7github.com/lijunsheng/familyos/proto/gen/dish/v1;dishv1b\x06proto3"
+	"\fSearchDishes\x12\x1c.dish.v1.SearchDishesRequest\x1a\x1d.dish.v1.SearchDishesResponse\x12N\n" +
+	"\rGetDishDetail\x12\x1d.dish.v1.GetDishDetailRequest\x1a\x1e.dish.v1.GetDishDetailResponseB9Z7github.com/lijunsheng/familyos/proto/gen/dish/v1;dishv1b\x06proto3"
 
 var (
 	file_dish_v1_dish_proto_rawDescOnce sync.Once
@@ -543,7 +1015,7 @@ func file_dish_v1_dish_proto_rawDescGZIP() []byte {
 	return file_dish_v1_dish_proto_rawDescData
 }
 
-var file_dish_v1_dish_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_dish_v1_dish_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_dish_v1_dish_proto_goTypes = []any{
 	(*CategoryInfo)(nil),                 // 0: dish.v1.CategoryInfo
 	(*ListCategoriesRequest)(nil),        // 1: dish.v1.ListCategoriesRequest
@@ -553,22 +1025,34 @@ var file_dish_v1_dish_proto_goTypes = []any{
 	(*ListDishesByCategoryResponse)(nil), // 5: dish.v1.ListDishesByCategoryResponse
 	(*SearchDishesRequest)(nil),          // 6: dish.v1.SearchDishesRequest
 	(*SearchDishesResponse)(nil),         // 7: dish.v1.SearchDishesResponse
+	(*GetDishDetailRequest)(nil),         // 8: dish.v1.GetDishDetailRequest
+	(*IngredientInfo)(nil),               // 9: dish.v1.IngredientInfo
+	(*IngredientGroup)(nil),              // 10: dish.v1.IngredientGroup
+	(*DishStepInfo)(nil),                 // 11: dish.v1.DishStepInfo
+	(*DishDetailInfo)(nil),               // 12: dish.v1.DishDetailInfo
+	(*GetDishDetailResponse)(nil),        // 13: dish.v1.GetDishDetailResponse
 }
 var file_dish_v1_dish_proto_depIdxs = []int32{
-	0, // 0: dish.v1.ListCategoriesResponse.categories:type_name -> dish.v1.CategoryInfo
-	3, // 1: dish.v1.ListDishesByCategoryResponse.dishes:type_name -> dish.v1.DishInfo
-	3, // 2: dish.v1.SearchDishesResponse.dishes:type_name -> dish.v1.DishInfo
-	1, // 3: dish.v1.DishService.ListCategories:input_type -> dish.v1.ListCategoriesRequest
-	4, // 4: dish.v1.DishService.ListDishesByCategory:input_type -> dish.v1.ListDishesByCategoryRequest
-	6, // 5: dish.v1.DishService.SearchDishes:input_type -> dish.v1.SearchDishesRequest
-	2, // 6: dish.v1.DishService.ListCategories:output_type -> dish.v1.ListCategoriesResponse
-	5, // 7: dish.v1.DishService.ListDishesByCategory:output_type -> dish.v1.ListDishesByCategoryResponse
-	7, // 8: dish.v1.DishService.SearchDishes:output_type -> dish.v1.SearchDishesResponse
-	6, // [6:9] is the sub-list for method output_type
-	3, // [3:6] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0,  // 0: dish.v1.ListCategoriesResponse.categories:type_name -> dish.v1.CategoryInfo
+	3,  // 1: dish.v1.ListDishesByCategoryResponse.dishes:type_name -> dish.v1.DishInfo
+	3,  // 2: dish.v1.SearchDishesResponse.dishes:type_name -> dish.v1.DishInfo
+	9,  // 3: dish.v1.IngredientGroup.ingredients:type_name -> dish.v1.IngredientInfo
+	10, // 4: dish.v1.DishDetailInfo.ingredient_groups:type_name -> dish.v1.IngredientGroup
+	11, // 5: dish.v1.DishDetailInfo.steps:type_name -> dish.v1.DishStepInfo
+	12, // 6: dish.v1.GetDishDetailResponse.dish:type_name -> dish.v1.DishDetailInfo
+	1,  // 7: dish.v1.DishService.ListCategories:input_type -> dish.v1.ListCategoriesRequest
+	4,  // 8: dish.v1.DishService.ListDishesByCategory:input_type -> dish.v1.ListDishesByCategoryRequest
+	6,  // 9: dish.v1.DishService.SearchDishes:input_type -> dish.v1.SearchDishesRequest
+	8,  // 10: dish.v1.DishService.GetDishDetail:input_type -> dish.v1.GetDishDetailRequest
+	2,  // 11: dish.v1.DishService.ListCategories:output_type -> dish.v1.ListCategoriesResponse
+	5,  // 12: dish.v1.DishService.ListDishesByCategory:output_type -> dish.v1.ListDishesByCategoryResponse
+	7,  // 13: dish.v1.DishService.SearchDishes:output_type -> dish.v1.SearchDishesResponse
+	13, // 14: dish.v1.DishService.GetDishDetail:output_type -> dish.v1.GetDishDetailResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_dish_v1_dish_proto_init() }
@@ -576,13 +1060,14 @@ func file_dish_v1_dish_proto_init() {
 	if File_dish_v1_dish_proto != nil {
 		return
 	}
+	file_dish_v1_dish_proto_msgTypes[9].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_dish_v1_dish_proto_rawDesc), len(file_dish_v1_dish_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

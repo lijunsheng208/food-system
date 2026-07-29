@@ -2,11 +2,14 @@ package server
 
 import (
 	"context"
+	"errors"
 
-	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
+	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
 )
+
+const DishCodeNotFound = 2002
 
 // DishServer gRPC DishService 实现
 type DishServer struct {
@@ -85,6 +88,29 @@ func (s *DishServer) SearchDishes(ctx context.Context, req *dishv1.SearchDishesR
 	}, nil
 }
 
+// GetDishDetail 实现菜谱详情查询接口
+func (s *DishServer) GetDishDetail(ctx context.Context, req *dishv1.GetDishDetailRequest) (*dishv1.GetDishDetailResponse, error) {
+	detail, err := s.svc.GetDishDetail(ctx, uint64(req.DishId))
+	if err != nil {
+		if errors.Is(err, service.ErrDishNotFound) {
+			return &dishv1.GetDishDetailResponse{
+				Code:    DishCodeNotFound,
+				Message: err.Error(),
+			}, nil
+		}
+		return &dishv1.GetDishDetailResponse{
+			Code:    CodeInternalError,
+			Message: "查询菜谱详情失败",
+		}, nil
+	}
+
+	return &dishv1.GetDishDetailResponse{
+		Code:    CodeSuccess,
+		Message: "查询成功",
+		Dish:    toDishDetailInfo(detail),
+	}, nil
+}
+
 // toCategoryInfo 将 model.DishCategory 转为 proto CategoryInfo
 func toCategoryInfo(c *model.DishCategory) *dishv1.CategoryInfo {
 	return &dishv1.CategoryInfo{
@@ -108,5 +134,55 @@ func toDishInfo(d *model.Dish) *dishv1.DishInfo {
 	if d.Description != nil {
 		info.Description = *d.Description
 	}
+	return info
+}
+
+func toDishDetailInfo(detail *service.DishDetail) *dishv1.DishDetailInfo {
+	dish := detail.Dish
+	info := &dishv1.DishDetailInfo{
+		Id:               int64(dish.ID),
+		CategoryId:       int64(dish.CategoryID),
+		Name:             dish.Name,
+		ImageKey:         dish.ImageKey,
+		CookMinutes:      int32(dish.CookMinutes),
+		Difficulty:       int32(dish.Difficulty),
+		Servings:         int32(dish.Servings),
+		IngredientGroups: make([]*dishv1.IngredientGroup, 0, len(detail.IngredientGroups)),
+		Steps:            make([]*dishv1.DishStepInfo, 0, len(detail.Steps)),
+	}
+	if dish.Description != nil {
+		info.Description = *dish.Description
+	}
+	if dish.Tips != nil {
+		info.Tips = *dish.Tips
+	}
+
+	for _, group := range detail.IngredientGroups {
+		groupInfo := &dishv1.IngredientGroup{
+			Name:        group.Name,
+			Ingredients: make([]*dishv1.IngredientInfo, 0, len(group.Ingredients)),
+		}
+		for _, ingredient := range group.Ingredients {
+			groupInfo.Ingredients = append(groupInfo.Ingredients, &dishv1.IngredientInfo{
+				Id:         int64(ingredient.ID),
+				Name:       ingredient.Name,
+				Amount:     ingredient.Amount,
+				AmountText: ingredient.AmountText,
+				Unit:       ingredient.Unit,
+				Sort:       int32(ingredient.Sort),
+			})
+		}
+		info.IngredientGroups = append(info.IngredientGroups, groupInfo)
+	}
+
+	for _, step := range detail.Steps {
+		info.Steps = append(info.Steps, &dishv1.DishStepInfo{
+			Id:          int64(step.ID),
+			StepNo:      int32(step.StepNo),
+			Description: step.Description,
+			ImageKey:    step.ImageKey,
+		})
+	}
+
 	return info
 }
