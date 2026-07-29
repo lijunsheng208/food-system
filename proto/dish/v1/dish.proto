@@ -88,10 +88,11 @@ message IngredientGroup {
 }
 
 message DishStepInfo {
-  int64 id          = 1; // 步骤ID
-  int32 step_no     = 2; // 步骤序号
-  string description = 3; // 步骤说明
-  string image_key  = 4; // 步骤图片OSS key
+  int64 id            = 1; // 步骤ID
+  int32 step_no       = 2; // 步骤序号
+  string description  = 3; // 步骤说明
+  string image_key    = 4; // 步骤图片OSS key
+  int32 timer_seconds = 5; // 步骤计时秒数，0表示不计时
 }
 
 message DishDetailInfo {

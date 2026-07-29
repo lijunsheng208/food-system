@@ -177,10 +177,11 @@ func toDishDetailInfo(detail *service.DishDetail) *dishv1.DishDetailInfo {
 
 	for _, step := range detail.Steps {
 		info.Steps = append(info.Steps, &dishv1.DishStepInfo{
-			Id:          int64(step.ID),
-			StepNo:      int32(step.StepNo),
-			Description: step.Description,
-			ImageKey:    step.ImageKey,
+			Id:           int64(step.ID),
+			StepNo:       int32(step.StepNo),
+			Description:  step.Description,
+			ImageKey:     step.ImageKey,
+			TimerSeconds: int32(step.TimerSeconds),
 		})
 	}
 

@@ -667,10 +667,11 @@ func (x *IngredientGroup) GetIngredients() []*IngredientInfo {
 
 type DishStepInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                            // 步骤ID
-	StepNo        int32                  `protobuf:"varint,2,opt,name=step_no,json=stepNo,proto3" json:"step_no,omitempty"`      // 步骤序号
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`           // 步骤说明
-	ImageKey      string                 `protobuf:"bytes,4,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"` // 步骤图片OSS key
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                                         // 步骤ID
+	StepNo        int32                  `protobuf:"varint,2,opt,name=step_no,json=stepNo,proto3" json:"step_no,omitempty"`                   // 步骤序号
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`                        // 步骤说明
+	ImageKey      string                 `protobuf:"bytes,4,opt,name=image_key,json=imageKey,proto3" json:"image_key,omitempty"`              // 步骤图片OSS key
+	TimerSeconds  int32                  `protobuf:"varint,5,opt,name=timer_seconds,json=timerSeconds,proto3" json:"timer_seconds,omitempty"` // 步骤计时秒数，0表示不计时
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -731,6 +732,13 @@ func (x *DishStepInfo) GetImageKey() string {
 		return x.ImageKey
 	}
 	return ""
+}
+
+func (x *DishStepInfo) GetTimerSeconds() int32 {
+	if x != nil {
+		return x.TimerSeconds
+	}
+	return 0
 }
 
 type DishDetailInfo struct {
@@ -971,12 +979,13 @@ const file_dish_v1_dish_proto_rawDesc = "" +
 	"\a_amount\"`\n" +
 	"\x0fIngredientGroup\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
-	"\vingredients\x18\x02 \x03(\v2\x17.dish.v1.IngredientInfoR\vingredients\"v\n" +
+	"\vingredients\x18\x02 \x03(\v2\x17.dish.v1.IngredientInfoR\vingredients\"\x9b\x01\n" +
 	"\fDishStepInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\astep_no\x18\x02 \x01(\x05R\x06stepNo\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1b\n" +
-	"\timage_key\x18\x04 \x01(\tR\bimageKey\"\xfb\x02\n" +
+	"\timage_key\x18\x04 \x01(\tR\bimageKey\x12#\n" +
+	"\rtimer_seconds\x18\x05 \x01(\x05R\ftimerSeconds\"\xfb\x02\n" +
 	"\x0eDishDetailInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vcategory_id\x18\x02 \x01(\x03R\n" +

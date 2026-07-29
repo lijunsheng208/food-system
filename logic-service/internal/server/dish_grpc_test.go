@@ -7,7 +7,7 @@ import (
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
 )
 
-func TestToDishDetailInfoPreservesOptionalAmountAndEmptySteps(t *testing.T) {
+func TestToDishDetailInfoPreservesOptionalAmountAndTimer(t *testing.T) {
 	amount := 500.0
 	detail := &service.DishDetail{
 		Dish: &model.Dish{
@@ -27,12 +27,20 @@ func TestToDishDetailInfoPreservesOptionalAmountAndEmptySteps(t *testing.T) {
 				},
 			},
 		},
-		Steps: []model.DishStep{},
+		Steps: []model.DishStep{{
+			ID:           10,
+			StepNo:       1,
+			Description:  "小火炖煮",
+			TimerSeconds: 1800,
+		}},
 	}
 
 	info := toDishDetailInfo(detail)
-	if info.Steps == nil {
-		t.Fatal("steps is nil, want empty slice")
+	if len(info.Steps) != 1 {
+		t.Fatalf("steps count = %d, want 1", len(info.Steps))
+	}
+	if info.Steps[0].GetTimerSeconds() != 1800 {
+		t.Fatalf("timer_seconds = %d, want 1800", info.Steps[0].GetTimerSeconds())
 	}
 	ingredients := info.IngredientGroups[0].Ingredients
 	if ingredients[0].Amount == nil || ingredients[0].GetAmount() != 500 {

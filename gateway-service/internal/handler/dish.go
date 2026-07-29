@@ -215,10 +215,11 @@ func (h *DishHandler) GetDishDetail(c *gin.Context) {
 	steps := make([]gin.H, 0, len(dish.GetSteps()))
 	for _, step := range dish.GetSteps() {
 		steps = append(steps, gin.H{
-			"id":          step.GetId(),
-			"step_no":     step.GetStepNo(),
-			"description": step.GetDescription(),
-			"image_key":   step.GetImageKey(),
+			"id":            step.GetId(),
+			"step_no":       step.GetStepNo(),
+			"description":   step.GetDescription(),
+			"image_key":     step.GetImageKey(),
+			"timer_seconds": step.GetTimerSeconds(),
 		})
 	}
 
