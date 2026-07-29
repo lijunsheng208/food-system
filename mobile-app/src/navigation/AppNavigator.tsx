@@ -12,6 +12,8 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RecipeScreen from '../screens/RecipeScreen';
+import RecipeDetailScreen from '../screens/RecipeDetailScreen';
+import CookingModeScreen from '../screens/CookingModeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileDetailScreen from '../screens/ProfileDetailScreen';
 import FamilyManagementScreen from '../screens/FamilyManagementScreen';
@@ -122,6 +124,16 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen
+        name="RecipeDetail"
+        component={RecipeDetailScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="CookingMode"
+        component={CookingModeScreen}
+        options={{ animation: 'slide_from_bottom' }}
+      />
       <Stack.Screen
         name="ProfileDetail"
         component={ProfileDetailScreen}

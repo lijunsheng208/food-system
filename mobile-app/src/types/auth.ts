@@ -54,6 +54,15 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   Main: undefined;
+  RecipeDetail: {
+    dishId: number;
+    dishName?: string;
+  };
+  CookingMode: {
+    dishId: number;
+    dishName: string;
+    servings: number;
+  };
   ProfileDetail: undefined;
   FamilyManagement: undefined;
   CreateFamily: undefined;

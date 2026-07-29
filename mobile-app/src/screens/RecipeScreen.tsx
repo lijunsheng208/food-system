@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing, radius, shadow } from '../theme';
 import {
   fetchCategories,
@@ -17,6 +19,7 @@ import {
   searchDishes,
 } from '../services/dish';
 import type { CategoryInfo, DishInfo } from '../services/dish';
+import type { AuthStackParamList } from '../types/auth';
 
 const SIDEBAR_WIDTH = 80;
 
@@ -30,6 +33,8 @@ const PLACEHOLDER_PALETTE = [
 
 export default function RecipeScreen() {
   const insets = useSafeAreaInsets();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
   // 分类
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
@@ -150,7 +155,18 @@ export default function RecipeScreen() {
   const renderDish = ({ item, index }: { item: DishInfo; index: number }) => {
     const bg = PLACEHOLDER_PALETTE[index % PLACEHOLDER_PALETTE.length];
     return (
-      <View style={styles.dishRow}>
+      <TouchableOpacity
+        style={styles.dishRow}
+        onPress={() =>
+          navigation.navigate('RecipeDetail', {
+            dishId: item.id,
+            dishName: item.name,
+          })
+        }
+        activeOpacity={0.72}
+        accessibilityRole="button"
+        accessibilityLabel={`查看${item.name}菜谱`}
+      >
         {/* 缩略图占位 */}
         <View style={[styles.dishThumb, { backgroundColor: bg }]}>
           <Ionicons name="restaurant-outline" size={22} color={colors.primary} />
@@ -172,7 +188,7 @@ export default function RecipeScreen() {
           size={16}
           color={colors.textSecondary}
         />
-      </View>
+      </TouchableOpacity>
     );
   };
 
