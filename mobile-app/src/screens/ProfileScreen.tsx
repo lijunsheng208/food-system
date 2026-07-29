@@ -18,7 +18,7 @@ import { colors, typography, spacing, radius, shadow } from '../theme';
 import type { AuthStackParamList } from '../types/auth';
 
 export default function ProfileScreen() {
-  const { user, clearUser } = useUser();
+  const { user, familyName, clearUser } = useUser();
   const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
   const avatarLetter = nickname.charAt(0).toUpperCase();
 
   const handleFamilyMgmt = () => {
-    Alert.alert('家庭管理', '家庭管理功能即将上线，敬请期待');
+    navigation.navigate('FamilyManagement');
   };
 
   const handleLogout = () => {
@@ -89,7 +89,7 @@ export default function ProfileScreen() {
                 style={styles.familyIcon}
               />
               <Text style={styles.familyText} numberOfLines={1}>
-                未加入家庭
+                {familyName || '未加入家庭'}
               </Text>
             </View>
           </View>

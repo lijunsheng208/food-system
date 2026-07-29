@@ -55,6 +55,27 @@ export type AuthStackParamList = {
   Register: undefined;
   Main: undefined;
   ProfileDetail: undefined;
+  FamilyManagement: undefined;
+  CreateFamily: undefined;
+  EditFamily: {
+    familyId: number;
+    name: string;
+    description: string;
+    avatar: string;
+  };
+  JoinFamily: { inviteCode?: string };
+  FamilyMemberEdit: {
+    familyId: number;
+    member: {
+      user_id: number;
+      nickname: string;
+      avatar: string;
+      role: number;
+      relation: string;
+      display_name: string;
+    };
+    myRole: number;
+  };
 };
 
 export type MainTabParamList = {

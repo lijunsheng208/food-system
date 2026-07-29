@@ -14,6 +14,11 @@ import HomeScreen from '../screens/HomeScreen';
 import RecipeScreen from '../screens/RecipeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileDetailScreen from '../screens/ProfileDetailScreen';
+import FamilyManagementScreen from '../screens/FamilyManagementScreen';
+import CreateFamilyScreen from '../screens/CreateFamilyScreen';
+import EditFamilyScreen from '../screens/EditFamilyScreen';
+import JoinFamilyScreen from '../screens/JoinFamilyScreen';
+import FamilyMemberEditScreen from '../screens/FamilyMemberEditScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -77,7 +82,7 @@ export default function AppNavigator() {
   const [initialRoute, setInitialRoute] =
     useState<keyof AuthStackParamList>('Login');
   const [isLoading, setIsLoading] = useState(true);
-  const { setUser } = useUser();
+  const { setUser, setFamilyName } = useUser();
 
   useEffect(() => {
     (async () => {
@@ -95,6 +100,7 @@ export default function AppNavigator() {
           const profile = await getProfile(userId);
           if (profile.user) {
             setUser(profile.user);
+            setFamilyName(profile.family_name ?? '');
           }
         } catch {
           // 获取失败不影响导航，使用本地缓存数据
@@ -119,6 +125,31 @@ export default function AppNavigator() {
       <Stack.Screen
         name="ProfileDetail"
         component={ProfileDetailScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="FamilyManagement"
+        component={FamilyManagementScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="CreateFamily"
+        component={CreateFamilyScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="EditFamily"
+        component={EditFamilyScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="JoinFamily"
+        component={JoinFamilyScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="FamilyMemberEdit"
+        component={FamilyMemberEditScreen}
         options={{ animation: 'slide_from_right' }}
       />
     </Stack.Navigator>

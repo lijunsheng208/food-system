@@ -33,7 +33,7 @@ export default function ProfileDetailScreen() {
   const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
-  const { user, setUser } = useUser();
+  const { user, familyName, setUser } = useUser();
 
   const nickname = user?.nickname ?? '未设置昵称';
   const phone = user?.phone ?? '未绑定';
@@ -209,7 +209,9 @@ export default function ProfileDetailScreen() {
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>当前家庭</Text>
-              <Text style={styles.infoValueMuted}>未加入家庭</Text>
+              <Text style={familyName ? styles.infoValue : styles.infoValueMuted}>
+                {familyName || '未加入家庭'}
+              </Text>
             </View>
           </View>
 
