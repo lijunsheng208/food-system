@@ -1169,6 +1169,570 @@ func (x *ResetInviteCodeResponse) GetInviteCodeExpiredAt() string {
 	return ""
 }
 
+type CreateMealPlanRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FamilyId      int64                  `protobuf:"varint,1,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	DishId        int64                  `protobuf:"varint,2,opt,name=dish_id,json=dishId,proto3" json:"dish_id,omitempty"`
+	MealDate      string                 `protobuf:"bytes,3,opt,name=meal_date,json=mealDate,proto3" json:"meal_date,omitempty"`  // YYYY-MM-DD
+	MealType      int32                  `protobuf:"varint,4,opt,name=meal_type,json=mealType,proto3" json:"meal_type,omitempty"` // 1早餐 2午餐 3晚餐
+	Servings      int32                  `protobuf:"varint,5,opt,name=servings,proto3" json:"servings,omitempty"`
+	CookUserId    *int64                 `protobuf:"varint,6,opt,name=cook_user_id,json=cookUserId,proto3,oneof" json:"cook_user_id,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,7,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMealPlanRequest) Reset() {
+	*x = CreateMealPlanRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMealPlanRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMealPlanRequest) ProtoMessage() {}
+
+func (x *CreateMealPlanRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMealPlanRequest.ProtoReflect.Descriptor instead.
+func (*CreateMealPlanRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *CreateMealPlanRequest) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *CreateMealPlanRequest) GetDishId() int64 {
+	if x != nil {
+		return x.DishId
+	}
+	return 0
+}
+
+func (x *CreateMealPlanRequest) GetMealDate() string {
+	if x != nil {
+		return x.MealDate
+	}
+	return ""
+}
+
+func (x *CreateMealPlanRequest) GetMealType() int32 {
+	if x != nil {
+		return x.MealType
+	}
+	return 0
+}
+
+func (x *CreateMealPlanRequest) GetServings() int32 {
+	if x != nil {
+		return x.Servings
+	}
+	return 0
+}
+
+func (x *CreateMealPlanRequest) GetCookUserId() int64 {
+	if x != nil && x.CookUserId != nil {
+		return *x.CookUserId
+	}
+	return 0
+}
+
+func (x *CreateMealPlanRequest) GetCreatedBy() int64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+type FamilyMealPlanInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	FamilyId      int64                  `protobuf:"varint,2,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	DishId        int64                  `protobuf:"varint,3,opt,name=dish_id,json=dishId,proto3" json:"dish_id,omitempty"`
+	MealDate      string                 `protobuf:"bytes,4,opt,name=meal_date,json=mealDate,proto3" json:"meal_date,omitempty"`
+	MealType      int32                  `protobuf:"varint,5,opt,name=meal_type,json=mealType,proto3" json:"meal_type,omitempty"`
+	Servings      int32                  `protobuf:"varint,6,opt,name=servings,proto3" json:"servings,omitempty"`
+	CookUserId    *int64                 `protobuf:"varint,7,opt,name=cook_user_id,json=cookUserId,proto3,oneof" json:"cook_user_id,omitempty"`
+	Status        int32                  `protobuf:"varint,8,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedBy     int64                  `protobuf:"varint,9,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DishName      string                 `protobuf:"bytes,12,opt,name=dish_name,json=dishName,proto3" json:"dish_name,omitempty"`
+	DishImageKey  string                 `protobuf:"bytes,13,opt,name=dish_image_key,json=dishImageKey,proto3" json:"dish_image_key,omitempty"`
+	CookUserName  string                 `protobuf:"bytes,14,opt,name=cook_user_name,json=cookUserName,proto3" json:"cook_user_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FamilyMealPlanInfo) Reset() {
+	*x = FamilyMealPlanInfo{}
+	mi := &file_family_v1_family_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FamilyMealPlanInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FamilyMealPlanInfo) ProtoMessage() {}
+
+func (x *FamilyMealPlanInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FamilyMealPlanInfo.ProtoReflect.Descriptor instead.
+func (*FamilyMealPlanInfo) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *FamilyMealPlanInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetDishId() int64 {
+	if x != nil {
+		return x.DishId
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetMealDate() string {
+	if x != nil {
+		return x.MealDate
+	}
+	return ""
+}
+
+func (x *FamilyMealPlanInfo) GetMealType() int32 {
+	if x != nil {
+		return x.MealType
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetServings() int32 {
+	if x != nil {
+		return x.Servings
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetCookUserId() int64 {
+	if x != nil && x.CookUserId != nil {
+		return *x.CookUserId
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetCreatedBy() int64 {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return 0
+}
+
+func (x *FamilyMealPlanInfo) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *FamilyMealPlanInfo) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *FamilyMealPlanInfo) GetDishName() string {
+	if x != nil {
+		return x.DishName
+	}
+	return ""
+}
+
+func (x *FamilyMealPlanInfo) GetDishImageKey() string {
+	if x != nil {
+		return x.DishImageKey
+	}
+	return ""
+}
+
+func (x *FamilyMealPlanInfo) GetCookUserName() string {
+	if x != nil {
+		return x.CookUserName
+	}
+	return ""
+}
+
+type CreateMealPlanResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	MealPlan      *FamilyMealPlanInfo    `protobuf:"bytes,3,opt,name=meal_plan,json=mealPlan,proto3" json:"meal_plan,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateMealPlanResponse) Reset() {
+	*x = CreateMealPlanResponse{}
+	mi := &file_family_v1_family_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateMealPlanResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateMealPlanResponse) ProtoMessage() {}
+
+func (x *CreateMealPlanResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateMealPlanResponse.ProtoReflect.Descriptor instead.
+func (*CreateMealPlanResponse) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *CreateMealPlanResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *CreateMealPlanResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *CreateMealPlanResponse) GetMealPlan() *FamilyMealPlanInfo {
+	if x != nil {
+		return x.MealPlan
+	}
+	return nil
+}
+
+type ListMealPlansRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FamilyId      int64                  `protobuf:"varint,1,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	StartDate     string                 `protobuf:"bytes,3,opt,name=start_date,json=startDate,proto3" json:"start_date,omitempty"`
+	EndDate       string                 `protobuf:"bytes,4,opt,name=end_date,json=endDate,proto3" json:"end_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMealPlansRequest) Reset() {
+	*x = ListMealPlansRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMealPlansRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMealPlansRequest) ProtoMessage() {}
+
+func (x *ListMealPlansRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMealPlansRequest.ProtoReflect.Descriptor instead.
+func (*ListMealPlansRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListMealPlansRequest) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *ListMealPlansRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ListMealPlansRequest) GetStartDate() string {
+	if x != nil {
+		return x.StartDate
+	}
+	return ""
+}
+
+func (x *ListMealPlansRequest) GetEndDate() string {
+	if x != nil {
+		return x.EndDate
+	}
+	return ""
+}
+
+type ListMealPlansResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	MealPlans     []*FamilyMealPlanInfo  `protobuf:"bytes,3,rep,name=meal_plans,json=mealPlans,proto3" json:"meal_plans,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMealPlansResponse) Reset() {
+	*x = ListMealPlansResponse{}
+	mi := &file_family_v1_family_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMealPlansResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMealPlansResponse) ProtoMessage() {}
+
+func (x *ListMealPlansResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMealPlansResponse.ProtoReflect.Descriptor instead.
+func (*ListMealPlansResponse) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListMealPlansResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *ListMealPlansResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListMealPlansResponse) GetMealPlans() []*FamilyMealPlanInfo {
+	if x != nil {
+		return x.MealPlans
+	}
+	return nil
+}
+
+type UpdateMealPlanRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	MealDate      *string                `protobuf:"bytes,3,opt,name=meal_date,json=mealDate,proto3,oneof" json:"meal_date,omitempty"`
+	MealType      *int32                 `protobuf:"varint,4,opt,name=meal_type,json=mealType,proto3,oneof" json:"meal_type,omitempty"`
+	Servings      *int32                 `protobuf:"varint,5,opt,name=servings,proto3,oneof" json:"servings,omitempty"`
+	CookUserId    *int64                 `protobuf:"varint,6,opt,name=cook_user_id,json=cookUserId,proto3,oneof" json:"cook_user_id,omitempty"` // 0 表示清空负责人
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateMealPlanRequest) Reset() {
+	*x = UpdateMealPlanRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateMealPlanRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMealPlanRequest) ProtoMessage() {}
+
+func (x *UpdateMealPlanRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMealPlanRequest.ProtoReflect.Descriptor instead.
+func (*UpdateMealPlanRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateMealPlanRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateMealPlanRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *UpdateMealPlanRequest) GetMealDate() string {
+	if x != nil && x.MealDate != nil {
+		return *x.MealDate
+	}
+	return ""
+}
+
+func (x *UpdateMealPlanRequest) GetMealType() int32 {
+	if x != nil && x.MealType != nil {
+		return *x.MealType
+	}
+	return 0
+}
+
+func (x *UpdateMealPlanRequest) GetServings() int32 {
+	if x != nil && x.Servings != nil {
+		return *x.Servings
+	}
+	return 0
+}
+
+func (x *UpdateMealPlanRequest) GetCookUserId() int64 {
+	if x != nil && x.CookUserId != nil {
+		return *x.CookUserId
+	}
+	return 0
+}
+
+type DeleteMealPlanRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteMealPlanRequest) Reset() {
+	*x = DeleteMealPlanRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteMealPlanRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMealPlanRequest) ProtoMessage() {}
+
+func (x *DeleteMealPlanRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMealPlanRequest.ProtoReflect.Descriptor instead.
+func (*DeleteMealPlanRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteMealPlanRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DeleteMealPlanRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 type CommonResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
@@ -1179,7 +1743,7 @@ type CommonResponse struct {
 
 func (x *CommonResponse) Reset() {
 	*x = CommonResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[17]
+	mi := &file_family_v1_family_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1191,7 +1755,7 @@ func (x *CommonResponse) String() string {
 func (*CommonResponse) ProtoMessage() {}
 
 func (x *CommonResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[17]
+	mi := &file_family_v1_family_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1204,7 +1768,7 @@ func (x *CommonResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommonResponse.ProtoReflect.Descriptor instead.
 func (*CommonResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{17}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CommonResponse) GetCode() int32 {
@@ -1317,10 +1881,74 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
 	"\vinvite_code\x18\x03 \x01(\tR\n" +
 	"inviteCode\x123\n" +
-	"\x16invite_code_expired_at\x18\x04 \x01(\tR\x13inviteCodeExpiredAt\">\n" +
+	"\x16invite_code_expired_at\x18\x04 \x01(\tR\x13inviteCodeExpiredAt\"\xfa\x01\n" +
+	"\x15CreateMealPlanRequest\x12\x1b\n" +
+	"\tfamily_id\x18\x01 \x01(\x03R\bfamilyId\x12\x17\n" +
+	"\adish_id\x18\x02 \x01(\x03R\x06dishId\x12\x1b\n" +
+	"\tmeal_date\x18\x03 \x01(\tR\bmealDate\x12\x1b\n" +
+	"\tmeal_type\x18\x04 \x01(\x05R\bmealType\x12\x1a\n" +
+	"\bservings\x18\x05 \x01(\x05R\bservings\x12%\n" +
+	"\fcook_user_id\x18\x06 \x01(\x03H\x00R\n" +
+	"cookUserId\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\a \x01(\x03R\tcreatedByB\x0f\n" +
+	"\r_cook_user_id\"\xc6\x03\n" +
+	"\x12FamilyMealPlanInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
+	"\tfamily_id\x18\x02 \x01(\x03R\bfamilyId\x12\x17\n" +
+	"\adish_id\x18\x03 \x01(\x03R\x06dishId\x12\x1b\n" +
+	"\tmeal_date\x18\x04 \x01(\tR\bmealDate\x12\x1b\n" +
+	"\tmeal_type\x18\x05 \x01(\x05R\bmealType\x12\x1a\n" +
+	"\bservings\x18\x06 \x01(\x05R\bservings\x12%\n" +
+	"\fcook_user_id\x18\a \x01(\x03H\x00R\n" +
+	"cookUserId\x88\x01\x01\x12\x16\n" +
+	"\x06status\x18\b \x01(\x05R\x06status\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\t \x01(\x03R\tcreatedBy\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\n" +
+	" \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt\x12\x1b\n" +
+	"\tdish_name\x18\f \x01(\tR\bdishName\x12$\n" +
+	"\x0edish_image_key\x18\r \x01(\tR\fdishImageKey\x12$\n" +
+	"\x0ecook_user_name\x18\x0e \x01(\tR\fcookUserNameB\x0f\n" +
+	"\r_cook_user_id\"\x82\x01\n" +
+	"\x16CreateMealPlanResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12:\n" +
+	"\tmeal_plan\x18\x03 \x01(\v2\x1d.family.v1.FamilyMealPlanInfoR\bmealPlan\"\x86\x01\n" +
+	"\x14ListMealPlansRequest\x12\x1b\n" +
+	"\tfamily_id\x18\x01 \x01(\x03R\bfamilyId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1d\n" +
+	"\n" +
+	"start_date\x18\x03 \x01(\tR\tstartDate\x12\x19\n" +
+	"\bend_date\x18\x04 \x01(\tR\aendDate\"\x83\x01\n" +
+	"\x15ListMealPlansResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12<\n" +
+	"\n" +
+	"meal_plans\x18\x03 \x03(\v2\x1d.family.v1.FamilyMealPlanInfoR\tmealPlans\"\x86\x02\n" +
+	"\x15UpdateMealPlanRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12 \n" +
+	"\tmeal_date\x18\x03 \x01(\tH\x00R\bmealDate\x88\x01\x01\x12 \n" +
+	"\tmeal_type\x18\x04 \x01(\x05H\x01R\bmealType\x88\x01\x01\x12\x1f\n" +
+	"\bservings\x18\x05 \x01(\x05H\x02R\bservings\x88\x01\x01\x12%\n" +
+	"\fcook_user_id\x18\x06 \x01(\x03H\x03R\n" +
+	"cookUserId\x88\x01\x01B\f\n" +
+	"\n" +
+	"_meal_dateB\f\n" +
+	"\n" +
+	"_meal_typeB\v\n" +
+	"\t_servingsB\x0f\n" +
+	"\r_cook_user_id\"@\n" +
+	"\x15DeleteMealPlanRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\">\n" +
 	"\x0eCommonResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\x9a\x06\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xeb\b\n" +
 	"\rFamilyService\x12L\n" +
 	"\vGetMyFamily\x12\x1d.family.v1.GetMyFamilyRequest\x1a\x1e.family.v1.GetMyFamilyResponse\x12O\n" +
 	"\fCreateFamily\x12\x1e.family.v1.CreateFamilyRequest\x1a\x1f.family.v1.CreateFamilyResponse\x12I\n" +
@@ -1332,7 +1960,11 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\vListMembers\x12\x1d.family.v1.ListMembersRequest\x1a\x1e.family.v1.ListMembersResponse\x12I\n" +
 	"\fUpdateMember\x12\x1e.family.v1.UpdateMemberRequest\x1a\x19.family.v1.CommonResponse\x12I\n" +
 	"\fRemoveMember\x12\x1e.family.v1.RemoveMemberRequest\x1a\x19.family.v1.CommonResponse\x12X\n" +
-	"\x0fResetInviteCode\x12!.family.v1.ResetInviteCodeRequest\x1a\".family.v1.ResetInviteCodeResponseB=Z;github.com/lijunsheng/familyos/proto/gen/family/v1;familyv1b\x06proto3"
+	"\x0fResetInviteCode\x12!.family.v1.ResetInviteCodeRequest\x1a\".family.v1.ResetInviteCodeResponse\x12U\n" +
+	"\x0eCreateMealPlan\x12 .family.v1.CreateMealPlanRequest\x1a!.family.v1.CreateMealPlanResponse\x12R\n" +
+	"\rListMealPlans\x12\x1f.family.v1.ListMealPlansRequest\x1a .family.v1.ListMealPlansResponse\x12U\n" +
+	"\x0eUpdateMealPlan\x12 .family.v1.UpdateMealPlanRequest\x1a!.family.v1.CreateMealPlanResponse\x12M\n" +
+	"\x0eDeleteMealPlan\x12 .family.v1.DeleteMealPlanRequest\x1a\x19.family.v1.CommonResponseB=Z;github.com/lijunsheng/familyos/proto/gen/family/v1;familyv1b\x06proto3"
 
 var (
 	file_family_v1_family_proto_rawDescOnce sync.Once
@@ -1346,7 +1978,7 @@ func file_family_v1_family_proto_rawDescGZIP() []byte {
 	return file_family_v1_family_proto_rawDescData
 }
 
-var file_family_v1_family_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_family_v1_family_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_family_v1_family_proto_goTypes = []any{
 	(*FamilyInfo)(nil),              // 0: family.v1.FamilyInfo
 	(*GetMyFamilyRequest)(nil),      // 1: family.v1.GetMyFamilyRequest
@@ -1365,36 +1997,53 @@ var file_family_v1_family_proto_goTypes = []any{
 	(*DissolveFamilyRequest)(nil),   // 14: family.v1.DissolveFamilyRequest
 	(*ResetInviteCodeRequest)(nil),  // 15: family.v1.ResetInviteCodeRequest
 	(*ResetInviteCodeResponse)(nil), // 16: family.v1.ResetInviteCodeResponse
-	(*CommonResponse)(nil),          // 17: family.v1.CommonResponse
+	(*CreateMealPlanRequest)(nil),   // 17: family.v1.CreateMealPlanRequest
+	(*FamilyMealPlanInfo)(nil),      // 18: family.v1.FamilyMealPlanInfo
+	(*CreateMealPlanResponse)(nil),  // 19: family.v1.CreateMealPlanResponse
+	(*ListMealPlansRequest)(nil),    // 20: family.v1.ListMealPlansRequest
+	(*ListMealPlansResponse)(nil),   // 21: family.v1.ListMealPlansResponse
+	(*UpdateMealPlanRequest)(nil),   // 22: family.v1.UpdateMealPlanRequest
+	(*DeleteMealPlanRequest)(nil),   // 23: family.v1.DeleteMealPlanRequest
+	(*CommonResponse)(nil),          // 24: family.v1.CommonResponse
 }
 var file_family_v1_family_proto_depIdxs = []int32{
 	0,  // 0: family.v1.GetMyFamilyResponse.family:type_name -> family.v1.FamilyInfo
 	6,  // 1: family.v1.ListMembersResponse.members:type_name -> family.v1.FamilyMemberInfo
-	1,  // 2: family.v1.FamilyService.GetMyFamily:input_type -> family.v1.GetMyFamilyRequest
-	3,  // 3: family.v1.FamilyService.CreateFamily:input_type -> family.v1.CreateFamilyRequest
-	5,  // 4: family.v1.FamilyService.UpdateFamily:input_type -> family.v1.UpdateFamilyRequest
-	11, // 5: family.v1.FamilyService.JoinFamily:input_type -> family.v1.JoinFamilyRequest
-	13, // 6: family.v1.FamilyService.LeaveFamily:input_type -> family.v1.LeaveFamilyRequest
-	14, // 7: family.v1.FamilyService.DissolveFamily:input_type -> family.v1.DissolveFamilyRequest
-	7,  // 8: family.v1.FamilyService.ListMembers:input_type -> family.v1.ListMembersRequest
-	9,  // 9: family.v1.FamilyService.UpdateMember:input_type -> family.v1.UpdateMemberRequest
-	10, // 10: family.v1.FamilyService.RemoveMember:input_type -> family.v1.RemoveMemberRequest
-	15, // 11: family.v1.FamilyService.ResetInviteCode:input_type -> family.v1.ResetInviteCodeRequest
-	2,  // 12: family.v1.FamilyService.GetMyFamily:output_type -> family.v1.GetMyFamilyResponse
-	4,  // 13: family.v1.FamilyService.CreateFamily:output_type -> family.v1.CreateFamilyResponse
-	17, // 14: family.v1.FamilyService.UpdateFamily:output_type -> family.v1.CommonResponse
-	12, // 15: family.v1.FamilyService.JoinFamily:output_type -> family.v1.JoinFamilyResponse
-	17, // 16: family.v1.FamilyService.LeaveFamily:output_type -> family.v1.CommonResponse
-	17, // 17: family.v1.FamilyService.DissolveFamily:output_type -> family.v1.CommonResponse
-	8,  // 18: family.v1.FamilyService.ListMembers:output_type -> family.v1.ListMembersResponse
-	17, // 19: family.v1.FamilyService.UpdateMember:output_type -> family.v1.CommonResponse
-	17, // 20: family.v1.FamilyService.RemoveMember:output_type -> family.v1.CommonResponse
-	16, // 21: family.v1.FamilyService.ResetInviteCode:output_type -> family.v1.ResetInviteCodeResponse
-	12, // [12:22] is the sub-list for method output_type
-	2,  // [2:12] is the sub-list for method input_type
-	2,  // [2:2] is the sub-list for extension type_name
-	2,  // [2:2] is the sub-list for extension extendee
-	0,  // [0:2] is the sub-list for field type_name
+	18, // 2: family.v1.CreateMealPlanResponse.meal_plan:type_name -> family.v1.FamilyMealPlanInfo
+	18, // 3: family.v1.ListMealPlansResponse.meal_plans:type_name -> family.v1.FamilyMealPlanInfo
+	1,  // 4: family.v1.FamilyService.GetMyFamily:input_type -> family.v1.GetMyFamilyRequest
+	3,  // 5: family.v1.FamilyService.CreateFamily:input_type -> family.v1.CreateFamilyRequest
+	5,  // 6: family.v1.FamilyService.UpdateFamily:input_type -> family.v1.UpdateFamilyRequest
+	11, // 7: family.v1.FamilyService.JoinFamily:input_type -> family.v1.JoinFamilyRequest
+	13, // 8: family.v1.FamilyService.LeaveFamily:input_type -> family.v1.LeaveFamilyRequest
+	14, // 9: family.v1.FamilyService.DissolveFamily:input_type -> family.v1.DissolveFamilyRequest
+	7,  // 10: family.v1.FamilyService.ListMembers:input_type -> family.v1.ListMembersRequest
+	9,  // 11: family.v1.FamilyService.UpdateMember:input_type -> family.v1.UpdateMemberRequest
+	10, // 12: family.v1.FamilyService.RemoveMember:input_type -> family.v1.RemoveMemberRequest
+	15, // 13: family.v1.FamilyService.ResetInviteCode:input_type -> family.v1.ResetInviteCodeRequest
+	17, // 14: family.v1.FamilyService.CreateMealPlan:input_type -> family.v1.CreateMealPlanRequest
+	20, // 15: family.v1.FamilyService.ListMealPlans:input_type -> family.v1.ListMealPlansRequest
+	22, // 16: family.v1.FamilyService.UpdateMealPlan:input_type -> family.v1.UpdateMealPlanRequest
+	23, // 17: family.v1.FamilyService.DeleteMealPlan:input_type -> family.v1.DeleteMealPlanRequest
+	2,  // 18: family.v1.FamilyService.GetMyFamily:output_type -> family.v1.GetMyFamilyResponse
+	4,  // 19: family.v1.FamilyService.CreateFamily:output_type -> family.v1.CreateFamilyResponse
+	24, // 20: family.v1.FamilyService.UpdateFamily:output_type -> family.v1.CommonResponse
+	12, // 21: family.v1.FamilyService.JoinFamily:output_type -> family.v1.JoinFamilyResponse
+	24, // 22: family.v1.FamilyService.LeaveFamily:output_type -> family.v1.CommonResponse
+	24, // 23: family.v1.FamilyService.DissolveFamily:output_type -> family.v1.CommonResponse
+	8,  // 24: family.v1.FamilyService.ListMembers:output_type -> family.v1.ListMembersResponse
+	24, // 25: family.v1.FamilyService.UpdateMember:output_type -> family.v1.CommonResponse
+	24, // 26: family.v1.FamilyService.RemoveMember:output_type -> family.v1.CommonResponse
+	16, // 27: family.v1.FamilyService.ResetInviteCode:output_type -> family.v1.ResetInviteCodeResponse
+	19, // 28: family.v1.FamilyService.CreateMealPlan:output_type -> family.v1.CreateMealPlanResponse
+	21, // 29: family.v1.FamilyService.ListMealPlans:output_type -> family.v1.ListMealPlansResponse
+	19, // 30: family.v1.FamilyService.UpdateMealPlan:output_type -> family.v1.CreateMealPlanResponse
+	24, // 31: family.v1.FamilyService.DeleteMealPlan:output_type -> family.v1.CommonResponse
+	18, // [18:32] is the sub-list for method output_type
+	4,  // [4:18] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_family_v1_family_proto_init() }
@@ -1402,13 +2051,16 @@ func file_family_v1_family_proto_init() {
 	if File_family_v1_family_proto != nil {
 		return
 	}
+	file_family_v1_family_proto_msgTypes[17].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[18].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[22].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_family_v1_family_proto_rawDesc), len(file_family_v1_family_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

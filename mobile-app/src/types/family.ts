@@ -5,6 +5,8 @@
  */
 
 export type FamilyRole = 1 | 2 | 3;
+export type MealType = 1 | 2 | 3;
+export type MealPlanStatus = 0 | 1 | 2 | 3;
 
 /** 家庭信息 */
 export interface FamilyInfo {
@@ -38,6 +40,29 @@ export interface ApiResponse {
   code: number;
   message: string;
 }
+
+export interface FamilyMealPlanInfo {
+  id: number;
+  family_id: number;
+  dish_id: number;
+  dish_name: string;
+  dish_image_key: string;
+  meal_date: string;
+  meal_type: MealType;
+  servings: number;
+  cook_user_id: number | null;
+  cook_user_name: string;
+  status: MealPlanStatus;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export const MealTypeLabel: Record<MealType, string> = {
+  1: '早餐',
+  2: '午餐',
+  3: '晚餐',
+};
 
 /** 角色常量 */
 export const FamilyRoleLabel: Record<FamilyRole, string> = {

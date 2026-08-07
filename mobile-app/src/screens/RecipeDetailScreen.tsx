@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,6 +26,10 @@ import type {
 } from '../services/dish';
 import { colors, spacing, radius } from '../theme';
 import type { AuthStackParamList } from '../types/auth';
+import { useUser } from '../contexts/UserContext';
+import { createMealPlan, getMyFamily, listFamilyMembers } from '../services/family';
+import type { FamilyMemberInfo, MealType } from '../types/family';
+import { MealTypeLabel } from '../types/family';
 
 const herbGreen = '#287A4D';
 const stoveOrange = '#B45309';
@@ -54,6 +60,7 @@ export default function RecipeDetailScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const route = useRoute<RouteProp<AuthStackParamList, 'RecipeDetail'>>();
+  const { user } = useUser();
 
   const [dish, setDish] = useState<DishDetailInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +69,13 @@ export default function RecipeDetailScreen() {
   const [failedImages, setFailedImages] = useState<Set<string>>(
     () => new Set(),
   );
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [familyId, setFamilyId] = useState<number | null>(null);
+  const [members, setMembers] = useState<FamilyMemberInfo[]>([]);
+  const [mealDate, setMealDate] = useState(() => localDateKey(new Date()));
+  const [mealType, setMealType] = useState<MealType>(3);
+  const [cookUserId, setCookUserId] = useState<number | undefined>();
+  const [menuLoading, setMenuLoading] = useState(false);
 
   const loadDetail = useCallback(async () => {
     setLoading(true);
@@ -95,6 +109,47 @@ export default function RecipeDetailScreen() {
       return next;
     });
   }, []);
+
+  const openMealPlan = useCallback(async () => {
+    if (!user) return;
+    setMenuOpen(true);
+    setMenuLoading(true);
+    try {
+      const family = await getMyFamily(user.id);
+      if (!family) {
+        setMenuOpen(false);
+        Alert.alert('还没有家庭', '请先在“我的”中创建或加入家庭。');
+        return;
+      }
+      setFamilyId(family.id);
+      setMembers(await listFamilyMembers(family.id, user.id));
+    } catch (e: any) {
+      setMenuOpen(false);
+      Alert.alert('加载失败', e.message || '暂时无法读取家庭信息');
+    } finally {
+      setMenuLoading(false);
+    }
+  }, [user]);
+
+  const addToMealPlan = useCallback(async () => {
+    if (!user || !familyId || !dish) return;
+    setMenuLoading(true);
+    try {
+      await createMealPlan({
+        family_id: familyId, dish_id: dish.id, meal_date: mealDate,
+        meal_type: mealType, servings, cook_user_id: cookUserId, created_by: user.id,
+      });
+      setMenuOpen(false);
+      Alert.alert('已加入家庭菜单', `${formatMenuDate(mealDate)} · ${MealTypeLabel[mealType]}`, [
+        { text: '继续看菜谱' },
+        { text: '查看菜单', onPress: () => navigation.navigate('FamilyMealPlan', { initialDate: mealDate }) },
+      ]);
+    } catch (e: any) {
+      Alert.alert('加入失败', e.message || '请稍后重试');
+    } finally {
+      setMenuLoading(false);
+    }
+  }, [cookUserId, dish, familyId, mealDate, mealType, navigation, servings, user]);
 
   if (loading) {
     return (
@@ -314,6 +369,16 @@ export default function RecipeDetailScreen() {
           ]}
         >
           <TouchableOpacity
+            style={styles.menuButton}
+            onPress={openMealPlan}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel="加入家庭菜单"
+          >
+            <Ionicons name="calendar-outline" size={18} color={colors.primary} />
+            <Text style={styles.menuButtonText}>加入菜单</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={styles.startButton}
             onPress={() =>
               navigation.navigate('CookingMode', {
@@ -331,8 +396,46 @@ export default function RecipeDetailScreen() {
           </TouchableOpacity>
         </View>
       ) : null}
+
+      <Modal transparent visible={menuOpen} animationType="slide" onRequestClose={() => setMenuOpen(false)}>
+        <View style={styles.modalShade}>
+          <TouchableOpacity style={StyleSheet.absoluteFill} activeOpacity={1} onPress={() => setMenuOpen(false)} />
+          <View style={[styles.menuSheet, { paddingBottom: Math.max(insets.bottom, spacing.lg) }]}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.sheetHeader}>
+              <View><Text style={styles.sheetTitle}>加入家庭菜单</Text><Text style={styles.sheetSubtitle}>{dish.name} · {servings}人份</Text></View>
+              <TouchableOpacity style={styles.sheetClose} onPress={() => setMenuOpen(false)}><Ionicons name="close" size={20} color={colors.textSecondary} /></TouchableOpacity>
+            </View>
+            {menuLoading && !familyId ? <View style={styles.sheetLoading}><ActivityIndicator color={colors.primary} /></View> : <>
+              <Text style={styles.fieldLabel}>用餐日期</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateChoices}>
+                {nextDates(7).map((date) => { const key = localDateKey(date); const active = key === mealDate; return <TouchableOpacity key={key} style={[styles.dateChoice, active && styles.dateChoiceActive]} onPress={() => setMealDate(key)}><Text style={[styles.dateWeekday, active && styles.choiceActiveText]}>{key === localDateKey(new Date()) ? '今天' : `周${'日一二三四五六'[date.getDay()]}`}</Text><Text style={[styles.dateNumber, active && styles.choiceActiveText]}>{date.getMonth()+1}/{date.getDate()}</Text></TouchableOpacity>; })}
+              </ScrollView>
+              <Text style={styles.fieldLabel}>餐次</Text>
+              <View style={styles.mealChoices}>{([1,2,3] as MealType[]).map((type) => <TouchableOpacity key={type} style={[styles.mealChoice, mealType === type && styles.mealChoiceActive]} onPress={() => setMealType(type)}><Text style={[styles.mealChoiceText, mealType === type && styles.mealChoiceTextActive]}>{MealTypeLabel[type]}</Text></TouchableOpacity>)}</View>
+              <Text style={styles.fieldLabel}>做饭负责人</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.memberChoices}><TouchableOpacity style={[styles.memberChoice, cookUserId == null && styles.memberChoiceActive]} onPress={() => setCookUserId(undefined)}><Text style={styles.memberChoiceText}>暂不指定</Text></TouchableOpacity>{members.map((member) => <TouchableOpacity key={member.user_id} style={[styles.memberChoice, cookUserId === member.user_id && styles.memberChoiceActive]} onPress={() => setCookUserId(member.user_id)}><Text style={styles.memberChoiceText}>{member.display_name || member.nickname}</Text></TouchableOpacity>)}</ScrollView>
+              <TouchableOpacity style={styles.confirmMenuButton} disabled={menuLoading} onPress={addToMealPlan}>{menuLoading ? <ActivityIndicator size="small" color="#fff" /> : <><Ionicons name="checkmark" size={18} color="#fff" /><Text style={styles.confirmMenuText}>确认加入</Text></>}</TouchableOpacity>
+            </>}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+}
+
+function localDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function nextDates(count: number) {
+  const today = new Date();
+  return Array.from({ length: count }, (_, index) => { const date = new Date(today); date.setDate(today.getDate() + index); return date; });
+}
+
+function formatMenuDate(value: string) {
+  const [, month, day] = value.split('-');
+  return `${Number(month)}月${Number(day)}日`;
 }
 
 function StepItem({
@@ -718,8 +821,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
+    flexDirection: 'row',
+    gap: spacing.sm,
   },
+  menuButton: {
+    height: 48,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  menuButtonText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
   startButton: {
+    flex: 1,
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
@@ -735,4 +853,30 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0,
   },
+  modalShade: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(17,24,39,0.42)' },
+  menuSheet: { backgroundColor: colors.surface, borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+  sheetHandle: { width: 36, height: 4, borderRadius: 2, backgroundColor: colors.border, alignSelf: 'center', marginBottom: spacing.md },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  sheetTitle: { fontSize: 17, lineHeight: 24, fontWeight: '700', color: colors.textPrimary },
+  sheetSubtitle: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 2 },
+  sheetClose: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  sheetLoading: { height: 220, alignItems: 'center', justifyContent: 'center' },
+  fieldLabel: { fontSize: 12, lineHeight: 18, fontWeight: '600', color: colors.textPrimary, marginTop: spacing.lg, marginBottom: spacing.sm },
+  dateChoices: { gap: spacing.sm, paddingRight: spacing.lg },
+  dateChoice: { width: 58, height: 48, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  dateChoiceActive: { borderColor: colors.primary, backgroundColor: colors.primary },
+  dateWeekday: { fontSize: 10, color: colors.textSecondary },
+  dateNumber: { fontSize: 12, lineHeight: 18, fontWeight: '700', color: colors.textPrimary },
+  choiceActiveText: { color: colors.textOnPrimary },
+  mealChoices: { flexDirection: 'row', gap: spacing.sm },
+  mealChoice: { flex: 1, height: 36, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  mealChoiceActive: { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
+  mealChoiceText: { fontSize: 12, color: colors.textSecondary },
+  mealChoiceTextActive: { fontWeight: '700', color: colors.primary },
+  memberChoices: { gap: spacing.sm, paddingRight: spacing.lg },
+  memberChoice: { height: 34, borderRadius: radius.full, borderWidth: 1, borderColor: colors.border, paddingHorizontal: spacing.md, justifyContent: 'center' },
+  memberChoiceActive: { borderColor: colors.primary, backgroundColor: colors.primarySubtle },
+  memberChoiceText: { fontSize: 12, color: colors.textPrimary },
+  confirmMenuButton: { height: 44, marginTop: spacing.xl, borderRadius: radius.md, backgroundColor: colors.primary, flexDirection: 'row', gap: spacing.sm, alignItems: 'center', justifyContent: 'center' },
+  confirmMenuText: { fontSize: 14, fontWeight: '700', color: colors.textOnPrimary },
 });

@@ -26,6 +26,11 @@ service FamilyService {
   rpc RemoveMember(RemoveMemberRequest) returns (CommonResponse);
   // ResetInviteCode 重置邀请码
   rpc ResetInviteCode(ResetInviteCodeRequest) returns (ResetInviteCodeResponse);
+  // CreateMealPlan 将菜谱加入家庭菜单
+  rpc CreateMealPlan(CreateMealPlanRequest) returns (CreateMealPlanResponse);
+  rpc ListMealPlans(ListMealPlansRequest) returns (ListMealPlansResponse);
+  rpc UpdateMealPlan(UpdateMealPlanRequest) returns (CreateMealPlanResponse);
+  rpc DeleteMealPlan(DeleteMealPlanRequest) returns (CommonResponse);
 }
 
 // ========== Family ==========
@@ -152,6 +157,68 @@ message ResetInviteCodeResponse {
   string message                 = 2;
   string invite_code             = 3;
   string invite_code_expired_at  = 4;
+}
+
+// ========== Meal Plan ==========
+
+message CreateMealPlanRequest {
+  int64 family_id             = 1;
+  int64 dish_id               = 2;
+  string meal_date            = 3; // YYYY-MM-DD
+  int32 meal_type             = 4; // 1早餐 2午餐 3晚餐
+  int32 servings              = 5;
+  optional int64 cook_user_id = 6;
+  int64 created_by            = 7;
+}
+
+message FamilyMealPlanInfo {
+  int64 id                    = 1;
+  int64 family_id             = 2;
+  int64 dish_id               = 3;
+  string meal_date            = 4;
+  int32 meal_type             = 5;
+  int32 servings              = 6;
+  optional int64 cook_user_id = 7;
+  int32 status                = 8;
+  int64 created_by            = 9;
+  string created_at           = 10;
+  string updated_at           = 11;
+  string dish_name            = 12;
+  string dish_image_key       = 13;
+  string cook_user_name       = 14;
+}
+
+message CreateMealPlanResponse {
+  int32 code                  = 1;
+  string message              = 2;
+  FamilyMealPlanInfo meal_plan = 3;
+}
+
+message ListMealPlansRequest {
+  int64 family_id  = 1;
+  int64 user_id    = 2;
+  string start_date = 3;
+  string end_date   = 4;
+}
+
+message ListMealPlansResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated FamilyMealPlanInfo meal_plans = 3;
+}
+
+message UpdateMealPlanRequest {
+  int64 id = 1;
+  int64 user_id = 2;
+  optional string meal_date = 3;
+  optional int32 meal_type = 4;
+  optional int32 servings = 5;
+  optional int64 cook_user_id = 6; // 0 表示清空负责人
+}
+
+message DeleteMealPlanRequest {
+  int64 id = 1;
+  int64 user_id = 2;
 }
 
 // ========== Common ==========

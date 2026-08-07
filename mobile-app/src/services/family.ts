@@ -11,6 +11,8 @@ import type {
   FamilyInfo,
   FamilyMemberInfo,
   ApiResponse,
+  FamilyMealPlanInfo,
+  MealType,
 } from '../types/family';
 
 // ─── 查询我的家庭 ────────────────────────────────────────────
@@ -158,4 +160,58 @@ export async function resetInviteCode(
   });
   if (data.code !== 0) throw new Error(data.message || '重置邀请码失败');
   return data;
+}
+
+export async function createMealPlan(params: {
+  family_id: number;
+  dish_id: number;
+  meal_date: string;
+  meal_type: MealType;
+  servings: number;
+  cook_user_id?: number;
+  created_by: number;
+}) {
+  const { data } = await api.post<ApiResponse & { meal_plan: FamilyMealPlanInfo }>(
+    '/family/meal-plans', params,
+  );
+  if (data.code !== 0) throw new Error(data.message || '加入家庭菜单失败');
+  return data.meal_plan;
+}
+
+export async function listMealPlans(
+  familyId: number,
+  userId: number,
+  startDate: string,
+  endDate: string,
+) {
+  const { data } = await api.get<ApiResponse & { meal_plans: FamilyMealPlanInfo[] }>(
+    `/family/${familyId}/meal-plans`,
+    { params: { user_id: userId, start_date: startDate, end_date: endDate } },
+  );
+  if (data.code !== 0) throw new Error(data.message || '查询家庭菜单失败');
+  return data.meal_plans ?? [];
+}
+
+export async function updateMealPlan(
+  id: number,
+  params: {
+    user_id: number;
+    meal_date?: string;
+    meal_type?: MealType;
+    servings?: number;
+    cook_user_id?: number;
+  },
+) {
+  const { data } = await api.patch<ApiResponse & { meal_plan: FamilyMealPlanInfo }>(
+    `/family/meal-plans/${id}`, params,
+  );
+  if (data.code !== 0) throw new Error(data.message || '修改家庭菜单失败');
+  return data.meal_plan;
+}
+
+export async function deleteMealPlan(id: number, userId: number) {
+  const { data } = await api.delete<ApiResponse>(`/family/meal-plans/${id}`, {
+    params: { user_id: userId },
+  });
+  if (data.code !== 0) throw new Error(data.message || '删除家庭菜单失败');
 }

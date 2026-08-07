@@ -50,8 +50,10 @@ func main() {
 	dishSvc := service.NewDishService(dishRepo)
 	dishServer := server.NewDishServer(dishSvc)
 
+	mealPlanRepo := repository.NewMealPlanRepo(db)
+	mealPlanSvc := service.NewMealPlanService(mealPlanRepo, familyRepo, dishRepo)
 	familySvc := service.NewFamilyService(familyRepo, userRepo)
-	familyServer := server.NewFamilyServer(familySvc)
+	familyServer := server.NewFamilyServer(familySvc, mealPlanSvc)
 
 	// 4. 启动 gRPC Server
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.GRPCPort))

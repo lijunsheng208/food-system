@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	familyv1 "github.com/lijunsheng/familyos/proto/gen/family/v1"
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
+	familyv1 "github.com/lijunsheng/familyos/proto/gen/family/v1"
 )
 
 // 家庭模块状态码
@@ -15,26 +15,36 @@ const (
 	FamilyCodeSuccess = 0
 
 	// 家庭业务错误（对齐文档 2001-2009）
-	FamilyCodeNotFound     = 2001
-	FamilyCodeAlreadyIn    = 2002
-	FamilyCodeNotIn        = 2003
-	FamilyCodeNoPermission = 2004
-	FamilyCodeInvalidCode  = 2005
-	FamilyCodeFull         = 2006
-	FamilyCodeCannotOpOwner = 2007
-	FamilyCodeInvalidName  = 2008
+	FamilyCodeNotFound       = 2001
+	FamilyCodeAlreadyIn      = 2002
+	FamilyCodeNotIn          = 2003
+	FamilyCodeNoPermission   = 2004
+	FamilyCodeInvalidCode    = 2005
+	FamilyCodeFull           = 2006
+	FamilyCodeCannotOpOwner  = 2007
+	FamilyCodeInvalidName    = 2008
 	FamilyCodeMemberNotFound = 2009
+
+	MealPlanCodeInvalidDate     = 2101
+	MealPlanCodeInvalidType     = 2102
+	MealPlanCodeInvalidServings = 2103
+	MealPlanCodeDishNotFound    = 2104
+	MealPlanCodeCookNotInFamily = 2105
+	MealPlanCodeInvalidIDs      = 2106
+	MealPlanCodeNotFound        = 2107
+	MealPlanCodeInvalidRange    = 2108
 )
 
 // FamilyServer gRPC FamilyService 实现
 type FamilyServer struct {
 	familyv1.UnimplementedFamilyServiceServer
-	svc *service.FamilyService
+	svc         *service.FamilyService
+	mealPlanSvc *service.MealPlanService
 }
 
 // NewFamilyServer 创建 FamilyServer
-func NewFamilyServer(svc *service.FamilyService) *FamilyServer {
-	return &FamilyServer{svc: svc}
+func NewFamilyServer(svc *service.FamilyService, mealPlanSvc *service.MealPlanService) *FamilyServer {
+	return &FamilyServer{svc: svc, mealPlanSvc: mealPlanSvc}
 }
 
 // ─── GetMyFamily ─────────────────────────────────────────────
@@ -273,11 +283,93 @@ func (s *FamilyServer) ResetInviteCode(ctx context.Context, req *familyv1.ResetI
 	}
 
 	return &familyv1.ResetInviteCodeResponse{
-		Code:                 FamilyCodeSuccess,
-		Message:              "重置成功",
-		InviteCode:           result.InviteCode,
-		InviteCodeExpiredAt:  expiredAtStr,
+		Code:                FamilyCodeSuccess,
+		Message:             "重置成功",
+		InviteCode:          result.InviteCode,
+		InviteCodeExpiredAt: expiredAtStr,
 	}, nil
+}
+
+// ─── CreateMealPlan ──────────────────────────────────────────
+
+func (s *FamilyServer) CreateMealPlan(ctx context.Context, req *familyv1.CreateMealPlanRequest) (*familyv1.CreateMealPlanResponse, error) {
+	if req.GetFamilyId() <= 0 || req.GetDishId() <= 0 || req.GetCreatedBy() <= 0 ||
+		(req.CookUserId != nil && req.GetCookUserId() <= 0) {
+		return &familyv1.CreateMealPlanResponse{
+			Code:    MealPlanCodeInvalidIDs,
+			Message: service.ErrInvalidMealPlanIDs.Error(),
+		}, nil
+	}
+
+	var cookUserID *uint64
+	if req.CookUserId != nil {
+		value := uint64(req.GetCookUserId())
+		cookUserID = &value
+	}
+
+	plan, err := s.mealPlanSvc.CreateMealPlan(
+		ctx,
+		uint64(req.GetFamilyId()),
+		uint64(req.GetDishId()),
+		req.GetMealDate(),
+		req.GetMealType(),
+		int(req.GetServings()),
+		cookUserID,
+		uint64(req.GetCreatedBy()),
+	)
+	if err != nil {
+		return &familyv1.CreateMealPlanResponse{
+			Code:    mapFamilyErrorCode(err),
+			Message: err.Error(),
+		}, nil
+	}
+
+	return &familyv1.CreateMealPlanResponse{
+		Code:     FamilyCodeSuccess,
+		Message:  "已加入家庭菜单",
+		MealPlan: toFamilyMealPlanInfo(plan),
+	}, nil
+}
+
+func (s *FamilyServer) ListMealPlans(ctx context.Context, req *familyv1.ListMealPlansRequest) (*familyv1.ListMealPlansResponse, error) {
+	plans, err := s.mealPlanSvc.ListMealPlans(ctx, uint64(req.GetFamilyId()), uint64(req.GetUserId()), req.GetStartDate(), req.GetEndDate())
+	if err != nil {
+		return &familyv1.ListMealPlansResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	infos := make([]*familyv1.FamilyMealPlanInfo, 0, len(plans))
+	for i := range plans {
+		info := toFamilyMealPlanInfo(&plans[i].FamilyMealPlan)
+		info.DishName = plans[i].DishName
+		info.DishImageKey = plans[i].DishImageKey
+		info.CookUserName = plans[i].CookUserName
+		infos = append(infos, info)
+	}
+	return &familyv1.ListMealPlansResponse{Code: FamilyCodeSuccess, Message: "查询成功", MealPlans: infos}, nil
+}
+
+func (s *FamilyServer) UpdateMealPlan(ctx context.Context, req *familyv1.UpdateMealPlanRequest) (*familyv1.CreateMealPlanResponse, error) {
+	var servings *int
+	if req.Servings != nil {
+		value := int(req.GetServings())
+		servings = &value
+	}
+	var cookUserID *uint64
+	if req.CookUserId != nil {
+		value := uint64(req.GetCookUserId())
+		cookUserID = &value
+	}
+	plan, err := s.mealPlanSvc.UpdateMealPlan(ctx, uint64(req.GetId()), uint64(req.GetUserId()), req.MealDate, req.MealType, servings, cookUserID)
+	if err != nil {
+		return &familyv1.CreateMealPlanResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.CreateMealPlanResponse{Code: FamilyCodeSuccess, Message: "修改成功", MealPlan: toFamilyMealPlanInfo(plan)}, nil
+}
+
+func (s *FamilyServer) DeleteMealPlan(ctx context.Context, req *familyv1.DeleteMealPlanRequest) (*familyv1.CommonResponse, error) {
+	if err := s.mealPlanSvc.DeleteMealPlan(ctx, uint64(req.GetId()), uint64(req.GetUserId())); err != nil {
+		return &familyv1.CommonResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.CommonResponse{Code: FamilyCodeSuccess, Message: "删除成功"}, nil
 }
 
 // ─── 错误码映射 ──────────────────────────────────────────────
@@ -302,6 +394,22 @@ func mapFamilyErrorCode(err error) int32 {
 		return FamilyCodeInvalidName
 	case errors.Is(err, service.ErrMemberNotFound):
 		return FamilyCodeMemberNotFound
+	case errors.Is(err, service.ErrInvalidMealPlanIDs):
+		return MealPlanCodeInvalidIDs
+	case errors.Is(err, service.ErrInvalidMealDate):
+		return MealPlanCodeInvalidDate
+	case errors.Is(err, service.ErrInvalidMealType):
+		return MealPlanCodeInvalidType
+	case errors.Is(err, service.ErrInvalidMealServings):
+		return MealPlanCodeInvalidServings
+	case errors.Is(err, service.ErrMealPlanDishNotFound):
+		return MealPlanCodeDishNotFound
+	case errors.Is(err, service.ErrCookUserNotInFamily):
+		return MealPlanCodeCookNotInFamily
+	case errors.Is(err, service.ErrMealPlanNotFound):
+		return MealPlanCodeNotFound
+	case errors.Is(err, service.ErrInvalidMealDateRange):
+		return MealPlanCodeInvalidRange
 	case errors.Is(err, service.ErrUserNotFound):
 		return CodeUserNotFound
 	default:
@@ -334,10 +442,10 @@ func toFamilyInfo(f *model.Family, myRole int8) *familyv1.FamilyInfo {
 
 func toFamilyMemberInfo(m *model.FamilyMemberWithUser) *familyv1.FamilyMemberInfo {
 	info := &familyv1.FamilyMemberInfo{
-		UserId:  int64(m.UserID),
-		Phone:   m.Phone,
+		UserId:   int64(m.UserID),
+		Phone:    m.Phone,
 		Nickname: m.Nickname,
-		Role:    int32(m.Role),
+		Role:     int32(m.Role),
 		JoinedAt: m.JoinedAt.Format("2006-01-02 15:04:05"),
 	}
 	if m.Avatar != nil {
@@ -348,6 +456,26 @@ func toFamilyMemberInfo(m *model.FamilyMemberWithUser) *familyv1.FamilyMemberInf
 	}
 	if m.DisplayName != nil {
 		info.DisplayName = *m.DisplayName
+	}
+	return info
+}
+
+func toFamilyMealPlanInfo(plan *model.FamilyMealPlan) *familyv1.FamilyMealPlanInfo {
+	info := &familyv1.FamilyMealPlanInfo{
+		Id:        int64(plan.ID),
+		FamilyId:  int64(plan.FamilyID),
+		DishId:    int64(plan.DishID),
+		MealDate:  plan.MealDate.Format("2006-01-02"),
+		MealType:  int32(plan.MealType),
+		Servings:  int32(plan.Servings),
+		Status:    int32(plan.Status),
+		CreatedBy: int64(plan.CreatedBy),
+		CreatedAt: plan.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: plan.UpdatedAt.Format("2006-01-02 15:04:05"),
+	}
+	if plan.CookUserID != nil {
+		cookUserID := int64(*plan.CookUserID)
+		info.CookUserId = &cookUserID
 	}
 	return info
 }

@@ -95,6 +95,10 @@ func main() {
 		family := api.Group("/family")
 		{
 			family.GET("/my", familyHandler.GetMyFamily)
+			family.POST("/meal-plans", familyHandler.CreateMealPlan)
+			family.GET("/:family_id/meal-plans", familyHandler.ListMealPlans)
+			family.PATCH("/meal-plans/:id", familyHandler.UpdateMealPlan)
+			family.DELETE("/meal-plans/:id", familyHandler.DeleteMealPlan)
 			family.POST("/create", familyHandler.CreateFamily)
 			family.PUT("/:family_id", familyHandler.UpdateFamily)
 			family.DELETE("/:family_id", familyHandler.DissolveFamily)

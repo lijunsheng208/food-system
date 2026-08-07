@@ -29,6 +29,10 @@ const (
 	FamilyService_UpdateMember_FullMethodName    = "/family.v1.FamilyService/UpdateMember"
 	FamilyService_RemoveMember_FullMethodName    = "/family.v1.FamilyService/RemoveMember"
 	FamilyService_ResetInviteCode_FullMethodName = "/family.v1.FamilyService/ResetInviteCode"
+	FamilyService_CreateMealPlan_FullMethodName  = "/family.v1.FamilyService/CreateMealPlan"
+	FamilyService_ListMealPlans_FullMethodName   = "/family.v1.FamilyService/ListMealPlans"
+	FamilyService_UpdateMealPlan_FullMethodName  = "/family.v1.FamilyService/UpdateMealPlan"
+	FamilyService_DeleteMealPlan_FullMethodName  = "/family.v1.FamilyService/DeleteMealPlan"
 )
 
 // FamilyServiceClient is the client API for FamilyService service.
@@ -57,6 +61,11 @@ type FamilyServiceClient interface {
 	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*CommonResponse, error)
 	// ResetInviteCode 重置邀请码
 	ResetInviteCode(ctx context.Context, in *ResetInviteCodeRequest, opts ...grpc.CallOption) (*ResetInviteCodeResponse, error)
+	// CreateMealPlan 将菜谱加入家庭菜单
+	CreateMealPlan(ctx context.Context, in *CreateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error)
+	ListMealPlans(ctx context.Context, in *ListMealPlansRequest, opts ...grpc.CallOption) (*ListMealPlansResponse, error)
+	UpdateMealPlan(ctx context.Context, in *UpdateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error)
+	DeleteMealPlan(ctx context.Context, in *DeleteMealPlanRequest, opts ...grpc.CallOption) (*CommonResponse, error)
 }
 
 type familyServiceClient struct {
@@ -167,6 +176,46 @@ func (c *familyServiceClient) ResetInviteCode(ctx context.Context, in *ResetInvi
 	return out, nil
 }
 
+func (c *familyServiceClient) CreateMealPlan(ctx context.Context, in *CreateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMealPlanResponse)
+	err := c.cc.Invoke(ctx, FamilyService_CreateMealPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) ListMealPlans(ctx context.Context, in *ListMealPlansRequest, opts ...grpc.CallOption) (*ListMealPlansResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMealPlansResponse)
+	err := c.cc.Invoke(ctx, FamilyService_ListMealPlans_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) UpdateMealPlan(ctx context.Context, in *UpdateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateMealPlanResponse)
+	err := c.cc.Invoke(ctx, FamilyService_UpdateMealPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) DeleteMealPlan(ctx context.Context, in *DeleteMealPlanRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, FamilyService_DeleteMealPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FamilyServiceServer is the server API for FamilyService service.
 // All implementations must embed UnimplementedFamilyServiceServer
 // for forward compatibility.
@@ -193,6 +242,11 @@ type FamilyServiceServer interface {
 	RemoveMember(context.Context, *RemoveMemberRequest) (*CommonResponse, error)
 	// ResetInviteCode 重置邀请码
 	ResetInviteCode(context.Context, *ResetInviteCodeRequest) (*ResetInviteCodeResponse, error)
+	// CreateMealPlan 将菜谱加入家庭菜单
+	CreateMealPlan(context.Context, *CreateMealPlanRequest) (*CreateMealPlanResponse, error)
+	ListMealPlans(context.Context, *ListMealPlansRequest) (*ListMealPlansResponse, error)
+	UpdateMealPlan(context.Context, *UpdateMealPlanRequest) (*CreateMealPlanResponse, error)
+	DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error)
 	mustEmbedUnimplementedFamilyServiceServer()
 }
 
@@ -232,6 +286,18 @@ func (UnimplementedFamilyServiceServer) RemoveMember(context.Context, *RemoveMem
 }
 func (UnimplementedFamilyServiceServer) ResetInviteCode(context.Context, *ResetInviteCodeRequest) (*ResetInviteCodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResetInviteCode not implemented")
+}
+func (UnimplementedFamilyServiceServer) CreateMealPlan(context.Context, *CreateMealPlanRequest) (*CreateMealPlanResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateMealPlan not implemented")
+}
+func (UnimplementedFamilyServiceServer) ListMealPlans(context.Context, *ListMealPlansRequest) (*ListMealPlansResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMealPlans not implemented")
+}
+func (UnimplementedFamilyServiceServer) UpdateMealPlan(context.Context, *UpdateMealPlanRequest) (*CreateMealPlanResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateMealPlan not implemented")
+}
+func (UnimplementedFamilyServiceServer) DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteMealPlan not implemented")
 }
 func (UnimplementedFamilyServiceServer) mustEmbedUnimplementedFamilyServiceServer() {}
 func (UnimplementedFamilyServiceServer) testEmbeddedByValue()                       {}
@@ -434,6 +500,78 @@ func _FamilyService_ResetInviteCode_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FamilyService_CreateMealPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateMealPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).CreateMealPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_CreateMealPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).CreateMealPlan(ctx, req.(*CreateMealPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_ListMealPlans_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMealPlansRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).ListMealPlans(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_ListMealPlans_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).ListMealPlans(ctx, req.(*ListMealPlansRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_UpdateMealPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMealPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).UpdateMealPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_UpdateMealPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).UpdateMealPlan(ctx, req.(*UpdateMealPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_DeleteMealPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMealPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).DeleteMealPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_DeleteMealPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).DeleteMealPlan(ctx, req.(*DeleteMealPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FamilyService_ServiceDesc is the grpc.ServiceDesc for FamilyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -480,6 +618,22 @@ var FamilyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetInviteCode",
 			Handler:    _FamilyService_ResetInviteCode_Handler,
+		},
+		{
+			MethodName: "CreateMealPlan",
+			Handler:    _FamilyService_CreateMealPlan_Handler,
+		},
+		{
+			MethodName: "ListMealPlans",
+			Handler:    _FamilyService_ListMealPlans_Handler,
+		},
+		{
+			MethodName: "UpdateMealPlan",
+			Handler:    _FamilyService_UpdateMealPlan_Handler,
+		},
+		{
+			MethodName: "DeleteMealPlan",
+			Handler:    _FamilyService_DeleteMealPlan_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

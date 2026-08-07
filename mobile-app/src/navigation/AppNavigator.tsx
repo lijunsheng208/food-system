@@ -21,6 +21,7 @@ import CreateFamilyScreen from '../screens/CreateFamilyScreen';
 import EditFamilyScreen from '../screens/EditFamilyScreen';
 import JoinFamilyScreen from '../screens/JoinFamilyScreen';
 import FamilyMemberEditScreen from '../screens/FamilyMemberEditScreen';
+import FamilyMealPlanScreen from '../screens/FamilyMealPlanScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -133,6 +134,11 @@ export default function AppNavigator() {
         name="CookingMode"
         component={CookingModeScreen}
         options={{ animation: 'slide_from_bottom' }}
+      />
+      <Stack.Screen
+        name="FamilyMealPlan"
+        component={FamilyMealPlanScreen}
+        options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="ProfileDetail"
