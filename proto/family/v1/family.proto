@@ -31,6 +31,18 @@ service FamilyService {
   rpc ListMealPlans(ListMealPlansRequest) returns (ListMealPlansResponse);
   rpc UpdateMealPlan(UpdateMealPlanRequest) returns (CreateMealPlanResponse);
   rpc DeleteMealPlan(DeleteMealPlanRequest) returns (CommonResponse);
+  // GenerateShoppingList 根据家庭菜单生成购物清单
+  rpc GenerateShoppingList(GenerateShoppingListRequest) returns (ShoppingListResponse);
+  // ListShoppingLists 查询家庭购物清单
+  rpc ListShoppingLists(ListShoppingListsRequest) returns (ShoppingListsResponse);
+  // GetShoppingList 查询购物清单详情
+  rpc GetShoppingList(GetShoppingListRequest) returns (ShoppingListResponse);
+  // UpdateShoppingItemPurchased 更新购物项目购买状态
+  rpc UpdateShoppingItemPurchased(UpdateShoppingItemPurchasedRequest) returns (CommonResponse);
+  // AddManualShoppingItem 添加手动购物项目
+  rpc AddManualShoppingItem(AddManualShoppingItemRequest) returns (ShoppingItemResponse);
+  // DeleteShoppingItem 删除购物项目
+  rpc DeleteShoppingItem(DeleteShoppingItemRequest) returns (CommonResponse);
 }
 
 // ========== Family ==========
@@ -218,6 +230,91 @@ message UpdateMealPlanRequest {
 
 message DeleteMealPlanRequest {
   int64 id = 1;
+  int64 user_id = 2;
+}
+
+// ========== Shopping List ==========
+
+message ShoppingListInfo {
+  int64  id         = 1;
+  int64  family_id  = 2;
+  int64  created_by = 3;
+  string name       = 4;
+  string start_date = 5;
+  string end_date   = 6;
+  int32  status     = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message ShoppingItemInfo {
+  int64  id              = 1;
+  int64  shopping_list_id = 2;
+  string ingredient_name = 3;
+  optional double quantity = 4;
+  string quantity_text   = 5;
+  string unit            = 6;
+  bool   is_purchased    = 7;
+  string source          = 8;
+  int32  sort_order      = 9;
+  string created_at      = 10;
+  string updated_at      = 11;
+}
+
+message ShoppingListResponse {
+  int32 code = 1;
+  string message = 2;
+  ShoppingListInfo shopping_list = 3;
+  repeated ShoppingItemInfo items = 4;
+}
+
+message ShoppingListsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated ShoppingListInfo shopping_lists = 3;
+}
+
+message GenerateShoppingListRequest {
+  int64 family_id = 1;
+  string start_date = 2;
+  string end_date = 3;
+  string name = 4;
+  int64 user_id = 5;
+}
+
+message ListShoppingListsRequest {
+  int64 family_id = 1;
+  int64 user_id = 2;
+}
+
+message GetShoppingListRequest {
+  int64 id = 1;
+  int64 user_id = 2;
+}
+
+message UpdateShoppingItemPurchasedRequest {
+  int64 item_id = 1;
+  int64 user_id = 2;
+  bool is_purchased = 3;
+}
+
+message AddManualShoppingItemRequest {
+  int64 shopping_list_id = 1;
+  int64 user_id = 2;
+  string ingredient_name = 3;
+  optional double quantity = 4;
+  string quantity_text = 5;
+  string unit = 6;
+}
+
+message ShoppingItemResponse {
+  int32 code = 1;
+  string message = 2;
+  ShoppingItemInfo item = 3;
+}
+
+message DeleteShoppingItemRequest {
+  int64 item_id = 1;
   int64 user_id = 2;
 }
 

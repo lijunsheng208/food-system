@@ -106,6 +106,12 @@ func main() {
 
 		family := protected.Group("/family")
 		{
+			family.POST("/shopping-lists/generate", familyHandler.GenerateShoppingList)
+			family.GET("/shopping-lists", familyHandler.ListShoppingLists)
+			family.GET("/shopping-lists/:id", familyHandler.GetShoppingList)
+			family.PATCH("/shopping-list-items/:id", familyHandler.UpdateShoppingItemPurchased)
+			family.POST("/shopping-list-items", familyHandler.AddManualShoppingItem)
+			family.DELETE("/shopping-list-items/:id", familyHandler.DeleteShoppingItem)
 			family.GET("/my", familyHandler.GetMyFamily)
 			family.POST("/meal-plans", familyHandler.CreateMealPlan)
 			family.GET("/:family_id/meal-plans", familyHandler.ListMealPlans)

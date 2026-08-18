@@ -33,6 +33,12 @@ const (
 	MealPlanCodeInvalidIDs      = 2106
 	MealPlanCodeNotFound        = 2107
 	MealPlanCodeInvalidRange    = 2108
+
+	ShoppingCodeListNotFound = 2201
+	ShoppingCodeItemNotFound = 2202
+	ShoppingCodeInvalidDate  = 2203
+	ShoppingCodeInvalidName  = 2204
+	ShoppingCodeInvalidItem  = 2205
 )
 
 // FamilyServer gRPC FamilyService 实现
@@ -40,11 +46,12 @@ type FamilyServer struct {
 	familyv1.UnimplementedFamilyServiceServer
 	svc         *service.FamilyService
 	mealPlanSvc *service.MealPlanService
+	shoppingSvc *service.ShoppingListService
 }
 
 // NewFamilyServer 创建 FamilyServer
-func NewFamilyServer(svc *service.FamilyService, mealPlanSvc *service.MealPlanService) *FamilyServer {
-	return &FamilyServer{svc: svc, mealPlanSvc: mealPlanSvc}
+func NewFamilyServer(svc *service.FamilyService, mealPlanSvc *service.MealPlanService, shoppingSvc *service.ShoppingListService) *FamilyServer {
+	return &FamilyServer{svc: svc, mealPlanSvc: mealPlanSvc, shoppingSvc: shoppingSvc}
 }
 
 // ─── GetMyFamily ─────────────────────────────────────────────
@@ -372,6 +379,68 @@ func (s *FamilyServer) DeleteMealPlan(ctx context.Context, req *familyv1.DeleteM
 	return &familyv1.CommonResponse{Code: FamilyCodeSuccess, Message: "删除成功"}, nil
 }
 
+// GenerateShoppingList 根据家庭菜单汇总食材并创建购物清单。
+func (s *FamilyServer) GenerateShoppingList(ctx context.Context, req *familyv1.GenerateShoppingListRequest) (*familyv1.ShoppingListResponse, error) {
+	result, err := s.shoppingSvc.GenerateShoppingList(ctx, uint64(req.GetUserId()), uint64(req.GetFamilyId()), req.GetStartDate(), req.GetEndDate(), req.GetName())
+	if err != nil {
+		return &familyv1.ShoppingListResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	return shoppingListResponse(result, "购物清单生成成功"), nil
+}
+
+// ListShoppingLists 查询当前家庭的购物清单。
+func (s *FamilyServer) ListShoppingLists(ctx context.Context, req *familyv1.ListShoppingListsRequest) (*familyv1.ShoppingListsResponse, error) {
+	lists, err := s.shoppingSvc.ListShoppingLists(ctx, uint64(req.GetUserId()), uint64(req.GetFamilyId()))
+	if err != nil {
+		return &familyv1.ShoppingListsResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	items := make([]*familyv1.ShoppingListInfo, 0, len(lists))
+	for index := range lists {
+		items = append(items, toShoppingListInfo(&lists[index]))
+	}
+	return &familyv1.ShoppingListsResponse{Code: FamilyCodeSuccess, Message: "查询成功", ShoppingLists: items}, nil
+}
+
+// GetShoppingList 查询购物清单及项目。
+func (s *FamilyServer) GetShoppingList(ctx context.Context, req *familyv1.GetShoppingListRequest) (*familyv1.ShoppingListResponse, error) {
+	result, err := s.shoppingSvc.GetShoppingList(ctx, uint64(req.GetUserId()), uint64(req.GetId()))
+	if err != nil {
+		return &familyv1.ShoppingListResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	return shoppingListResponse(result, "查询成功"), nil
+}
+
+// UpdateShoppingItemPurchased 更新购物项目的购买状态。
+func (s *FamilyServer) UpdateShoppingItemPurchased(ctx context.Context, req *familyv1.UpdateShoppingItemPurchasedRequest) (*familyv1.CommonResponse, error) {
+	err := s.shoppingSvc.UpdateItemPurchased(ctx, uint64(req.GetUserId()), uint64(req.GetItemId()), req.GetIsPurchased())
+	if err != nil {
+		return &familyv1.CommonResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.CommonResponse{Code: FamilyCodeSuccess, Message: "更新成功"}, nil
+}
+
+// AddManualShoppingItem 添加手动购物项目。
+func (s *FamilyServer) AddManualShoppingItem(ctx context.Context, req *familyv1.AddManualShoppingItemRequest) (*familyv1.ShoppingItemResponse, error) {
+	var quantity *float64
+	if req.Quantity != nil {
+		value := req.GetQuantity()
+		quantity = &value
+	}
+	item, err := s.shoppingSvc.AddManualItem(ctx, uint64(req.GetUserId()), uint64(req.GetShoppingListId()), req.GetIngredientName(), quantity, req.GetQuantityText(), req.GetUnit())
+	if err != nil {
+		return &familyv1.ShoppingItemResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.ShoppingItemResponse{Code: FamilyCodeSuccess, Message: "添加成功", Item: toShoppingItemInfo(item)}, nil
+}
+
+// DeleteShoppingItem 删除购物项目。
+func (s *FamilyServer) DeleteShoppingItem(ctx context.Context, req *familyv1.DeleteShoppingItemRequest) (*familyv1.CommonResponse, error) {
+	if err := s.shoppingSvc.DeleteItem(ctx, uint64(req.GetUserId()), uint64(req.GetItemId())); err != nil {
+		return &familyv1.CommonResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.CommonResponse{Code: FamilyCodeSuccess, Message: "删除成功"}, nil
+}
+
 // ─── 错误码映射 ──────────────────────────────────────────────
 
 func mapFamilyErrorCode(err error) int32 {
@@ -415,6 +484,50 @@ func mapFamilyErrorCode(err error) int32 {
 	default:
 		return CodeInternalError
 	}
+}
+
+// mapShoppingErrorCode 将购物清单错误转换为对外业务码。
+func mapShoppingErrorCode(err error) int32 {
+	switch {
+	case errors.Is(err, service.ErrShoppingListNotFound):
+		return ShoppingCodeListNotFound
+	case errors.Is(err, service.ErrShoppingItemNotFound):
+		return ShoppingCodeItemNotFound
+	case errors.Is(err, service.ErrInvalidShoppingDate):
+		return ShoppingCodeInvalidDate
+	case errors.Is(err, service.ErrInvalidShoppingName):
+		return ShoppingCodeInvalidName
+	case errors.Is(err, service.ErrInvalidShoppingItem):
+		return ShoppingCodeInvalidItem
+	case errors.Is(err, service.ErrUserNotInFamily):
+		return FamilyCodeNotIn
+	default:
+		return CodeInternalError
+	}
+}
+
+// shoppingListResponse 将购物清单领域对象转换为 gRPC 响应。
+func shoppingListResponse(result *service.ShoppingListResult, message string) *familyv1.ShoppingListResponse {
+	items := make([]*familyv1.ShoppingItemInfo, 0, len(result.Items))
+	for index := range result.Items {
+		items = append(items, toShoppingItemInfo(&result.Items[index]))
+	}
+	return &familyv1.ShoppingListResponse{Code: FamilyCodeSuccess, Message: message, ShoppingList: toShoppingListInfo(result.List), Items: items}
+}
+
+// toShoppingListInfo 将购物清单模型转换为 Proto 信息。
+func toShoppingListInfo(list *model.ShoppingList) *familyv1.ShoppingListInfo {
+	return &familyv1.ShoppingListInfo{Id: int64(list.ID), FamilyId: int64(list.FamilyID), CreatedBy: int64(list.CreatedBy), Name: list.Name, StartDate: list.StartDate.Format("2006-01-02"), EndDate: list.EndDate.Format("2006-01-02"), Status: int32(list.Status), CreatedAt: list.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: list.UpdatedAt.Format("2006-01-02 15:04:05")}
+}
+
+// toShoppingItemInfo 将购物项目模型转换为 Proto 信息。
+func toShoppingItemInfo(item *model.ShoppingListItem) *familyv1.ShoppingItemInfo {
+	info := &familyv1.ShoppingItemInfo{Id: int64(item.ID), ShoppingListId: int64(item.ShoppingListID), IngredientName: item.IngredientName, QuantityText: item.QuantityText, Unit: item.Unit, IsPurchased: item.IsPurchased == model.ShoppingItemPurchased, Source: item.Source, SortOrder: int32(item.SortOrder), CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: item.UpdatedAt.Format("2006-01-02 15:04:05")}
+	if item.Quantity != nil {
+		value := *item.Quantity
+		info.Quantity = &value
+	}
+	return info
 }
 
 // ─── Proto 转换 ──────────────────────────────────────────────

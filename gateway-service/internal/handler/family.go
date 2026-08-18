@@ -270,7 +270,7 @@ func familyHTTPStatus(code int32) int {
 	switch code {
 	case 0:
 		return http.StatusOK
-	case 1004, 2001, 2009, 2104, 2107:
+	case 1004, 2001, 2009, 2104, 2107, 2201, 2202:
 		return http.StatusNotFound
 	case 2002, 2006:
 		return http.StatusConflict

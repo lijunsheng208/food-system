@@ -19,20 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	FamilyService_GetMyFamily_FullMethodName     = "/family.v1.FamilyService/GetMyFamily"
-	FamilyService_CreateFamily_FullMethodName    = "/family.v1.FamilyService/CreateFamily"
-	FamilyService_UpdateFamily_FullMethodName    = "/family.v1.FamilyService/UpdateFamily"
-	FamilyService_JoinFamily_FullMethodName      = "/family.v1.FamilyService/JoinFamily"
-	FamilyService_LeaveFamily_FullMethodName     = "/family.v1.FamilyService/LeaveFamily"
-	FamilyService_DissolveFamily_FullMethodName  = "/family.v1.FamilyService/DissolveFamily"
-	FamilyService_ListMembers_FullMethodName     = "/family.v1.FamilyService/ListMembers"
-	FamilyService_UpdateMember_FullMethodName    = "/family.v1.FamilyService/UpdateMember"
-	FamilyService_RemoveMember_FullMethodName    = "/family.v1.FamilyService/RemoveMember"
-	FamilyService_ResetInviteCode_FullMethodName = "/family.v1.FamilyService/ResetInviteCode"
-	FamilyService_CreateMealPlan_FullMethodName  = "/family.v1.FamilyService/CreateMealPlan"
-	FamilyService_ListMealPlans_FullMethodName   = "/family.v1.FamilyService/ListMealPlans"
-	FamilyService_UpdateMealPlan_FullMethodName  = "/family.v1.FamilyService/UpdateMealPlan"
-	FamilyService_DeleteMealPlan_FullMethodName  = "/family.v1.FamilyService/DeleteMealPlan"
+	FamilyService_GetMyFamily_FullMethodName                 = "/family.v1.FamilyService/GetMyFamily"
+	FamilyService_CreateFamily_FullMethodName                = "/family.v1.FamilyService/CreateFamily"
+	FamilyService_UpdateFamily_FullMethodName                = "/family.v1.FamilyService/UpdateFamily"
+	FamilyService_JoinFamily_FullMethodName                  = "/family.v1.FamilyService/JoinFamily"
+	FamilyService_LeaveFamily_FullMethodName                 = "/family.v1.FamilyService/LeaveFamily"
+	FamilyService_DissolveFamily_FullMethodName              = "/family.v1.FamilyService/DissolveFamily"
+	FamilyService_ListMembers_FullMethodName                 = "/family.v1.FamilyService/ListMembers"
+	FamilyService_UpdateMember_FullMethodName                = "/family.v1.FamilyService/UpdateMember"
+	FamilyService_RemoveMember_FullMethodName                = "/family.v1.FamilyService/RemoveMember"
+	FamilyService_ResetInviteCode_FullMethodName             = "/family.v1.FamilyService/ResetInviteCode"
+	FamilyService_CreateMealPlan_FullMethodName              = "/family.v1.FamilyService/CreateMealPlan"
+	FamilyService_ListMealPlans_FullMethodName               = "/family.v1.FamilyService/ListMealPlans"
+	FamilyService_UpdateMealPlan_FullMethodName              = "/family.v1.FamilyService/UpdateMealPlan"
+	FamilyService_DeleteMealPlan_FullMethodName              = "/family.v1.FamilyService/DeleteMealPlan"
+	FamilyService_GenerateShoppingList_FullMethodName        = "/family.v1.FamilyService/GenerateShoppingList"
+	FamilyService_ListShoppingLists_FullMethodName           = "/family.v1.FamilyService/ListShoppingLists"
+	FamilyService_GetShoppingList_FullMethodName             = "/family.v1.FamilyService/GetShoppingList"
+	FamilyService_UpdateShoppingItemPurchased_FullMethodName = "/family.v1.FamilyService/UpdateShoppingItemPurchased"
+	FamilyService_AddManualShoppingItem_FullMethodName       = "/family.v1.FamilyService/AddManualShoppingItem"
+	FamilyService_DeleteShoppingItem_FullMethodName          = "/family.v1.FamilyService/DeleteShoppingItem"
 )
 
 // FamilyServiceClient is the client API for FamilyService service.
@@ -66,6 +72,18 @@ type FamilyServiceClient interface {
 	ListMealPlans(ctx context.Context, in *ListMealPlansRequest, opts ...grpc.CallOption) (*ListMealPlansResponse, error)
 	UpdateMealPlan(ctx context.Context, in *UpdateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error)
 	DeleteMealPlan(ctx context.Context, in *DeleteMealPlanRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	// GenerateShoppingList 根据家庭菜单生成购物清单
+	GenerateShoppingList(ctx context.Context, in *GenerateShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error)
+	// ListShoppingLists 查询家庭购物清单
+	ListShoppingLists(ctx context.Context, in *ListShoppingListsRequest, opts ...grpc.CallOption) (*ShoppingListsResponse, error)
+	// GetShoppingList 查询购物清单详情
+	GetShoppingList(ctx context.Context, in *GetShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error)
+	// UpdateShoppingItemPurchased 更新购物项目购买状态
+	UpdateShoppingItemPurchased(ctx context.Context, in *UpdateShoppingItemPurchasedRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	// AddManualShoppingItem 添加手动购物项目
+	AddManualShoppingItem(ctx context.Context, in *AddManualShoppingItemRequest, opts ...grpc.CallOption) (*ShoppingItemResponse, error)
+	// DeleteShoppingItem 删除购物项目
+	DeleteShoppingItem(ctx context.Context, in *DeleteShoppingItemRequest, opts ...grpc.CallOption) (*CommonResponse, error)
 }
 
 type familyServiceClient struct {
@@ -216,6 +234,66 @@ func (c *familyServiceClient) DeleteMealPlan(ctx context.Context, in *DeleteMeal
 	return out, nil
 }
 
+func (c *familyServiceClient) GenerateShoppingList(ctx context.Context, in *GenerateShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShoppingListResponse)
+	err := c.cc.Invoke(ctx, FamilyService_GenerateShoppingList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) ListShoppingLists(ctx context.Context, in *ListShoppingListsRequest, opts ...grpc.CallOption) (*ShoppingListsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShoppingListsResponse)
+	err := c.cc.Invoke(ctx, FamilyService_ListShoppingLists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) GetShoppingList(ctx context.Context, in *GetShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShoppingListResponse)
+	err := c.cc.Invoke(ctx, FamilyService_GetShoppingList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) UpdateShoppingItemPurchased(ctx context.Context, in *UpdateShoppingItemPurchasedRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, FamilyService_UpdateShoppingItemPurchased_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) AddManualShoppingItem(ctx context.Context, in *AddManualShoppingItemRequest, opts ...grpc.CallOption) (*ShoppingItemResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ShoppingItemResponse)
+	err := c.cc.Invoke(ctx, FamilyService_AddManualShoppingItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) DeleteShoppingItem(ctx context.Context, in *DeleteShoppingItemRequest, opts ...grpc.CallOption) (*CommonResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CommonResponse)
+	err := c.cc.Invoke(ctx, FamilyService_DeleteShoppingItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FamilyServiceServer is the server API for FamilyService service.
 // All implementations must embed UnimplementedFamilyServiceServer
 // for forward compatibility.
@@ -247,6 +325,18 @@ type FamilyServiceServer interface {
 	ListMealPlans(context.Context, *ListMealPlansRequest) (*ListMealPlansResponse, error)
 	UpdateMealPlan(context.Context, *UpdateMealPlanRequest) (*CreateMealPlanResponse, error)
 	DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error)
+	// GenerateShoppingList 根据家庭菜单生成购物清单
+	GenerateShoppingList(context.Context, *GenerateShoppingListRequest) (*ShoppingListResponse, error)
+	// ListShoppingLists 查询家庭购物清单
+	ListShoppingLists(context.Context, *ListShoppingListsRequest) (*ShoppingListsResponse, error)
+	// GetShoppingList 查询购物清单详情
+	GetShoppingList(context.Context, *GetShoppingListRequest) (*ShoppingListResponse, error)
+	// UpdateShoppingItemPurchased 更新购物项目购买状态
+	UpdateShoppingItemPurchased(context.Context, *UpdateShoppingItemPurchasedRequest) (*CommonResponse, error)
+	// AddManualShoppingItem 添加手动购物项目
+	AddManualShoppingItem(context.Context, *AddManualShoppingItemRequest) (*ShoppingItemResponse, error)
+	// DeleteShoppingItem 删除购物项目
+	DeleteShoppingItem(context.Context, *DeleteShoppingItemRequest) (*CommonResponse, error)
 	mustEmbedUnimplementedFamilyServiceServer()
 }
 
@@ -298,6 +388,24 @@ func (UnimplementedFamilyServiceServer) UpdateMealPlan(context.Context, *UpdateM
 }
 func (UnimplementedFamilyServiceServer) DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteMealPlan not implemented")
+}
+func (UnimplementedFamilyServiceServer) GenerateShoppingList(context.Context, *GenerateShoppingListRequest) (*ShoppingListResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GenerateShoppingList not implemented")
+}
+func (UnimplementedFamilyServiceServer) ListShoppingLists(context.Context, *ListShoppingListsRequest) (*ShoppingListsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListShoppingLists not implemented")
+}
+func (UnimplementedFamilyServiceServer) GetShoppingList(context.Context, *GetShoppingListRequest) (*ShoppingListResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetShoppingList not implemented")
+}
+func (UnimplementedFamilyServiceServer) UpdateShoppingItemPurchased(context.Context, *UpdateShoppingItemPurchasedRequest) (*CommonResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateShoppingItemPurchased not implemented")
+}
+func (UnimplementedFamilyServiceServer) AddManualShoppingItem(context.Context, *AddManualShoppingItemRequest) (*ShoppingItemResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddManualShoppingItem not implemented")
+}
+func (UnimplementedFamilyServiceServer) DeleteShoppingItem(context.Context, *DeleteShoppingItemRequest) (*CommonResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteShoppingItem not implemented")
 }
 func (UnimplementedFamilyServiceServer) mustEmbedUnimplementedFamilyServiceServer() {}
 func (UnimplementedFamilyServiceServer) testEmbeddedByValue()                       {}
@@ -572,6 +680,114 @@ func _FamilyService_DeleteMealPlan_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FamilyService_GenerateShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateShoppingListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).GenerateShoppingList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_GenerateShoppingList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).GenerateShoppingList(ctx, req.(*GenerateShoppingListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_ListShoppingLists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListShoppingListsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).ListShoppingLists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_ListShoppingLists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).ListShoppingLists(ctx, req.(*ListShoppingListsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_GetShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetShoppingListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).GetShoppingList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_GetShoppingList_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).GetShoppingList(ctx, req.(*GetShoppingListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_UpdateShoppingItemPurchased_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateShoppingItemPurchasedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).UpdateShoppingItemPurchased(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_UpdateShoppingItemPurchased_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).UpdateShoppingItemPurchased(ctx, req.(*UpdateShoppingItemPurchasedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_AddManualShoppingItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddManualShoppingItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).AddManualShoppingItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_AddManualShoppingItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).AddManualShoppingItem(ctx, req.(*AddManualShoppingItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_DeleteShoppingItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteShoppingItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).DeleteShoppingItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_DeleteShoppingItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).DeleteShoppingItem(ctx, req.(*DeleteShoppingItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FamilyService_ServiceDesc is the grpc.ServiceDesc for FamilyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -634,6 +850,30 @@ var FamilyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMealPlan",
 			Handler:    _FamilyService_DeleteMealPlan_Handler,
+		},
+		{
+			MethodName: "GenerateShoppingList",
+			Handler:    _FamilyService_GenerateShoppingList_Handler,
+		},
+		{
+			MethodName: "ListShoppingLists",
+			Handler:    _FamilyService_ListShoppingLists_Handler,
+		},
+		{
+			MethodName: "GetShoppingList",
+			Handler:    _FamilyService_GetShoppingList_Handler,
+		},
+		{
+			MethodName: "UpdateShoppingItemPurchased",
+			Handler:    _FamilyService_UpdateShoppingItemPurchased_Handler,
+		},
+		{
+			MethodName: "AddManualShoppingItem",
+			Handler:    _FamilyService_AddManualShoppingItem_Handler,
+		},
+		{
+			MethodName: "DeleteShoppingItem",
+			Handler:    _FamilyService_DeleteShoppingItem_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
