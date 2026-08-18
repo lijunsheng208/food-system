@@ -52,7 +52,7 @@ func (h *FamilyHandler) GetMyFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 		"family": gin.H{
@@ -96,7 +96,7 @@ func (h *FamilyHandler) CreateFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":        resp.GetCode(),
 		"message":     resp.GetMessage(),
 		"family_id":   resp.GetFamilyId(),
@@ -154,7 +154,7 @@ func (h *FamilyHandler) CreateMealPlan(c *gin.Context) {
 		return
 	}
 	if resp.GetCode() != 0 || resp.GetMealPlan() == nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 			"code":    resp.GetCode(),
 			"message": resp.GetMessage(),
 		})
@@ -204,7 +204,7 @@ func (h *FamilyHandler) ListMealPlans(c *gin.Context) {
 		return
 	}
 	if resp.GetCode() != 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
+		c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
 		return
 	}
 	plans := make([]gin.H, 0, len(resp.GetMealPlans()))
@@ -241,7 +241,7 @@ func (h *FamilyHandler) UpdateMealPlan(c *gin.Context) {
 		return
 	}
 	if resp.GetCode() != 0 || resp.GetMealPlan() == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
+		c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": resp.GetMessage(), "meal_plan": mealPlanJSON(resp.GetMealPlan())})
@@ -262,13 +262,28 @@ func (h *FamilyHandler) DeleteMealPlan(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
 		return
 	}
-	status := http.StatusOK
-	if resp.GetCode() != 0 {
-		status = http.StatusBadRequest
-	}
-	c.JSON(status, gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
 }
 
+// familyHTTPStatus 将家庭模块业务码映射为 HTTP 状态码，保持客户端可直接判断失败类型。
+func familyHTTPStatus(code int32) int {
+	switch code {
+	case 0:
+		return http.StatusOK
+	case 1004, 2001, 2009, 2104, 2107:
+		return http.StatusNotFound
+	case 2002, 2006:
+		return http.StatusConflict
+	case 2003, 2004, 2007:
+		return http.StatusForbidden
+	case 1999:
+		return http.StatusInternalServerError
+	default:
+		return http.StatusBadRequest
+	}
+}
+
+// mealPlanJSON 将菜单 Proto 对象转换为稳定的 HTTP JSON 响应结构。
 func mealPlanJSON(plan *familyv1.FamilyMealPlanInfo) gin.H {
 	var cookUserID any
 	if plan.CookUserId != nil {
@@ -329,7 +344,7 @@ func (h *FamilyHandler) UpdateFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 	})
@@ -360,7 +375,7 @@ func (h *FamilyHandler) JoinFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":      resp.GetCode(),
 		"message":   resp.GetMessage(),
 		"family_id": resp.GetFamilyId(),
@@ -392,7 +407,7 @@ func (h *FamilyHandler) LeaveFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 	})
@@ -428,7 +443,7 @@ func (h *FamilyHandler) DissolveFamily(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 	})
@@ -476,7 +491,7 @@ func (h *FamilyHandler) ListMembers(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 		"members": members,
@@ -540,7 +555,7 @@ func (h *FamilyHandler) UpdateMember(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 	})
@@ -587,7 +602,7 @@ func (h *FamilyHandler) RemoveMember(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":    resp.GetCode(),
 		"message": resp.GetMessage(),
 	})
@@ -635,7 +650,7 @@ func (h *FamilyHandler) ResetInviteCode(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{
 		"code":                   resp.GetCode(),
 		"message":                resp.GetMessage(),
 		"invite_code":            resp.GetInviteCode(),
