@@ -177,16 +177,14 @@ export async function clearAuthCredentials(): Promise<void> {
   }
 }
 
+// logoutAndClear 先清理本地凭证，再异步通知服务端撤销刷新会话，避免网络异常阻塞退出。
 export async function logoutAndClear(): Promise<void> {
   const refreshToken = await getRefreshToken();
-  try {
-    if (refreshToken) {
-      await authApi.post('/auth/logout', { refresh_token: refreshToken });
-    }
-  } catch {
-    // 本地退出不应被网络错误阻断。
-  } finally {
-    await clearAuthCredentials();
+  await clearAuthCredentials();
+
+  if (refreshToken) {
+    // 服务端注销属于 best-effort；本地退出完成后无需等待网络响应。
+    void authApi.post('/auth/logout', { refresh_token: refreshToken }).catch(() => undefined);
   }
 }
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,15 +14,19 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useUser } from '../contexts/UserContext';
 import { logoutAndClear } from '../services/api';
+import { resetToLogin } from '../navigation/navigationRef';
 import { colors, typography, spacing, radius, shadow } from '../theme';
 import type { AuthStackParamList } from '../types/auth';
 
+// ProfileScreen 展示当前用户与家庭入口，并负责发起本地退出流程。
 export default function ProfileScreen() {
   const { user, familyName, clearUser } = useUser();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
+  // handleGoProfileDetail 打开个人资料详情页面。
   const handleGoProfileDetail = () => {
     navigation.navigate('ProfileDetail');
   };
@@ -30,10 +34,12 @@ export default function ProfileScreen() {
   const nickname = user?.nickname ?? '未设置昵称';
   const avatarLetter = nickname.charAt(0).toUpperCase();
 
+  // handleFamilyMgmt 打开家庭管理页面。
   const handleFamilyMgmt = () => {
     navigation.navigate('FamilyManagement');
   };
 
+  // handleLogout 确认退出后清理本地会话并重置根导航。
   const handleLogout = () => {
     Alert.alert('退出登录', '确定要退出当前账号吗？', [
       { text: '取消', style: 'cancel' },
@@ -41,12 +47,15 @@ export default function ProfileScreen() {
         text: '退出',
         style: 'destructive',
         onPress: async () => {
-          await logoutAndClear();
-          clearUser();
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-          });
+          if (isLoggingOut) return;
+          setIsLoggingOut(true);
+          try {
+            await logoutAndClear();
+            clearUser();
+            resetToLogin();
+          } finally {
+            setIsLoggingOut(false);
+          }
         },
       },
     ]);
@@ -129,6 +138,7 @@ export default function ProfileScreen() {
             style={styles.menuItem}
             activeOpacity={0.6}
             onPress={handleLogout}
+            disabled={isLoggingOut}
           >
             <View style={[styles.menuIconBox, { backgroundColor: colors.errorBackground }]}>
               <Ionicons name="log-out-outline" size={20} color={colors.error} />
