@@ -1,0 +1,22 @@
+# FamilyOS Gateway Service configuration example
+# Copy this file to config.yaml and replace placeholders with local values.
+
+server:
+  http_port: 8080
+
+grpc:
+  target: "localhost:50051"
+
+jwt:
+  # Must match the Logic Service JWT secret.
+  secret: "replace-with-a-long-random-secret"
+  issuer: "familyos"
+  audience: "familyos-mobile"
+
+oss:
+  endpoint: "oss-cn-beijing.aliyuncs.com"
+  access_key_id: "replace-with-your-access-key-id"
+  access_key_secret: "replace-with-your-access-key-secret"
+  bucket_name: "replace-with-your-bucket-name"
+  custom_domain: ""
+

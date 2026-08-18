@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { getToken, getUserId } from '../services/api';
+import { getAccessToken } from '../services/api';
 import { getProfile } from '../services/auth';
 import { useUser } from '../contexts/UserContext';
 import { colors } from '../theme';
@@ -89,7 +89,7 @@ export default function AppNavigator() {
 
   useEffect(() => {
     (async () => {
-      const token = await getToken();
+      const token = await getAccessToken();
       if (!token) {
         setInitialRoute('Login');
         setIsLoading(false);
@@ -97,16 +97,18 @@ export default function AppNavigator() {
       }
 
       // 有 token，尝试从服务端拉取最新用户数据
-      const userId = await getUserId();
-      if (userId) {
-        try {
-          const profile = await getProfile(userId);
-          if (profile.user) {
-            setUser(profile.user);
-            setFamilyName(profile.family_name ?? '');
-          }
-        } catch {
-          // 获取失败不影响导航，使用本地缓存数据
+      try {
+        const profile = await getProfile();
+        if (profile.user) {
+          setUser(profile.user);
+          setFamilyName(profile.family_name ?? '');
+        }
+      } catch {
+        // 刷新失败会清空凭证，此时必须回到登录页。
+        if (!(await getAccessToken())) {
+          setInitialRoute('Login');
+          setIsLoading(false);
+          return;
         }
       }
 

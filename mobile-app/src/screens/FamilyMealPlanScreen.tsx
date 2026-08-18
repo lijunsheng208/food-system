@@ -63,15 +63,15 @@ export default function FamilyMealPlanScreen() {
     setLoading(true);
     setError('');
     try {
-      const family = await getMyFamily(user.id);
+    const family = await getMyFamily();
       if (!family) {
         setError('请先创建或加入家庭，再安排家庭菜单');
         setPlans([]);
         return;
       }
       const [nextPlans, nextMembers] = await Promise.all([
-        listMealPlans(family.id, user.id, dateKey(dates[0]), dateKey(dates[6])),
-        listFamilyMembers(family.id, user.id),
+    listMealPlans(family.id, dateKey(dates[0]), dateKey(dates[6])),
+    listFamilyMembers(family.id),
       ]);
       setPlans(nextPlans);
       setMembers(nextMembers);
@@ -99,7 +99,6 @@ export default function FamilyMealPlanScreen() {
     setSaving(true);
     try {
       await updateMealPlan(editing.id, {
-        user_id: user.id,
         meal_type: editing.meal_type,
         servings: editing.servings,
         cook_user_id: editing.cook_user_id ?? 0,
@@ -119,7 +118,7 @@ export default function FamilyMealPlanScreen() {
       { text: '取消', style: 'cancel' },
       { text: '移除', style: 'destructive', onPress: async () => {
         try {
-          await deleteMealPlan(plan.id, user.id);
+      await deleteMealPlan(plan.id);
           setPlans((current) => current.filter((item) => item.id !== plan.id));
         } catch (e: any) {
           Alert.alert('删除失败', e.message || '请稍后重试');

@@ -41,11 +41,11 @@ export default function HomeScreen() {
     setLoading(true);
     setError('');
     try {
-      const family = await getMyFamily(user.id);
+    const family = await getMyFamily();
       setHasFamily(Boolean(family));
       setPlans(
         family
-          ? await listMealPlans(family.id, user.id, todayKey(), todayKey())
+      ? await listMealPlans(family.id, todayKey(), todayKey())
           : [],
       );
     } catch (e: any) {

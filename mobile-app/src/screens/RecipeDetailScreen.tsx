@@ -115,14 +115,14 @@ export default function RecipeDetailScreen() {
     setMenuOpen(true);
     setMenuLoading(true);
     try {
-      const family = await getMyFamily(user.id);
+    const family = await getMyFamily();
       if (!family) {
         setMenuOpen(false);
         Alert.alert('还没有家庭', '请先在“我的”中创建或加入家庭。');
         return;
       }
       setFamilyId(family.id);
-      setMembers(await listFamilyMembers(family.id, user.id));
+    setMembers(await listFamilyMembers(family.id));
     } catch (e: any) {
       setMenuOpen(false);
       Alert.alert('加载失败', e.message || '暂时无法读取家庭信息');
@@ -137,7 +137,7 @@ export default function RecipeDetailScreen() {
     try {
       await createMealPlan({
         family_id: familyId, dish_id: dish.id, meal_date: mealDate,
-        meal_type: mealType, servings, cook_user_id: cookUserId, created_by: user.id,
+    meal_type: mealType, servings, cook_user_id: cookUserId,
       });
       setMenuOpen(false);
       Alert.alert('已加入家庭菜单', `${formatMenuDate(mealDate)} · ${MealTypeLabel[mealType]}`, [

@@ -1,17 +1,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/lijunsheng/familyos/logic-service/config"
+	"github.com/lijunsheng/familyos/logic-service/internal/provider"
 	"github.com/lijunsheng/familyos/logic-service/internal/repository"
 	"github.com/lijunsheng/familyos/logic-service/internal/server"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
+	"github.com/redis/go-redis/v9"
 
 	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
 	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
@@ -39,11 +43,48 @@ func main() {
 	}
 	log.Println("数据库连接成功")
 
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:         cfg.Redis.Addr,
+		Password:     cfg.Redis.Password,
+		DB:           cfg.Redis.DB,
+		DialTimeout:  cfg.Redis.DialTimeout,
+		ReadTimeout:  cfg.Redis.ReadTimeout,
+		WriteTimeout: cfg.Redis.WriteTimeout,
+	})
+	defer redisClient.Close()
+	redisCtx, redisCancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer redisCancel()
+	if err := redisClient.Ping(redisCtx).Err(); err != nil {
+		log.Fatalf("连接 Redis 失败: %v", err)
+	}
+	log.Println("Redis 连接成功")
+
 	// 3. 依赖注入
 	userRepo := repository.NewUserRepo(db)
 	familyRepo := repository.NewFamilyRepo(db)
 
 	authSvc := service.NewAuthService(userRepo, familyRepo, cfg.JWT.Secret)
+	smsStore := repository.NewSMSCodeStore(redisClient, cfg.Redis.KeyPrefix)
+	sessionStore := repository.NewRefreshSessionStore(redisClient, cfg.Redis.KeyPrefix)
+	authSvc.ConfigureTokens(sessionStore, service.TokenConfig{
+		Issuer: cfg.JWT.Issuer, Audience: cfg.JWT.Audience,
+		AccessTTL: cfg.JWT.AccessTTL, RefreshTTL: cfg.JWT.RefreshTTL,
+	})
+	var smsProvider service.SMSProvider
+	switch cfg.SMS.Provider {
+	case "console":
+		smsProvider = provider.NewConsoleSMSProvider()
+	default:
+		log.Fatalf("不支持的短信 Provider: %s", cfg.SMS.Provider)
+	}
+	authSvc.ConfigureSMS(smsStore, smsProvider, service.SMSCodeConfig{
+		HMACSecret:    cfg.SMS.CodeHMACSecret,
+		CodeTTL:       cfg.SMS.CodeTTL,
+		Cooldown:      cfg.SMS.Cooldown,
+		DailyLimit:    cfg.SMS.DailyLimit,
+		IPLimit:       cfg.SMS.IPHourlyLimit,
+		IPLimitWindow: cfg.SMS.IPLimitWindow,
+	})
 	authServer := server.NewAuthServer(authSvc)
 
 	dishRepo := repository.NewDishRepo(db)

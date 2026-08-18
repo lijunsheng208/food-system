@@ -5,13 +5,14 @@ import {
   TextInput as RNTextInput,
   StyleSheet,
   TextInputProps as RNTextInputProps,
-  Animated,
+  ViewStyle,
 } from 'react-native';
 import { colors, typography, radius, spacing } from '../theme';
 
 interface Props extends RNTextInputProps {
   label: string;
   error?: string;
+  containerStyle?: ViewStyle;
 }
 
 /**
@@ -20,7 +21,7 @@ interface Props extends RNTextInputProps {
  * 白色表面，蓝色聚焦边框，红色错误态。
  * 标签在上，错误信息在下 — 每个元素只做一件事。
  */
-export default function TextInput({ label, error, style, ...rest }: Props) {
+export default function TextInput({ label, error, style, containerStyle, ...rest }: Props) {
   const [isFocused, setIsFocused] = useState(false);
 
   const borderColor = error
@@ -30,7 +31,7 @@ export default function TextInput({ label, error, style, ...rest }: Props) {
       : colors.border;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       <Text style={styles.label}>{label}</Text>
       <View style={[styles.inputWrapper, { borderColor }]}>
         <RNTextInput

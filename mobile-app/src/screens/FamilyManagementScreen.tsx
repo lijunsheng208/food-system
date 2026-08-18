@@ -50,11 +50,11 @@ export default function FamilyManagementScreen() {
   const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      const f = await getMyFamily(user.id);
+    const f = await getMyFamily();
       setFamily(f);
       if (f) {
         setFamilyName(f.name);
-        const m = await listFamilyMembers(f.id, user.id);
+      const m = await listFamilyMembers(f.id);
         setMembers(m);
       } else {
         setFamilyName('');
@@ -98,7 +98,7 @@ export default function FamilyManagementScreen() {
         onPress: async () => {
           try {
             setActionLoading(true);
-            const res = await resetInviteCode(family.id, user.id);
+      const res = await resetInviteCode(family.id);
             setFamily({ ...family, invite_code: res.invite_code });
             Alert.alert('已重置', `新邀请码：${res.invite_code}`);
           } catch (e: any) {
@@ -121,7 +121,7 @@ export default function FamilyManagementScreen() {
         onPress: async () => {
           try {
             setActionLoading(true);
-            await leaveFamily(user.id);
+      await leaveFamily();
             setFamily(null);
             setMembers([]);
             setFamilyName('');
@@ -148,7 +148,7 @@ export default function FamilyManagementScreen() {
           onPress: async () => {
             try {
               setActionLoading(true);
-              await dissolveFamily(family.id, user.id);
+        await dissolveFamily(family.id);
               setFamily(null);
               setMembers([]);
               setFamilyName('');
@@ -174,7 +174,7 @@ export default function FamilyManagementScreen() {
         onPress: async () => {
           try {
             setActionLoading(true);
-            await removeMember(family.id, user.id, member.user_id);
+      await removeMember(family.id, member.user_id);
             setMembers((prev) =>
               prev.filter((m) => m.user_id !== member.user_id),
             );

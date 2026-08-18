@@ -44,8 +44,7 @@ export default function CreateFamilyScreen() {
     if (!canSubmit || !user) return;
     try {
       setLoading(true);
-      await createFamily({
-        user_id: user.id,
+    await createFamily({
         name: trimmedName,
         description: description.trim() || undefined,
       });

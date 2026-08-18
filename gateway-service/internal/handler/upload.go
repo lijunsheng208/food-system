@@ -3,9 +3,9 @@ package handler
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lijunsheng/familyos/gateway-service/internal/middleware"
 	"github.com/lijunsheng/familyos/pkg/oss"
 )
 
@@ -30,15 +30,7 @@ func (h *UploadHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	userIDStr := c.PostForm("user_id")
-	userID, err := strconv.ParseUint(userIDStr, 10, 64)
-	if err != nil || userID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    1999,
-			"message": "请提供有效的 user_id",
-		})
-		return
-	}
+	userID := middleware.CurrentUserID(c)
 
 	file, header, err := c.Request.FormFile("file")
 	if err != nil {

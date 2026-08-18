@@ -6,7 +6,7 @@ import "time"
 type User struct {
 	ID           uint64     `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	Phone        string     `gorm:"column:phone;type:varchar(20);uniqueIndex:uk_phone;not null" json:"phone"`
-	PasswordHash string     `gorm:"column:password_hash;type:varchar(255)" json:"-"`
+	PasswordHash *string    `gorm:"column:password_hash;type:varchar(255)" json:"-"`
 	Nickname     string     `gorm:"column:nickname;type:varchar(50);not null" json:"nickname"`
 	Avatar       *string    `gorm:"column:avatar;type:varchar(500)" json:"avatar"`
 	Gender       int8       `gorm:"column:gender;type:tinyint;default:0" json:"gender"`

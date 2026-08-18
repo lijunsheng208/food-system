@@ -53,7 +53,6 @@ export default function FamilyMemberEditScreen() {
       setLoading(true);
       await updateMember({
         family_id: familyId,
-        operator_user_id: user.id,
         member_user_id: member.user_id,
         role: isOwner ? role : undefined,
         relation: relation.trim(),

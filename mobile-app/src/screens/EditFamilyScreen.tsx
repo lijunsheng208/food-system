@@ -54,7 +54,6 @@ export default function EditFamilyScreen() {
       setLoading(true);
       await updateFamily({
         family_id: familyId,
-        user_id: user.id,
         name: trimmedName,
         description: description.trim(),
       });

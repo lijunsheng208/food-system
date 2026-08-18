@@ -5,8 +5,11 @@
 export interface RegisterResponse {
   code: number;
   message: string;
-  token: string;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
   user_id: number;
+  user: UserInfo;
 }
 
 export interface UserInfo {
@@ -24,7 +27,19 @@ export interface UserInfo {
 export interface LoginResponse {
   code: number;
   message: string;
-  token: string;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  user: UserInfo;
+}
+
+export interface SMSLoginResponse {
+  code: number;
+  message: string;
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  is_new_user: boolean;
   user: UserInfo;
 }
 

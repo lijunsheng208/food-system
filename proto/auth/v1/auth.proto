@@ -6,6 +6,14 @@ option go_package = "github.com/lijunsheng/familyos/proto/gen/auth/v1;authv1";
 
 // AuthService 认证服务
 service AuthService {
+  // SendSMSCode 发送短信登录验证码
+  rpc SendSMSCode(SendSMSCodeRequest) returns (SendSMSCodeResponse);
+  // SMSLogin 使用短信验证码登录，不存在的手机号会自动注册
+  rpc SMSLogin(SMSLoginRequest) returns (SMSLoginResponse);
+  // RefreshToken 轮换 Refresh Token 并签发新的 Access Token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+  // Logout 注销当前 Refresh Session
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
   // Register 用户注册
   rpc Register(RegisterRequest) returns (RegisterResponse);
   // Login 用户登录
@@ -16,19 +24,76 @@ service AuthService {
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
 }
 
+// ========== SMS Code ==========
+
+message SendSMSCodeRequest {
+  string phone = 1;
+  string client_ip = 2;
+}
+
+message SendSMSCodeResponse {
+  int32 code = 1;
+  string message = 2;
+  int32 retry_after_seconds = 3;
+}
+
+message SMSLoginRequest {
+  string phone = 1;
+  string verification_code = 2;
+  string device_id = 3;
+}
+
+message SMSLoginResponse {
+  int32 code = 1;
+  string message = 2;
+  reserved 3;
+  bool is_new_user = 4;
+  UserInfo user = 5;
+  string access_token = 6;
+  string refresh_token = 7;
+  int32 expires_in = 8;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse {
+  int32 code = 1;
+  string message = 2;
+  reserved 3;
+  string access_token = 4;
+  string refresh_token = 5;
+  int32 expires_in = 6;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {
+  int32 code = 1;
+  string message = 2;
+}
+
 // ========== Register ==========
 
 message RegisterRequest {
   string phone    = 1; // 手机号
   string password = 2; // 密码
   string nickname = 3; // 昵称
+  string device_id = 4;
 }
 
 message RegisterResponse {
   int32  code    = 1; // 业务状态码 0=成功
   string message = 2; // 错误信息
-  string token   = 3; // JWT Token
+  reserved 3;
   int64  user_id = 4; // 用户ID
+  string access_token = 5;
+  string refresh_token = 6;
+  int32 expires_in = 7;
+  UserInfo user = 8;
 }
 
 // ========== Login ==========
@@ -36,13 +101,17 @@ message RegisterResponse {
 message LoginRequest {
   string phone    = 1; // 手机号
   string password = 2; // 密码
+  string device_id = 3;
 }
 
 message LoginResponse {
   int32    code    = 1;
   string   message = 2;
-  string   token   = 3;
+  reserved 3;
   UserInfo user    = 4;
+  string access_token = 5;
+  string refresh_token = 6;
+  int32 expires_in = 7;
 }
 
 // ========== GetProfile ==========

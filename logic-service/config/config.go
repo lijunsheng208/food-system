@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -11,6 +13,8 @@ type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
 	JWT      JWTConfig      `mapstructure:"jwt"`
+	Redis    RedisConfig    `mapstructure:"redis"`
+	SMS      SMSConfig      `mapstructure:"sms"`
 }
 
 // ServerConfig gRPC 服务配置
@@ -25,7 +29,31 @@ type DatabaseConfig struct {
 
 // JWTConfig JWT 配置
 type JWTConfig struct {
-	Secret string `mapstructure:"secret"`
+	Secret     string        `mapstructure:"secret"`
+	Issuer     string        `mapstructure:"issuer"`
+	Audience   string        `mapstructure:"audience"`
+	AccessTTL  time.Duration `mapstructure:"access_ttl"`
+	RefreshTTL time.Duration `mapstructure:"refresh_ttl"`
+}
+
+type RedisConfig struct {
+	Addr         string        `mapstructure:"addr"`
+	Password     string        `mapstructure:"password"`
+	DB           int           `mapstructure:"db"`
+	DialTimeout  time.Duration `mapstructure:"dial_timeout"`
+	ReadTimeout  time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout time.Duration `mapstructure:"write_timeout"`
+	KeyPrefix    string        `mapstructure:"key_prefix"`
+}
+
+type SMSConfig struct {
+	Provider       string        `mapstructure:"provider"`
+	CodeHMACSecret string        `mapstructure:"code_hmac_secret"`
+	CodeTTL        time.Duration `mapstructure:"code_ttl"`
+	Cooldown       time.Duration `mapstructure:"cooldown"`
+	DailyLimit     int64         `mapstructure:"daily_limit"`
+	IPHourlyLimit  int64         `mapstructure:"ip_hourly_limit"`
+	IPLimitWindow  time.Duration `mapstructure:"ip_limit_window"`
 }
 
 // Load 使用 Viper 从配置文件加载配置
@@ -46,10 +74,27 @@ func Load(configPath string) (*Config, error) {
 
 	// 也支持从环境变量覆盖：DATABASE_DSN → database.dsn
 	v.SetEnvPrefix("FAMILYOS")
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
 	// 设置默认值
 	v.SetDefault("server.grpc_port", 50051)
+	v.SetDefault("jwt.issuer", "familyos")
+	v.SetDefault("jwt.audience", "familyos-mobile")
+	v.SetDefault("jwt.access_ttl", "15m")
+	v.SetDefault("jwt.refresh_ttl", "720h")
+	v.SetDefault("redis.addr", "127.0.0.1:6379")
+	v.SetDefault("redis.db", 0)
+	v.SetDefault("redis.dial_timeout", "3s")
+	v.SetDefault("redis.read_timeout", "2s")
+	v.SetDefault("redis.write_timeout", "2s")
+	v.SetDefault("redis.key_prefix", "familyos:auth")
+	v.SetDefault("sms.provider", "console")
+	v.SetDefault("sms.code_ttl", "5m")
+	v.SetDefault("sms.cooldown", "60s")
+	v.SetDefault("sms.daily_limit", 10)
+	v.SetDefault("sms.ip_hourly_limit", 30)
+	v.SetDefault("sms.ip_limit_window", "1h")
 
 	// 读取配置文件
 	if err := v.ReadInConfig(); err != nil {
@@ -71,6 +116,15 @@ func Load(configPath string) (*Config, error) {
 	}
 	if cfg.JWT.Secret == "" {
 		return nil, fmt.Errorf("jwt.secret 未配置")
+	}
+	if cfg.JWT.Issuer == "" || cfg.JWT.Audience == "" || cfg.JWT.AccessTTL <= 0 || cfg.JWT.RefreshTTL <= 0 {
+		return nil, fmt.Errorf("jwt issuer、audience 和 token TTL 必须配置且有效")
+	}
+	if cfg.SMS.CodeHMACSecret == "" {
+		return nil, fmt.Errorf("sms.code_hmac_secret 未配置，请通过 FAMILYOS_SMS_CODE_HMAC_SECRET 注入")
+	}
+	if cfg.SMS.CodeTTL <= 0 || cfg.SMS.Cooldown <= 0 || cfg.SMS.DailyLimit <= 0 || cfg.SMS.IPHourlyLimit <= 0 || cfg.SMS.IPLimitWindow <= 0 {
+		return nil, fmt.Errorf("sms 验证码和限流配置必须大于 0")
 	}
 
 	return &cfg, nil

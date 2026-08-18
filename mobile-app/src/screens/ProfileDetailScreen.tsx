@@ -57,7 +57,7 @@ export default function ProfileDetailScreen() {
       return;
     }
     try {
-      await updateProfile({ user_id: user.id, nickname: trimmed });
+    await updateProfile({ nickname: trimmed });
       setUser({ ...user, nickname: trimmed });
       setNicknameModalVisible(false);
     } catch (e: any) {
@@ -93,9 +93,9 @@ export default function ProfileDetailScreen() {
     try {
       setAvatarUploading(true);
       // 1. 上传到 OSS
-      const url = await uploadAvatar(user.id, asset.uri, filename);
+    const url = await uploadAvatar(asset.uri, filename);
       // 2. 更新用户信息
-      await updateProfile({ user_id: user.id, avatar: url });
+    await updateProfile({ avatar: url });
       // 3. 刷新本地状态
       setUser({ ...user, avatar: url });
     } catch (e: any) {
@@ -116,7 +116,7 @@ export default function ProfileDetailScreen() {
         onPress: async () => {
           if (!user) return;
           try {
-            await updateProfile({ user_id: user.id, gender: opt.value });
+      await updateProfile({ gender: opt.value });
             setUser({ ...user, gender: opt.value });
           } catch (e: any) {
             Alert.alert('更新失败', e.message || '请稍后重试');

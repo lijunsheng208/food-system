@@ -1,0 +1,4 @@
+# Local service configuration may contain credentials.
+gateway-service/config/config.yaml
+logic-service/config/config.yaml
+

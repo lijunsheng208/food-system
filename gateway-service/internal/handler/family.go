@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lijunsheng/familyos/gateway-service/internal/middleware"
 	familyv1 "github.com/lijunsheng/familyos/proto/gen/family/v1"
 	"google.golang.org/grpc"
 )
@@ -24,17 +25,9 @@ func NewFamilyHandler(conn *grpc.ClientConn) *FamilyHandler {
 	}
 }
 
-// GetMyFamily GET /api/v1/family/my?user_id=1
+// GetMyFamily GET /api/v1/family/my
 func (h *FamilyHandler) GetMyFamily(c *gin.Context) {
-	userIDStr := c.DefaultQuery("user_id", "0")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || userID <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    1999,
-			"message": "请提供有效的 user_id",
-		})
-		return
-	}
+	userID := int64(middleware.CurrentUserID(c))
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -88,6 +81,7 @@ func (h *FamilyHandler) CreateFamily(c *gin.Context) {
 		})
 		return
 	}
+	req.UserId = int64(middleware.CurrentUserID(c))
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -119,7 +113,6 @@ func (h *FamilyHandler) CreateMealPlan(c *gin.Context) {
 		MealType   int32  `json:"meal_type"`
 		Servings   int32  `json:"servings"`
 		CookUserID *int64 `json:"cook_user_id"`
-		CreatedBy  int64  `json:"created_by"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -128,11 +121,11 @@ func (h *FamilyHandler) CreateMealPlan(c *gin.Context) {
 		})
 		return
 	}
-	if body.FamilyID <= 0 || body.DishID <= 0 || body.CreatedBy <= 0 ||
+	if body.FamilyID <= 0 || body.DishID <= 0 ||
 		(body.CookUserID != nil && *body.CookUserID <= 0) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code":    1999,
-			"message": "family_id、dish_id、created_by 和 cook_user_id 必须是有效ID",
+			"message": "family_id、dish_id 和 cook_user_id 必须是有效ID",
 		})
 		return
 	}
@@ -143,7 +136,7 @@ func (h *FamilyHandler) CreateMealPlan(c *gin.Context) {
 		MealDate:  body.MealDate,
 		MealType:  body.MealType,
 		Servings:  body.Servings,
-		CreatedBy: body.CreatedBy,
+		CreatedBy: int64(middleware.CurrentUserID(c)),
 	}
 	if body.CookUserID != nil {
 		req.CookUserId = body.CookUserID
@@ -195,9 +188,9 @@ func (h *FamilyHandler) CreateMealPlan(c *gin.Context) {
 // ListMealPlans GET /api/v1/family/{family_id}/meal-plans
 func (h *FamilyHandler) ListMealPlans(c *gin.Context) {
 	familyID, err := strconv.ParseInt(c.Param("family_id"), 10, 64)
-	userID, userErr := strconv.ParseInt(c.Query("user_id"), 10, 64)
-	if err != nil || userErr != nil || familyID <= 0 || userID <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的 family_id 和 user_id"})
+	userID := int64(middleware.CurrentUserID(c))
+	if err != nil || familyID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的 family_id"})
 		return
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
@@ -229,17 +222,16 @@ func (h *FamilyHandler) UpdateMealPlan(c *gin.Context) {
 		return
 	}
 	var body struct {
-		UserID     int64   `json:"user_id"`
 		MealDate   *string `json:"meal_date"`
 		MealType   *int32  `json:"meal_type"`
 		Servings   *int32  `json:"servings"`
 		CookUserID *int64  `json:"cook_user_id"`
 	}
-	if err := c.ShouldBindJSON(&body); err != nil || body.UserID <= 0 {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请求格式错误"})
 		return
 	}
-	req := &familyv1.UpdateMealPlanRequest{Id: id, UserId: body.UserID, MealDate: body.MealDate, MealType: body.MealType, Servings: body.Servings, CookUserId: body.CookUserID}
+	req := &familyv1.UpdateMealPlanRequest{Id: id, UserId: int64(middleware.CurrentUserID(c)), MealDate: body.MealDate, MealType: body.MealType, Servings: body.Servings, CookUserId: body.CookUserID}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 	resp, err := h.client.UpdateMealPlan(ctx, req)
@@ -258,14 +250,13 @@ func (h *FamilyHandler) UpdateMealPlan(c *gin.Context) {
 // DeleteMealPlan DELETE /api/v1/family/meal-plans/{id}
 func (h *FamilyHandler) DeleteMealPlan(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	userID, userErr := strconv.ParseInt(c.Query("user_id"), 10, 64)
-	if err != nil || userErr != nil || id <= 0 || userID <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的菜单记录ID和 user_id"})
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的菜单记录ID"})
 		return
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
-	resp, err := h.client.DeleteMealPlan(ctx, &familyv1.DeleteMealPlanRequest{Id: id, UserId: userID})
+	resp, err := h.client.DeleteMealPlan(ctx, &familyv1.DeleteMealPlanRequest{Id: id, UserId: int64(middleware.CurrentUserID(c))})
 	if err != nil {
 		log.Printf("gRPC DeleteMealPlan 调用失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
@@ -305,7 +296,6 @@ func (h *FamilyHandler) UpdateFamily(c *gin.Context) {
 	}
 
 	var body struct {
-		UserID      int64  `json:"user_id"`
 		Name        string `json:"name"`
 		Avatar      string `json:"avatar"`
 		Description string `json:"description"`
@@ -323,7 +313,7 @@ func (h *FamilyHandler) UpdateFamily(c *gin.Context) {
 
 	req := &familyv1.UpdateFamilyRequest{
 		FamilyId:    familyID,
-		UserId:      body.UserID,
+		UserId:      int64(middleware.CurrentUserID(c)),
 		Name:        body.Name,
 		Avatar:      body.Avatar,
 		Description: body.Description,
@@ -355,6 +345,7 @@ func (h *FamilyHandler) JoinFamily(c *gin.Context) {
 		})
 		return
 	}
+	req.UserId = int64(middleware.CurrentUserID(c))
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -386,6 +377,7 @@ func (h *FamilyHandler) LeaveFamily(c *gin.Context) {
 		})
 		return
 	}
+	req.UserId = int64(middleware.CurrentUserID(c))
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
@@ -418,23 +410,12 @@ func (h *FamilyHandler) DissolveFamily(c *gin.Context) {
 		return
 	}
 
-	var body struct {
-		UserID int64 `json:"user_id"`
-	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    1999,
-			"message": "请求格式错误",
-		})
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	req := &familyv1.DissolveFamilyRequest{
 		FamilyId: familyID,
-		UserId:   body.UserID,
+		UserId:   int64(middleware.CurrentUserID(c)),
 	}
 
 	resp, err := h.client.DissolveFamily(ctx, req)
@@ -453,7 +434,7 @@ func (h *FamilyHandler) DissolveFamily(c *gin.Context) {
 	})
 }
 
-// ListMembers GET /api/v1/family/{family_id}/members?user_id=1
+// ListMembers GET /api/v1/family/{family_id}/members
 func (h *FamilyHandler) ListMembers(c *gin.Context) {
 	familyIDStr := c.Param("family_id")
 	familyID, err := strconv.ParseInt(familyIDStr, 10, 64)
@@ -465,22 +446,12 @@ func (h *FamilyHandler) ListMembers(c *gin.Context) {
 		return
 	}
 
-	userIDStr := c.DefaultQuery("user_id", "0")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || userID <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    1999,
-			"message": "请提供有效的 user_id",
-		})
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	resp, err := h.client.ListMembers(ctx, &familyv1.ListMembersRequest{
 		FamilyId: familyID,
-		UserId:   userID,
+		UserId:   int64(middleware.CurrentUserID(c)),
 	})
 	if err != nil {
 		log.Printf("gRPC ListMembers 调用失败: %v", err)
@@ -535,10 +506,9 @@ func (h *FamilyHandler) UpdateMember(c *gin.Context) {
 	}
 
 	var body struct {
-		OperatorUserID int64  `json:"operator_user_id"`
-		Role           int32  `json:"role"`
-		Relation       string `json:"relation"`
-		DisplayName    string `json:"display_name"`
+		Role        int32  `json:"role"`
+		Relation    string `json:"relation"`
+		DisplayName string `json:"display_name"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -553,7 +523,7 @@ func (h *FamilyHandler) UpdateMember(c *gin.Context) {
 
 	req := &familyv1.UpdateMemberRequest{
 		FamilyId:       familyID,
-		OperatorUserId: body.OperatorUserID,
+		OperatorUserId: int64(middleware.CurrentUserID(c)),
 		MemberUserId:   memberID,
 		Role:           body.Role,
 		Relation:       body.Relation,
@@ -598,23 +568,12 @@ func (h *FamilyHandler) RemoveMember(c *gin.Context) {
 		return
 	}
 
-	var body struct {
-		OperatorUserID int64 `json:"operator_user_id"`
-	}
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    1999,
-			"message": "请求格式错误",
-		})
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
 	req := &familyv1.RemoveMemberRequest{
 		FamilyId:       familyID,
-		OperatorUserId: body.OperatorUserID,
+		OperatorUserId: int64(middleware.CurrentUserID(c)),
 		MemberUserId:   memberID,
 	}
 
@@ -647,7 +606,6 @@ func (h *FamilyHandler) ResetInviteCode(c *gin.Context) {
 	}
 
 	var body struct {
-		UserID      int64 `json:"user_id"`
 		ExpireHours int32 `json:"expire_hours"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -663,7 +621,7 @@ func (h *FamilyHandler) ResetInviteCode(c *gin.Context) {
 
 	req := &familyv1.ResetInviteCodeRequest{
 		FamilyId:    familyID,
-		UserId:      body.UserID,
+		UserId:      int64(middleware.CurrentUserID(c)),
 		ExpireHours: body.ExpireHours,
 	}
 

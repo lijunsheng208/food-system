@@ -1,0 +1,35 @@
+# FamilyOS Logic Service configuration example
+# Copy this file to config.yaml and replace placeholders with local values.
+
+server:
+  grpc_port: 50051
+
+database:
+  dsn: "root:password@tcp(127.0.0.1:3306)/familyos_logic?charset=utf8mb4&parseTime=true"
+
+jwt:
+  # Must match the Gateway JWT secret.
+  secret: "replace-with-a-long-random-secret"
+  issuer: "familyos"
+  audience: "familyos-mobile"
+  access_ttl: "15m"
+  refresh_ttl: "720h"
+
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0
+  dial_timeout: "3s"
+  read_timeout: "2s"
+  write_timeout: "2s"
+  key_prefix: "familyos:auth"
+
+sms:
+  provider: "console"
+  # Inject a real value through FAMILYOS_SMS_CODE_HMAC_SECRET.
+  code_hmac_secret: ""
+  code_ttl: "5m"
+  cooldown: "60s"
+  daily_limit: 10
+  ip_hourly_limit: 30
+  ip_limit_window: "1h"

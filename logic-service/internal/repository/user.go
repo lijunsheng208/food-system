@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"gorm.io/gorm"
 )
@@ -35,6 +36,12 @@ func (r *UserRepo) FindByPhone(ctx context.Context, phone string) (*model.User, 
 // Create 创建用户
 func (r *UserRepo) Create(ctx context.Context, user *model.User) error {
 	return r.db.WithContext(ctx).Create(user).Error
+}
+
+// IsDuplicateKeyError 判断写入失败是否由 MySQL 唯一键冲突导致。
+func IsDuplicateKeyError(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
 }
 
 // FindByID 按ID查询用户

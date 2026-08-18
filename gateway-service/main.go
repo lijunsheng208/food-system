@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lijunsheng/familyos/gateway-service/config"
 	"github.com/lijunsheng/familyos/gateway-service/internal/handler"
+	"github.com/lijunsheng/familyos/gateway-service/internal/middleware"
 	"github.com/lijunsheng/familyos/pkg/oss"
 
 	"google.golang.org/grpc"
@@ -62,6 +63,7 @@ func main() {
 	// 全局中间件
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.Use(middleware.CORS())
 
 	// 5. 注册路由
 	authHandler := handler.NewAuthHandler(conn)
@@ -73,10 +75,20 @@ func main() {
 	{
 		auth := api.Group("/auth")
 		{
+			auth.POST("/sms/code", authHandler.SendSMSCode)
+			auth.POST("/sms/login", authHandler.SMSLogin)
+			auth.POST("/refresh", authHandler.RefreshToken)
+			auth.POST("/logout", authHandler.Logout)
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
-			auth.GET("/profile", authHandler.GetProfile)
-			auth.PUT("/profile", authHandler.UpdateProfile)
+		}
+
+		protected := api.Group("")
+		protected.Use(middleware.Auth(cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.Audience))
+		protectedAuth := protected.Group("/auth")
+		{
+			protectedAuth.GET("/profile", authHandler.GetProfile)
+			protectedAuth.PUT("/profile", authHandler.UpdateProfile)
 		}
 
 		dish := api.Group("/dish")
@@ -87,12 +99,12 @@ func main() {
 			dish.GET("/:id", dishHandler.GetDishDetail)
 		}
 
-		upload := api.Group("/upload")
+		upload := protected.Group("/upload")
 		{
 			upload.POST("/avatar", uploadHandler.UploadAvatar)
 		}
 
-		family := api.Group("/family")
+		family := protected.Group("/family")
 		{
 			family.GET("/my", familyHandler.GetMyFamily)
 			family.POST("/meal-plans", familyHandler.CreateMealPlan)

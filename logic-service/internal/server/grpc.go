@@ -4,28 +4,103 @@ import (
 	"context"
 	"errors"
 
-	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
+	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
 )
 
 // 业务状态码
 const (
 	CodeSuccess = 0
 
-	CodeInvalidPhone     = 1001
-	CodePasswordTooShort = 1002
-	CodePhoneExists      = 1003
-	CodeUserNotFound     = 1004
-	CodePasswordWrong    = 1005
-	CodeUserDisabled     = 1006
-	CodeInternalError    = 1999
+	CodeInvalidPhone       = 1001
+	CodePasswordTooShort   = 1002
+	CodePhoneExists        = 1003
+	CodeUserNotFound       = 1004
+	CodePasswordWrong      = 1005
+	CodeUserDisabled       = 1006
+	CodeSMSCooldown        = 1007
+	CodeSMSDailyLimit      = 1008
+	CodeSMSIPLimit         = 1009
+	CodeSMSSendFailed      = 1010
+	CodeSMSUnavailable     = 1011
+	CodeSMSCodeInvalid     = 1012
+	CodeSMSAttemptsLimit   = 1013
+	CodePasswordNotSet     = 1014
+	CodeRefreshInvalid     = 1015
+	CodeRefreshReused      = 1016
+	CodeSessionUnavailable = 1017
+	CodeInternalError      = 1999
 )
 
 // AuthServer gRPC AuthService 实现
 type AuthServer struct {
 	authv1.UnimplementedAuthServiceServer
 	svc *service.AuthService
+}
+
+// SMSLogin 实现短信验证码登录和自动注册。
+func (s *AuthServer) SMSLogin(ctx context.Context, req *authv1.SMSLoginRequest) (*authv1.SMSLoginResponse, error) {
+	result, err := s.svc.SMSLogin(ctx, req.GetPhone(), req.GetVerificationCode(), req.GetDeviceId())
+	if err != nil {
+		return &authv1.SMSLoginResponse{
+			Code:    mapErrorCode(err),
+			Message: publicAuthErrorMessage(err),
+		}, nil
+	}
+	return &authv1.SMSLoginResponse{
+		Code:         CodeSuccess,
+		Message:      "登录成功",
+		IsNewUser:    result.IsNewUser,
+		User:         toUserInfo(result.User),
+		AccessToken:  result.AccessToken,
+		RefreshToken: result.RefreshToken,
+		ExpiresIn:    result.ExpiresIn,
+	}, nil
+}
+
+func (s *AuthServer) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest) (*authv1.RefreshTokenResponse, error) {
+	result, err := s.svc.RefreshToken(ctx, req.GetRefreshToken())
+	if err != nil {
+		return &authv1.RefreshTokenResponse{Code: mapErrorCode(err), Message: publicAuthErrorMessage(err)}, nil
+	}
+	return &authv1.RefreshTokenResponse{
+		Code: CodeSuccess, Message: "Token 刷新成功",
+		AccessToken: result.AccessToken, RefreshToken: result.RefreshToken, ExpiresIn: result.ExpiresIn,
+	}, nil
+}
+
+func (s *AuthServer) Logout(ctx context.Context, req *authv1.LogoutRequest) (*authv1.LogoutResponse, error) {
+	if err := s.svc.Logout(ctx, req.GetRefreshToken()); err != nil {
+		return &authv1.LogoutResponse{Code: mapErrorCode(err), Message: publicAuthErrorMessage(err)}, nil
+	}
+	return &authv1.LogoutResponse{Code: CodeSuccess, Message: "退出登录成功"}, nil
+}
+
+func (s *AuthServer) SendSMSCode(ctx context.Context, req *authv1.SendSMSCodeRequest) (*authv1.SendSMSCodeResponse, error) {
+	result, err := s.svc.SendSMSCode(ctx, req.GetPhone(), req.GetClientIp())
+	if err != nil {
+		response := &authv1.SendSMSCodeResponse{Code: mapErrorCode(err), Message: publicAuthErrorMessage(err)}
+		if result != nil {
+			response.RetryAfterSeconds = result.RetryAfterSeconds
+		}
+		return response, nil
+	}
+	return &authv1.SendSMSCodeResponse{
+		Code:              CodeSuccess,
+		Message:           "验证码已发送",
+		RetryAfterSeconds: result.RetryAfterSeconds,
+	}, nil
+}
+
+func publicAuthErrorMessage(err error) string {
+	if errors.Is(err, service.ErrSMSSendFailed) || errors.Is(err, service.ErrSMSUnavailable) {
+		return service.ErrSMSUnavailable.Error()
+	}
+	if errors.Is(err, service.ErrSessionUnavailable) {
+		return service.ErrSessionUnavailable.Error()
+	}
+	return err.Error()
 }
 
 // NewAuthServer 创建 AuthServer
@@ -35,7 +110,7 @@ func NewAuthServer(svc *service.AuthService) *AuthServer {
 
 // Register 实现注册接口
 func (s *AuthServer) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
-	result, err := s.svc.Register(ctx, req.Phone, req.Password, req.Nickname)
+	result, err := s.svc.Register(ctx, req.Phone, req.Password, req.Nickname, req.DeviceId)
 	if err != nil {
 		return &authv1.RegisterResponse{
 			Code:    mapErrorCode(err),
@@ -44,16 +119,19 @@ func (s *AuthServer) Register(ctx context.Context, req *authv1.RegisterRequest) 
 	}
 
 	return &authv1.RegisterResponse{
-		Code:    CodeSuccess,
-		Message: "注册成功",
-		Token:   result.Token,
-		UserId:  int64(result.UserID),
+		Code:         CodeSuccess,
+		Message:      "注册成功",
+		UserId:       int64(result.UserID),
+		AccessToken:  result.AccessToken,
+		RefreshToken: result.RefreshToken,
+		ExpiresIn:    result.ExpiresIn,
+		User:         toUserInfo(result.User),
 	}, nil
 }
 
 // Login 实现登录接口
 func (s *AuthServer) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
-	result, err := s.svc.Login(ctx, req.Phone, req.Password)
+	result, err := s.svc.Login(ctx, req.Phone, req.Password, req.DeviceId)
 	if err != nil {
 		return &authv1.LoginResponse{
 			Code:    mapErrorCode(err),
@@ -62,10 +140,12 @@ func (s *AuthServer) Login(ctx context.Context, req *authv1.LoginRequest) (*auth
 	}
 
 	return &authv1.LoginResponse{
-		Code:    CodeSuccess,
-		Message: "登录成功",
-		Token:   result.Token,
-		User:    toUserInfo(result.User),
+		Code:         CodeSuccess,
+		Message:      "登录成功",
+		User:         toUserInfo(result.User),
+		AccessToken:  result.AccessToken,
+		RefreshToken: result.RefreshToken,
+		ExpiresIn:    result.ExpiresIn,
 	}, nil
 }
 
@@ -116,8 +196,30 @@ func mapErrorCode(err error) int32 {
 		return CodeUserNotFound
 	case errors.Is(err, service.ErrPasswordWrong):
 		return CodePasswordWrong
+	case errors.Is(err, service.ErrPasswordNotSet):
+		return CodePasswordNotSet
 	case errors.Is(err, service.ErrUserDisabled):
 		return CodeUserDisabled
+	case errors.Is(err, service.ErrSMSCooldown):
+		return CodeSMSCooldown
+	case errors.Is(err, service.ErrSMSDailyLimit):
+		return CodeSMSDailyLimit
+	case errors.Is(err, service.ErrSMSIPLimit):
+		return CodeSMSIPLimit
+	case errors.Is(err, service.ErrSMSSendFailed):
+		return CodeSMSSendFailed
+	case errors.Is(err, service.ErrSMSUnavailable):
+		return CodeSMSUnavailable
+	case errors.Is(err, service.ErrSMSCodeInvalidOrExpired):
+		return CodeSMSCodeInvalid
+	case errors.Is(err, service.ErrSMSCodeAttemptsExceeded):
+		return CodeSMSAttemptsLimit
+	case errors.Is(err, service.ErrRefreshTokenInvalid):
+		return CodeRefreshInvalid
+	case errors.Is(err, service.ErrRefreshTokenReused):
+		return CodeRefreshReused
+	case errors.Is(err, service.ErrSessionUnavailable):
+		return CodeSessionUnavailable
 	default:
 		return CodeInternalError
 	}

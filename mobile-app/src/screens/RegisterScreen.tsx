@@ -6,15 +6,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, typography, spacing } from '../theme';
 import { validateRegister } from '../utils/validation';
-import { register } from '../services/auth';
+import { registerAndSaveCredentials } from '../services/auth';
 import { ErrorMessages } from '../types/auth';
 import type { AuthStackParamList } from '../types/auth';
+import { useUser } from '../contexts/UserContext';
 
 import LogoHeader from '../components/LogoHeader';
 import AuthCard from '../components/AuthCard';
@@ -33,6 +33,7 @@ export default function RegisterScreen({ navigation }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+  const { setUser, setFamilyName } = useUser();
 
   const handleRegister = async () => {
     setServerError('');
@@ -50,20 +51,11 @@ export default function RegisterScreen({ navigation }: Props) {
     setLoading(true);
 
     try {
-      const resp = await register(phone, password, nickname);
+      const resp = await registerAndSaveCredentials(phone, password, nickname);
       if (resp.code === 0) {
-        // 注册成功 → 显示成功提示 → 跳转到登录页
-        Alert.alert('注册成功', '账号已创建，请登录', [
-          {
-            text: '去登录',
-            onPress: () => {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
-            },
-          },
-        ]);
+    setUser(resp.user);
+    setFamilyName('');
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
       } else {
         // 服务端业务错误 → 显示在卡片上方，不在具体字段上
         const msg = ErrorMessages[resp.code] || resp.message || '注册失败';

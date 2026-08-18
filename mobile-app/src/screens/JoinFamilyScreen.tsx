@@ -53,7 +53,6 @@ export default function JoinFamilyScreen() {
     try {
       setLoading(true);
       const res = await joinFamily({
-        user_id: user.id,
         invite_code: trimmedCode,
         relation: relation.trim() || undefined,
         display_name: displayName.trim() || undefined,

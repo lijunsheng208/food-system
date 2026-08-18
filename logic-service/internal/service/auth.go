@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/repository"
-	pkgjwt "github.com/lijunsheng/familyos/pkg/jwt"
 	"github.com/lijunsheng/familyos/pkg/password"
 )
 
@@ -19,13 +20,25 @@ var (
 	ErrUserDisabled       = errors.New("用户已被禁用")
 	ErrInvalidPhone       = errors.New("手机号格式不正确")
 	ErrPasswordTooShort   = errors.New("密码长度不能少于6位")
+	ErrPasswordNotSet     = errors.New("该账号尚未设置密码，请使用验证码登录")
 )
 
 // AuthService 认证业务逻辑
 type AuthService struct {
-	userRepo   *repository.UserRepo
-	familyRepo *repository.FamilyRepo
-	jwtSecret  string
+	userRepo     *repository.UserRepo
+	familyRepo   *repository.FamilyRepo
+	jwtSecret    string
+	smsStore     SMSCodeStore
+	smsSender    SMSProvider
+	smsConfig    SMSCodeConfig
+	sessionStore RefreshSessionStore
+	tokenConfig  TokenConfig
+}
+
+func (s *AuthService) ConfigureSMS(store SMSCodeStore, sender SMSProvider, cfg SMSCodeConfig) {
+	s.smsStore = store
+	s.smsSender = sender
+	s.smsConfig = cfg
 }
 
 // NewAuthService 创建 AuthService
@@ -40,11 +53,12 @@ func NewAuthService(userRepo *repository.UserRepo, familyRepo *repository.Family
 // RegisterResult 注册结果
 type RegisterResult struct {
 	UserID uint64
-	Token  string
+	User   *model.User
+	*TokenPair
 }
 
 // Register 用户注册
-func (s *AuthService) Register(ctx context.Context, phone, plainPassword, nickname string) (*RegisterResult, error) {
+func (s *AuthService) Register(ctx context.Context, phone, plainPassword, nickname, deviceID string) (*RegisterResult, error) {
 	// 1. 校验手机号
 	if !isValidPhone(phone) {
 		return nil, ErrInvalidPhone
@@ -73,22 +87,23 @@ func (s *AuthService) Register(ctx context.Context, phone, plainPassword, nickna
 	// 5. 写入数据库
 	user := &model.User{
 		Phone:        phone,
-		PasswordHash: hashedPwd,
+		PasswordHash: &hashedPwd,
 		Nickname:     nickname,
 	}
 	if err := s.userRepo.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
-	// 6. 生成 JWT
-	token, err := pkgjwt.GenerateToken(s.jwtSecret, user.ID, user.Phone)
+	// 6. 创建登录会话并签发 Token
+	tokens, err := s.issueTokenPair(ctx, user, deviceID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RegisterResult{
-		UserID: user.ID,
-		Token:  token,
+		UserID:    user.ID,
+		User:      user,
+		TokenPair: tokens,
 	}, nil
 }
 
@@ -149,12 +164,12 @@ func (s *AuthService) UpdateProfile(ctx context.Context, userID uint64, nickname
 
 // LoginResult 登录结果
 type LoginResult struct {
-	User  *model.User
-	Token string
+	User *model.User
+	*TokenPair
 }
 
 // Login 用户登录
-func (s *AuthService) Login(ctx context.Context, phone, plainPassword string) (*LoginResult, error) {
+func (s *AuthService) Login(ctx context.Context, phone, plainPassword, deviceID string) (*LoginResult, error) {
 	// 1. 校验手机号
 	if !isValidPhone(phone) {
 		return nil, ErrInvalidPhone
@@ -170,7 +185,10 @@ func (s *AuthService) Login(ctx context.Context, phone, plainPassword string) (*
 	}
 
 	// 3. 验证密码
-	if !password.Verify(user.PasswordHash, plainPassword) {
+	if user.PasswordHash == nil {
+		return nil, ErrPasswordNotSet
+	}
+	if !password.Verify(*user.PasswordHash, plainPassword) {
 		return nil, ErrPasswordWrong
 	}
 
@@ -184,16 +202,74 @@ func (s *AuthService) Login(ctx context.Context, phone, plainPassword string) (*
 		return nil, err
 	}
 
-	// 6. 生成 JWT
-	token, err := pkgjwt.GenerateToken(s.jwtSecret, user.ID, user.Phone)
+	// 6. 创建登录会话并签发 Token
+	tokens, err := s.issueTokenPair(ctx, user, deviceID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &LoginResult{
-		User:  user,
-		Token: token,
+		User:      user,
+		TokenPair: tokens,
 	}, nil
+}
+
+// SMSLoginResult 短信验证码登录结果。
+type SMSLoginResult struct {
+	User      *model.User
+	IsNewUser bool
+	*TokenPair
+}
+
+// SMSLogin 使用一次性短信验证码登录，手机号不存在时自动注册。
+func (s *AuthService) SMSLogin(ctx context.Context, phone, verificationCode, deviceID string) (*SMSLoginResult, error) {
+	if !isValidPhone(phone) {
+		return nil, ErrInvalidPhone
+	}
+	if err := s.VerifySMSCode(ctx, phone, verificationCode); err != nil {
+		return nil, err
+	}
+
+	user, err := s.userRepo.FindByPhone(ctx, phone)
+	if err != nil {
+		return nil, err
+	}
+	isNewUser := false
+	if user == nil {
+		user = &model.User{
+			Phone:    phone,
+			Nickname: "用户" + phone[len(phone)-4:],
+			Status:   model.UserStatusNormal,
+		}
+		if err := s.userRepo.Create(ctx, user); err != nil {
+			if !repository.IsDuplicateKeyError(err) {
+				return nil, err
+			}
+			user, err = s.userRepo.FindByPhone(ctx, phone)
+			if err != nil {
+				return nil, err
+			}
+			if user == nil {
+				return nil, fmt.Errorf("唯一键冲突后未查询到用户")
+			}
+		} else {
+			isNewUser = true
+		}
+	}
+	if user.Status == model.UserStatusDisabled {
+		return nil, ErrUserDisabled
+	}
+	if err := s.userRepo.UpdateLastLogin(ctx, user.ID); err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	user.LastLoginAt = &now
+
+	tokens, err := s.issueTokenPair(ctx, user, deviceID)
+	if err != nil {
+		return nil, err
+	}
+	return &SMSLoginResult{User: user, IsNewUser: isNewUser, TokenPair: tokens}, nil
 }
 
 // isValidPhone 简单校验手机号格式

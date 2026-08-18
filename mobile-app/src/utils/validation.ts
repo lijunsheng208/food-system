@@ -13,6 +13,10 @@ export function isValidPassword(password: string): boolean {
   return password.length >= 6;
 }
 
+export function isValidVerificationCode(code: string): boolean {
+  return /^\d{6}$/.test(code);
+}
+
 export type ValidationErrors = Record<string, string | undefined>;
 
 /**

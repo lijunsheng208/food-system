@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useUser } from '../contexts/UserContext';
-import { removeToken } from '../services/api';
+import { logoutAndClear } from '../services/api';
 import { colors, typography, spacing, radius, shadow } from '../theme';
 import type { AuthStackParamList } from '../types/auth';
 
@@ -41,7 +41,7 @@ export default function ProfileScreen() {
         text: '退出',
         style: 'destructive',
         onPress: async () => {
-          await removeToken();
+          await logoutAndClear();
           clearUser();
           navigation.reset({
             index: 0,
