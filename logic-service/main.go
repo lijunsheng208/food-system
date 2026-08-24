@@ -61,9 +61,11 @@ func main() {
 
 	// 3. 依赖注入
 	userRepo := repository.NewUserRepo(db)
+	dietaryPreferenceRepo := repository.NewUserDietaryPreferenceRepo(db)
 	familyRepo := repository.NewFamilyRepo(db)
 
 	authSvc := service.NewAuthService(userRepo, familyRepo, cfg.JWT.Secret)
+	authSvc.ConfigureDietaryPreferences(dietaryPreferenceRepo)
 	smsStore := repository.NewSMSCodeStore(redisClient, cfg.Redis.KeyPrefix)
 	sessionStore := repository.NewRefreshSessionStore(redisClient, cfg.Redis.KeyPrefix)
 	authSvc.ConfigureTokens(sessionStore, service.TokenConfig{

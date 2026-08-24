@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/repository"
@@ -26,6 +28,7 @@ var (
 // AuthService 认证业务逻辑
 type AuthService struct {
 	userRepo     *repository.UserRepo
+	dietaryRepo  UserDietaryPreferenceStore
 	familyRepo   *repository.FamilyRepo
 	jwtSecret    string
 	smsStore     SMSCodeStore
@@ -47,6 +50,114 @@ func NewAuthService(userRepo *repository.UserRepo, familyRepo *repository.Family
 		userRepo:   userRepo,
 		familyRepo: familyRepo,
 		jwtSecret:  jwtSecret,
+	}
+}
+
+// ConfigureDietaryPreferences 注入用户饮食偏好仓储，保持认证服务负责当前用户的设置业务。
+func (s *AuthService) ConfigureDietaryPreferences(repo UserDietaryPreferenceStore) {
+	s.dietaryRepo = repo
+}
+
+// UserDietaryPreferenceStore 定义个人饮食偏好业务需要的持久化能力。
+type UserDietaryPreferenceStore interface {
+	ListByUser(ctx context.Context, userID uint64) ([]model.UserDietaryPreference, error)
+	ReplaceByUser(ctx context.Context, userID uint64, preferences []model.UserDietaryPreference) error
+}
+
+// UserDietaryPreferenceInput 表示一次保存请求中的用户偏好。
+type UserDietaryPreferenceInput struct {
+	PreferenceType  int8
+	PreferenceValue string
+	Note            string
+}
+
+// UserDietaryPreferenceResult 表示返回给接口层的用户偏好。
+type UserDietaryPreferenceResult struct {
+	ID              uint64
+	PreferenceType  int8
+	PreferenceValue string
+	Note            string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+}
+
+var (
+	ErrDietaryPreferenceUnavailable = errors.New("个人饮食偏好服务不可用")
+	ErrDietaryPreferenceType        = errors.New("个人饮食偏好类型无效")
+	ErrDietaryPreferenceValue       = errors.New("个人饮食偏好内容无效")
+	ErrDietaryPreferenceDuplicate   = errors.New("个人饮食偏好不能重复")
+)
+
+const maxUserDietaryPreferences = 50
+
+// ListDietaryPreferences 查询当前用户的全部饮食偏好。
+func (s *AuthService) ListDietaryPreferences(ctx context.Context, userID uint64) ([]UserDietaryPreferenceResult, error) {
+	if userID == 0 || s.dietaryRepo == nil {
+		return nil, ErrDietaryPreferenceUnavailable
+	}
+	preferences, err := s.dietaryRepo.ListByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]UserDietaryPreferenceResult, 0, len(preferences))
+	for _, preference := range preferences {
+		result = append(result, toDietaryPreferenceResult(preference))
+	}
+	return result, nil
+}
+
+// ReplaceDietaryPreferences 校验并整体保存当前用户的个人饮食偏好。
+func (s *AuthService) ReplaceDietaryPreferences(ctx context.Context, userID uint64, inputs []UserDietaryPreferenceInput) ([]UserDietaryPreferenceResult, error) {
+	if userID == 0 || s.dietaryRepo == nil {
+		return nil, ErrDietaryPreferenceUnavailable
+	}
+	if len(inputs) > maxUserDietaryPreferences {
+		return nil, ErrDietaryPreferenceValue
+	}
+	preferences := make([]model.UserDietaryPreference, 0, len(inputs))
+	seen := make(map[string]struct{}, len(inputs))
+	for _, input := range inputs {
+		displayValue := normalizeDietaryValue(input.PreferenceValue)
+		if !model.IsValidDietaryPreferenceType(input.PreferenceType) {
+			return nil, ErrDietaryPreferenceType
+		}
+		if displayValue == "" || utf8.RuneCountInString(displayValue) > 100 {
+			return nil, ErrDietaryPreferenceValue
+		}
+		note := strings.TrimSpace(input.Note)
+		if utf8.RuneCountInString(note) > 255 {
+			return nil, ErrDietaryPreferenceValue
+		}
+		normalizedValue := strings.ToLower(displayValue)
+		key := fmt.Sprintf("%d:%s", input.PreferenceType, normalizedValue)
+		if _, exists := seen[key]; exists {
+			return nil, ErrDietaryPreferenceDuplicate
+		}
+		seen[key] = struct{}{}
+		preferences = append(preferences, model.UserDietaryPreference{
+			PreferenceType:  input.PreferenceType,
+			PreferenceValue: displayValue,
+			NormalizedValue: normalizedValue,
+			Note:            note,
+		})
+	}
+	if err := s.dietaryRepo.ReplaceByUser(ctx, userID, preferences); err != nil {
+		return nil, err
+	}
+	return s.ListDietaryPreferences(ctx, userID)
+}
+
+// normalizeDietaryValue 统一用户输入的首尾和连续空白，保证唯一键稳定。
+func normalizeDietaryValue(value string) string {
+	return strings.Join(strings.Fields(value), " ")
+}
+
+// toDietaryPreferenceResult 将数据库模型转换为业务返回值。
+func toDietaryPreferenceResult(preference model.UserDietaryPreference) UserDietaryPreferenceResult {
+	return UserDietaryPreferenceResult{
+		ID: preference.ID, PreferenceType: preference.PreferenceType,
+		PreferenceValue: preference.PreferenceValue, Note: preference.Note,
+		CreatedAt: preference.CreatedAt, UpdatedAt: preference.UpdatedAt,
 	}
 }
 

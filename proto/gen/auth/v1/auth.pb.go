@@ -1037,6 +1037,366 @@ func (x *UpdateProfileResponse) GetMessage() string {
 	return ""
 }
 
+type DietaryPreferenceInfo struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	PreferenceType  int32                  `protobuf:"varint,2,opt,name=preference_type,json=preferenceType,proto3" json:"preference_type,omitempty"`
+	PreferenceValue string                 `protobuf:"bytes,3,opt,name=preference_value,json=preferenceValue,proto3" json:"preference_value,omitempty"`
+	Note            string                 `protobuf:"bytes,4,opt,name=note,proto3" json:"note,omitempty"`
+	CreatedAt       string                 `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt       string                 `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *DietaryPreferenceInfo) Reset() {
+	*x = DietaryPreferenceInfo{}
+	mi := &file_auth_v1_auth_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DietaryPreferenceInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DietaryPreferenceInfo) ProtoMessage() {}
+
+func (x *DietaryPreferenceInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DietaryPreferenceInfo.ProtoReflect.Descriptor instead.
+func (*DietaryPreferenceInfo) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DietaryPreferenceInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DietaryPreferenceInfo) GetPreferenceType() int32 {
+	if x != nil {
+		return x.PreferenceType
+	}
+	return 0
+}
+
+func (x *DietaryPreferenceInfo) GetPreferenceValue() string {
+	if x != nil {
+		return x.PreferenceValue
+	}
+	return ""
+}
+
+func (x *DietaryPreferenceInfo) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+func (x *DietaryPreferenceInfo) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *DietaryPreferenceInfo) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type DietaryPreferenceInput struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	PreferenceType  int32                  `protobuf:"varint,1,opt,name=preference_type,json=preferenceType,proto3" json:"preference_type,omitempty"`
+	PreferenceValue string                 `protobuf:"bytes,2,opt,name=preference_value,json=preferenceValue,proto3" json:"preference_value,omitempty"`
+	Note            string                 `protobuf:"bytes,3,opt,name=note,proto3" json:"note,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *DietaryPreferenceInput) Reset() {
+	*x = DietaryPreferenceInput{}
+	mi := &file_auth_v1_auth_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DietaryPreferenceInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DietaryPreferenceInput) ProtoMessage() {}
+
+func (x *DietaryPreferenceInput) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DietaryPreferenceInput.ProtoReflect.Descriptor instead.
+func (*DietaryPreferenceInput) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *DietaryPreferenceInput) GetPreferenceType() int32 {
+	if x != nil {
+		return x.PreferenceType
+	}
+	return 0
+}
+
+func (x *DietaryPreferenceInput) GetPreferenceValue() string {
+	if x != nil {
+		return x.PreferenceValue
+	}
+	return ""
+}
+
+func (x *DietaryPreferenceInput) GetNote() string {
+	if x != nil {
+		return x.Note
+	}
+	return ""
+}
+
+type ListDietaryPreferencesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDietaryPreferencesRequest) Reset() {
+	*x = ListDietaryPreferencesRequest{}
+	mi := &file_auth_v1_auth_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDietaryPreferencesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDietaryPreferencesRequest) ProtoMessage() {}
+
+func (x *ListDietaryPreferencesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDietaryPreferencesRequest.ProtoReflect.Descriptor instead.
+func (*ListDietaryPreferencesRequest) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListDietaryPreferencesRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type ListDietaryPreferencesResponse struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Code          int32                    `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Preferences   []*DietaryPreferenceInfo `protobuf:"bytes,3,rep,name=preferences,proto3" json:"preferences,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListDietaryPreferencesResponse) Reset() {
+	*x = ListDietaryPreferencesResponse{}
+	mi := &file_auth_v1_auth_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListDietaryPreferencesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListDietaryPreferencesResponse) ProtoMessage() {}
+
+func (x *ListDietaryPreferencesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListDietaryPreferencesResponse.ProtoReflect.Descriptor instead.
+func (*ListDietaryPreferencesResponse) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListDietaryPreferencesResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *ListDietaryPreferencesResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListDietaryPreferencesResponse) GetPreferences() []*DietaryPreferenceInfo {
+	if x != nil {
+		return x.Preferences
+	}
+	return nil
+}
+
+type ReplaceDietaryPreferencesRequest struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	UserId        int64                     `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Preferences   []*DietaryPreferenceInput `protobuf:"bytes,2,rep,name=preferences,proto3" json:"preferences,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplaceDietaryPreferencesRequest) Reset() {
+	*x = ReplaceDietaryPreferencesRequest{}
+	mi := &file_auth_v1_auth_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplaceDietaryPreferencesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplaceDietaryPreferencesRequest) ProtoMessage() {}
+
+func (x *ReplaceDietaryPreferencesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplaceDietaryPreferencesRequest.ProtoReflect.Descriptor instead.
+func (*ReplaceDietaryPreferencesRequest) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ReplaceDietaryPreferencesRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ReplaceDietaryPreferencesRequest) GetPreferences() []*DietaryPreferenceInput {
+	if x != nil {
+		return x.Preferences
+	}
+	return nil
+}
+
+type ReplaceDietaryPreferencesResponse struct {
+	state         protoimpl.MessageState   `protogen:"open.v1"`
+	Code          int32                    `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                   `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Preferences   []*DietaryPreferenceInfo `protobuf:"bytes,3,rep,name=preferences,proto3" json:"preferences,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReplaceDietaryPreferencesResponse) Reset() {
+	*x = ReplaceDietaryPreferencesResponse{}
+	mi := &file_auth_v1_auth_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReplaceDietaryPreferencesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReplaceDietaryPreferencesResponse) ProtoMessage() {}
+
+func (x *ReplaceDietaryPreferencesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_v1_auth_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReplaceDietaryPreferencesResponse.ProtoReflect.Descriptor instead.
+func (*ReplaceDietaryPreferencesResponse) Descriptor() ([]byte, []int) {
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ReplaceDietaryPreferencesResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *ReplaceDietaryPreferencesResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ReplaceDietaryPreferencesResponse) GetPreferences() []*DietaryPreferenceInfo {
+	if x != nil {
+		return x.Preferences
+	}
+	return nil
+}
+
 type UserInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1054,7 +1414,7 @@ type UserInfo struct {
 
 func (x *UserInfo) Reset() {
 	*x = UserInfo{}
-	mi := &file_auth_v1_auth_proto_msgTypes[16]
+	mi := &file_auth_v1_auth_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1066,7 +1426,7 @@ func (x *UserInfo) String() string {
 func (*UserInfo) ProtoMessage() {}
 
 func (x *UserInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_auth_v1_auth_proto_msgTypes[16]
+	mi := &file_auth_v1_auth_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1079,7 +1439,7 @@ func (x *UserInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserInfo.ProtoReflect.Descriptor instead.
 func (*UserInfo) Descriptor() ([]byte, []int) {
-	return file_auth_v1_auth_proto_rawDescGZIP(), []int{16}
+	return file_auth_v1_auth_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *UserInfo) GetId() int64 {
@@ -1225,7 +1585,33 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\x06gender\x18\x04 \x01(\x05R\x06gender\"E\n" +
 	"\x15UpdateProfileResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xf6\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\xcd\x01\n" +
+	"\x15DietaryPreferenceInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12'\n" +
+	"\x0fpreference_type\x18\x02 \x01(\x05R\x0epreferenceType\x12)\n" +
+	"\x10preference_value\x18\x03 \x01(\tR\x0fpreferenceValue\x12\x12\n" +
+	"\x04note\x18\x04 \x01(\tR\x04note\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x06 \x01(\tR\tupdatedAt\"\x80\x01\n" +
+	"\x16DietaryPreferenceInput\x12'\n" +
+	"\x0fpreference_type\x18\x01 \x01(\x05R\x0epreferenceType\x12)\n" +
+	"\x10preference_value\x18\x02 \x01(\tR\x0fpreferenceValue\x12\x12\n" +
+	"\x04note\x18\x03 \x01(\tR\x04note\"8\n" +
+	"\x1dListDietaryPreferencesRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\x90\x01\n" +
+	"\x1eListDietaryPreferencesResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12@\n" +
+	"\vpreferences\x18\x03 \x03(\v2\x1e.auth.v1.DietaryPreferenceInfoR\vpreferences\"~\n" +
+	" ReplaceDietaryPreferencesRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12A\n" +
+	"\vpreferences\x18\x02 \x03(\v2\x1f.auth.v1.DietaryPreferenceInputR\vpreferences\"\x93\x01\n" +
+	"!ReplaceDietaryPreferencesResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12@\n" +
+	"\vpreferences\x18\x03 \x03(\v2\x1e.auth.v1.DietaryPreferenceInfoR\vpreferences\"\xf6\x01\n" +
 	"\bUserInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05phone\x18\x02 \x01(\tR\x05phone\x12\x1a\n" +
@@ -1237,7 +1623,7 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt2\xb0\x04\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt2\x8f\x06\n" +
 	"\vAuthService\x12H\n" +
 	"\vSendSMSCode\x12\x1b.auth.v1.SendSMSCodeRequest\x1a\x1c.auth.v1.SendSMSCodeResponse\x12?\n" +
 	"\bSMSLogin\x12\x18.auth.v1.SMSLoginRequest\x1a\x19.auth.v1.SMSLoginResponse\x12K\n" +
@@ -1247,7 +1633,9 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\x05Login\x12\x15.auth.v1.LoginRequest\x1a\x16.auth.v1.LoginResponse\x12E\n" +
 	"\n" +
 	"GetProfile\x12\x1a.auth.v1.GetProfileRequest\x1a\x1b.auth.v1.GetProfileResponse\x12N\n" +
-	"\rUpdateProfile\x12\x1d.auth.v1.UpdateProfileRequest\x1a\x1e.auth.v1.UpdateProfileResponseB9Z7github.com/lijunsheng/familyos/proto/gen/auth/v1;authv1b\x06proto3"
+	"\rUpdateProfile\x12\x1d.auth.v1.UpdateProfileRequest\x1a\x1e.auth.v1.UpdateProfileResponse\x12i\n" +
+	"\x16ListDietaryPreferences\x12&.auth.v1.ListDietaryPreferencesRequest\x1a'.auth.v1.ListDietaryPreferencesResponse\x12r\n" +
+	"\x19ReplaceDietaryPreferences\x12).auth.v1.ReplaceDietaryPreferencesRequest\x1a*.auth.v1.ReplaceDietaryPreferencesResponseB9Z7github.com/lijunsheng/familyos/proto/gen/auth/v1;authv1b\x06proto3"
 
 var (
 	file_auth_v1_auth_proto_rawDescOnce sync.Once
@@ -1261,52 +1649,65 @@ func file_auth_v1_auth_proto_rawDescGZIP() []byte {
 	return file_auth_v1_auth_proto_rawDescData
 }
 
-var file_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_auth_v1_auth_proto_goTypes = []any{
-	(*SendSMSCodeRequest)(nil),    // 0: auth.v1.SendSMSCodeRequest
-	(*SendSMSCodeResponse)(nil),   // 1: auth.v1.SendSMSCodeResponse
-	(*SMSLoginRequest)(nil),       // 2: auth.v1.SMSLoginRequest
-	(*SMSLoginResponse)(nil),      // 3: auth.v1.SMSLoginResponse
-	(*RefreshTokenRequest)(nil),   // 4: auth.v1.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),  // 5: auth.v1.RefreshTokenResponse
-	(*LogoutRequest)(nil),         // 6: auth.v1.LogoutRequest
-	(*LogoutResponse)(nil),        // 7: auth.v1.LogoutResponse
-	(*RegisterRequest)(nil),       // 8: auth.v1.RegisterRequest
-	(*RegisterResponse)(nil),      // 9: auth.v1.RegisterResponse
-	(*LoginRequest)(nil),          // 10: auth.v1.LoginRequest
-	(*LoginResponse)(nil),         // 11: auth.v1.LoginResponse
-	(*GetProfileRequest)(nil),     // 12: auth.v1.GetProfileRequest
-	(*GetProfileResponse)(nil),    // 13: auth.v1.GetProfileResponse
-	(*UpdateProfileRequest)(nil),  // 14: auth.v1.UpdateProfileRequest
-	(*UpdateProfileResponse)(nil), // 15: auth.v1.UpdateProfileResponse
-	(*UserInfo)(nil),              // 16: auth.v1.UserInfo
+	(*SendSMSCodeRequest)(nil),                // 0: auth.v1.SendSMSCodeRequest
+	(*SendSMSCodeResponse)(nil),               // 1: auth.v1.SendSMSCodeResponse
+	(*SMSLoginRequest)(nil),                   // 2: auth.v1.SMSLoginRequest
+	(*SMSLoginResponse)(nil),                  // 3: auth.v1.SMSLoginResponse
+	(*RefreshTokenRequest)(nil),               // 4: auth.v1.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),              // 5: auth.v1.RefreshTokenResponse
+	(*LogoutRequest)(nil),                     // 6: auth.v1.LogoutRequest
+	(*LogoutResponse)(nil),                    // 7: auth.v1.LogoutResponse
+	(*RegisterRequest)(nil),                   // 8: auth.v1.RegisterRequest
+	(*RegisterResponse)(nil),                  // 9: auth.v1.RegisterResponse
+	(*LoginRequest)(nil),                      // 10: auth.v1.LoginRequest
+	(*LoginResponse)(nil),                     // 11: auth.v1.LoginResponse
+	(*GetProfileRequest)(nil),                 // 12: auth.v1.GetProfileRequest
+	(*GetProfileResponse)(nil),                // 13: auth.v1.GetProfileResponse
+	(*UpdateProfileRequest)(nil),              // 14: auth.v1.UpdateProfileRequest
+	(*UpdateProfileResponse)(nil),             // 15: auth.v1.UpdateProfileResponse
+	(*DietaryPreferenceInfo)(nil),             // 16: auth.v1.DietaryPreferenceInfo
+	(*DietaryPreferenceInput)(nil),            // 17: auth.v1.DietaryPreferenceInput
+	(*ListDietaryPreferencesRequest)(nil),     // 18: auth.v1.ListDietaryPreferencesRequest
+	(*ListDietaryPreferencesResponse)(nil),    // 19: auth.v1.ListDietaryPreferencesResponse
+	(*ReplaceDietaryPreferencesRequest)(nil),  // 20: auth.v1.ReplaceDietaryPreferencesRequest
+	(*ReplaceDietaryPreferencesResponse)(nil), // 21: auth.v1.ReplaceDietaryPreferencesResponse
+	(*UserInfo)(nil),                          // 22: auth.v1.UserInfo
 }
 var file_auth_v1_auth_proto_depIdxs = []int32{
-	16, // 0: auth.v1.SMSLoginResponse.user:type_name -> auth.v1.UserInfo
-	16, // 1: auth.v1.RegisterResponse.user:type_name -> auth.v1.UserInfo
-	16, // 2: auth.v1.LoginResponse.user:type_name -> auth.v1.UserInfo
-	16, // 3: auth.v1.GetProfileResponse.user:type_name -> auth.v1.UserInfo
-	0,  // 4: auth.v1.AuthService.SendSMSCode:input_type -> auth.v1.SendSMSCodeRequest
-	2,  // 5: auth.v1.AuthService.SMSLogin:input_type -> auth.v1.SMSLoginRequest
-	4,  // 6: auth.v1.AuthService.RefreshToken:input_type -> auth.v1.RefreshTokenRequest
-	6,  // 7: auth.v1.AuthService.Logout:input_type -> auth.v1.LogoutRequest
-	8,  // 8: auth.v1.AuthService.Register:input_type -> auth.v1.RegisterRequest
-	10, // 9: auth.v1.AuthService.Login:input_type -> auth.v1.LoginRequest
-	12, // 10: auth.v1.AuthService.GetProfile:input_type -> auth.v1.GetProfileRequest
-	14, // 11: auth.v1.AuthService.UpdateProfile:input_type -> auth.v1.UpdateProfileRequest
-	1,  // 12: auth.v1.AuthService.SendSMSCode:output_type -> auth.v1.SendSMSCodeResponse
-	3,  // 13: auth.v1.AuthService.SMSLogin:output_type -> auth.v1.SMSLoginResponse
-	5,  // 14: auth.v1.AuthService.RefreshToken:output_type -> auth.v1.RefreshTokenResponse
-	7,  // 15: auth.v1.AuthService.Logout:output_type -> auth.v1.LogoutResponse
-	9,  // 16: auth.v1.AuthService.Register:output_type -> auth.v1.RegisterResponse
-	11, // 17: auth.v1.AuthService.Login:output_type -> auth.v1.LoginResponse
-	13, // 18: auth.v1.AuthService.GetProfile:output_type -> auth.v1.GetProfileResponse
-	15, // 19: auth.v1.AuthService.UpdateProfile:output_type -> auth.v1.UpdateProfileResponse
-	12, // [12:20] is the sub-list for method output_type
-	4,  // [4:12] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	22, // 0: auth.v1.SMSLoginResponse.user:type_name -> auth.v1.UserInfo
+	22, // 1: auth.v1.RegisterResponse.user:type_name -> auth.v1.UserInfo
+	22, // 2: auth.v1.LoginResponse.user:type_name -> auth.v1.UserInfo
+	22, // 3: auth.v1.GetProfileResponse.user:type_name -> auth.v1.UserInfo
+	16, // 4: auth.v1.ListDietaryPreferencesResponse.preferences:type_name -> auth.v1.DietaryPreferenceInfo
+	17, // 5: auth.v1.ReplaceDietaryPreferencesRequest.preferences:type_name -> auth.v1.DietaryPreferenceInput
+	16, // 6: auth.v1.ReplaceDietaryPreferencesResponse.preferences:type_name -> auth.v1.DietaryPreferenceInfo
+	0,  // 7: auth.v1.AuthService.SendSMSCode:input_type -> auth.v1.SendSMSCodeRequest
+	2,  // 8: auth.v1.AuthService.SMSLogin:input_type -> auth.v1.SMSLoginRequest
+	4,  // 9: auth.v1.AuthService.RefreshToken:input_type -> auth.v1.RefreshTokenRequest
+	6,  // 10: auth.v1.AuthService.Logout:input_type -> auth.v1.LogoutRequest
+	8,  // 11: auth.v1.AuthService.Register:input_type -> auth.v1.RegisterRequest
+	10, // 12: auth.v1.AuthService.Login:input_type -> auth.v1.LoginRequest
+	12, // 13: auth.v1.AuthService.GetProfile:input_type -> auth.v1.GetProfileRequest
+	14, // 14: auth.v1.AuthService.UpdateProfile:input_type -> auth.v1.UpdateProfileRequest
+	18, // 15: auth.v1.AuthService.ListDietaryPreferences:input_type -> auth.v1.ListDietaryPreferencesRequest
+	20, // 16: auth.v1.AuthService.ReplaceDietaryPreferences:input_type -> auth.v1.ReplaceDietaryPreferencesRequest
+	1,  // 17: auth.v1.AuthService.SendSMSCode:output_type -> auth.v1.SendSMSCodeResponse
+	3,  // 18: auth.v1.AuthService.SMSLogin:output_type -> auth.v1.SMSLoginResponse
+	5,  // 19: auth.v1.AuthService.RefreshToken:output_type -> auth.v1.RefreshTokenResponse
+	7,  // 20: auth.v1.AuthService.Logout:output_type -> auth.v1.LogoutResponse
+	9,  // 21: auth.v1.AuthService.Register:output_type -> auth.v1.RegisterResponse
+	11, // 22: auth.v1.AuthService.Login:output_type -> auth.v1.LoginResponse
+	13, // 23: auth.v1.AuthService.GetProfile:output_type -> auth.v1.GetProfileResponse
+	15, // 24: auth.v1.AuthService.UpdateProfile:output_type -> auth.v1.UpdateProfileResponse
+	19, // 25: auth.v1.AuthService.ListDietaryPreferences:output_type -> auth.v1.ListDietaryPreferencesResponse
+	21, // 26: auth.v1.AuthService.ReplaceDietaryPreferences:output_type -> auth.v1.ReplaceDietaryPreferencesResponse
+	17, // [17:27] is the sub-list for method output_type
+	7,  // [7:17] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_auth_v1_auth_proto_init() }
@@ -1320,7 +1721,7 @@ func file_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_v1_auth_proto_rawDesc), len(file_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

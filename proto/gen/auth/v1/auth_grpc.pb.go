@@ -19,14 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_SendSMSCode_FullMethodName   = "/auth.v1.AuthService/SendSMSCode"
-	AuthService_SMSLogin_FullMethodName      = "/auth.v1.AuthService/SMSLogin"
-	AuthService_RefreshToken_FullMethodName  = "/auth.v1.AuthService/RefreshToken"
-	AuthService_Logout_FullMethodName        = "/auth.v1.AuthService/Logout"
-	AuthService_Register_FullMethodName      = "/auth.v1.AuthService/Register"
-	AuthService_Login_FullMethodName         = "/auth.v1.AuthService/Login"
-	AuthService_GetProfile_FullMethodName    = "/auth.v1.AuthService/GetProfile"
-	AuthService_UpdateProfile_FullMethodName = "/auth.v1.AuthService/UpdateProfile"
+	AuthService_SendSMSCode_FullMethodName               = "/auth.v1.AuthService/SendSMSCode"
+	AuthService_SMSLogin_FullMethodName                  = "/auth.v1.AuthService/SMSLogin"
+	AuthService_RefreshToken_FullMethodName              = "/auth.v1.AuthService/RefreshToken"
+	AuthService_Logout_FullMethodName                    = "/auth.v1.AuthService/Logout"
+	AuthService_Register_FullMethodName                  = "/auth.v1.AuthService/Register"
+	AuthService_Login_FullMethodName                     = "/auth.v1.AuthService/Login"
+	AuthService_GetProfile_FullMethodName                = "/auth.v1.AuthService/GetProfile"
+	AuthService_UpdateProfile_FullMethodName             = "/auth.v1.AuthService/UpdateProfile"
+	AuthService_ListDietaryPreferences_FullMethodName    = "/auth.v1.AuthService/ListDietaryPreferences"
+	AuthService_ReplaceDietaryPreferences_FullMethodName = "/auth.v1.AuthService/ReplaceDietaryPreferences"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -51,6 +53,10 @@ type AuthServiceClient interface {
 	GetProfile(ctx context.Context, in *GetProfileRequest, opts ...grpc.CallOption) (*GetProfileResponse, error)
 	// UpdateProfile 更新用户个人信息
 	UpdateProfile(ctx context.Context, in *UpdateProfileRequest, opts ...grpc.CallOption) (*UpdateProfileResponse, error)
+	// ListDietaryPreferences 查询用户个人饮食偏好
+	ListDietaryPreferences(ctx context.Context, in *ListDietaryPreferencesRequest, opts ...grpc.CallOption) (*ListDietaryPreferencesResponse, error)
+	// ReplaceDietaryPreferences 整体保存用户个人饮食偏好
+	ReplaceDietaryPreferences(ctx context.Context, in *ReplaceDietaryPreferencesRequest, opts ...grpc.CallOption) (*ReplaceDietaryPreferencesResponse, error)
 }
 
 type authServiceClient struct {
@@ -141,6 +147,26 @@ func (c *authServiceClient) UpdateProfile(ctx context.Context, in *UpdateProfile
 	return out, nil
 }
 
+func (c *authServiceClient) ListDietaryPreferences(ctx context.Context, in *ListDietaryPreferencesRequest, opts ...grpc.CallOption) (*ListDietaryPreferencesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDietaryPreferencesResponse)
+	err := c.cc.Invoke(ctx, AuthService_ListDietaryPreferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ReplaceDietaryPreferences(ctx context.Context, in *ReplaceDietaryPreferencesRequest, opts ...grpc.CallOption) (*ReplaceDietaryPreferencesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReplaceDietaryPreferencesResponse)
+	err := c.cc.Invoke(ctx, AuthService_ReplaceDietaryPreferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -163,6 +189,10 @@ type AuthServiceServer interface {
 	GetProfile(context.Context, *GetProfileRequest) (*GetProfileResponse, error)
 	// UpdateProfile 更新用户个人信息
 	UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error)
+	// ListDietaryPreferences 查询用户个人饮食偏好
+	ListDietaryPreferences(context.Context, *ListDietaryPreferencesRequest) (*ListDietaryPreferencesResponse, error)
+	// ReplaceDietaryPreferences 整体保存用户个人饮食偏好
+	ReplaceDietaryPreferences(context.Context, *ReplaceDietaryPreferencesRequest) (*ReplaceDietaryPreferencesResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -196,6 +226,12 @@ func (UnimplementedAuthServiceServer) GetProfile(context.Context, *GetProfileReq
 }
 func (UnimplementedAuthServiceServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateProfile not implemented")
+}
+func (UnimplementedAuthServiceServer) ListDietaryPreferences(context.Context, *ListDietaryPreferencesRequest) (*ListDietaryPreferencesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListDietaryPreferences not implemented")
+}
+func (UnimplementedAuthServiceServer) ReplaceDietaryPreferences(context.Context, *ReplaceDietaryPreferencesRequest) (*ReplaceDietaryPreferencesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReplaceDietaryPreferences not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -362,6 +398,42 @@ func _AuthService_UpdateProfile_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_ListDietaryPreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDietaryPreferencesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListDietaryPreferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ListDietaryPreferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListDietaryPreferences(ctx, req.(*ListDietaryPreferencesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ReplaceDietaryPreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReplaceDietaryPreferencesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ReplaceDietaryPreferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_ReplaceDietaryPreferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ReplaceDietaryPreferences(ctx, req.(*ReplaceDietaryPreferencesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -400,6 +472,14 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateProfile",
 			Handler:    _AuthService_UpdateProfile_Handler,
+		},
+		{
+			MethodName: "ListDietaryPreferences",
+			Handler:    _AuthService_ListDietaryPreferences_Handler,
+		},
+		{
+			MethodName: "ReplaceDietaryPreferences",
+			Handler:    _AuthService_ReplaceDietaryPreferences_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

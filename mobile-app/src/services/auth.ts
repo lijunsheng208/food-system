@@ -1,5 +1,6 @@
 import api, { getOrCreateDeviceID, saveAuthTokens } from './api';
 import type { RegisterResponse, LoginResponse, SMSLoginResponse } from '../types/auth';
+import type { UserDietaryPreference, UserDietaryPreferenceInput } from '../types/dietary';
 
 /**
  * 用户注册
@@ -113,6 +114,30 @@ export async function updateProfile(params: {
     throw new Error(data.message || '更新失败');
   }
   return data;
+}
+
+// getDietaryPreferences 查询当前用户长期保存的个人饮食偏好。
+export async function getDietaryPreferences(): Promise<UserDietaryPreference[]> {
+  const { data } = await api.get<{
+    code: number;
+    message: string;
+    preferences: UserDietaryPreference[];
+  }>('/auth/dietary-preferences');
+  if (data.code !== 0) throw new Error(data.message || '查询饮食偏好失败');
+  return data.preferences ?? [];
+}
+
+// replaceDietaryPreferences 整体保存当前用户的个人饮食偏好。
+export async function replaceDietaryPreferences(
+  preferences: UserDietaryPreferenceInput[],
+): Promise<UserDietaryPreference[]> {
+  const { data } = await api.put<{
+    code: number;
+    message: string;
+    preferences: UserDietaryPreference[];
+  }>('/auth/dietary-preferences', { preferences });
+  if (data.code !== 0) throw new Error(data.message || '保存饮食偏好失败');
+  return data.preferences ?? [];
 }
 
 /**

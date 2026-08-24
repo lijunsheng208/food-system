@@ -39,6 +39,11 @@ export default function ProfileScreen() {
     navigation.navigate('FamilyManagement');
   };
 
+  // handleDietaryPreferences 打开仅属于当前用户的饮食偏好设置。
+  const handleDietaryPreferences = () => {
+    navigation.navigate('DietaryPreferences');
+  };
+
   // handleLogout 确认退出后清理本地会话并重置根导航。
   const handleLogout = () => {
     Alert.alert('退出登录', '确定要退出当前账号吗？', [
@@ -131,6 +136,25 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           {/* 分割线 */}
+          <View style={styles.divider} />
+
+          {/* 个人饮食偏好 */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.6}
+            onPress={handleDietaryPreferences}
+          >
+            <View style={[styles.menuIconBox, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="restaurant-outline" size={20} color={colors.success} />
+            </View>
+            <Text style={styles.menuText}>饮食偏好</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+
           <View style={styles.divider} />
 
           {/* 退出登录 */}

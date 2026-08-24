@@ -13,24 +13,28 @@ import (
 const (
 	CodeSuccess = 0
 
-	CodeInvalidPhone       = 1001
-	CodePasswordTooShort   = 1002
-	CodePhoneExists        = 1003
-	CodeUserNotFound       = 1004
-	CodePasswordWrong      = 1005
-	CodeUserDisabled       = 1006
-	CodeSMSCooldown        = 1007
-	CodeSMSDailyLimit      = 1008
-	CodeSMSIPLimit         = 1009
-	CodeSMSSendFailed      = 1010
-	CodeSMSUnavailable     = 1011
-	CodeSMSCodeInvalid     = 1012
-	CodeSMSAttemptsLimit   = 1013
-	CodePasswordNotSet     = 1014
-	CodeRefreshInvalid     = 1015
-	CodeRefreshReused      = 1016
-	CodeSessionUnavailable = 1017
-	CodeInternalError      = 1999
+	CodeInvalidPhone        = 1001
+	CodePasswordTooShort    = 1002
+	CodePhoneExists         = 1003
+	CodeUserNotFound        = 1004
+	CodePasswordWrong       = 1005
+	CodeUserDisabled        = 1006
+	CodeSMSCooldown         = 1007
+	CodeSMSDailyLimit       = 1008
+	CodeSMSIPLimit          = 1009
+	CodeSMSSendFailed       = 1010
+	CodeSMSUnavailable      = 1011
+	CodeSMSCodeInvalid      = 1012
+	CodeSMSAttemptsLimit    = 1013
+	CodePasswordNotSet      = 1014
+	CodeRefreshInvalid      = 1015
+	CodeRefreshReused       = 1016
+	CodeSessionUnavailable  = 1017
+	CodeDietaryUnavailable  = 1020
+	CodeDietaryTypeInvalid  = 1021
+	CodeDietaryValueInvalid = 1022
+	CodeDietaryDuplicate    = 1023
+	CodeInternalError       = 1999
 )
 
 // AuthServer gRPC AuthService 实现
@@ -183,6 +187,47 @@ func (s *AuthServer) UpdateProfile(ctx context.Context, req *authv1.UpdateProfil
 	}, nil
 }
 
+// ListDietaryPreferences 查询当前用户保存的个人饮食偏好。
+func (s *AuthServer) ListDietaryPreferences(ctx context.Context, req *authv1.ListDietaryPreferencesRequest) (*authv1.ListDietaryPreferencesResponse, error) {
+	preferences, err := s.svc.ListDietaryPreferences(ctx, uint64(req.GetUserId()))
+	if err != nil {
+		return &authv1.ListDietaryPreferencesResponse{Code: mapErrorCode(err), Message: dietaryPreferenceErrorMessage(err)}, nil
+	}
+	return &authv1.ListDietaryPreferencesResponse{
+		Code: CodeSuccess, Message: "查询成功", Preferences: toDietaryPreferenceInfos(preferences),
+	}, nil
+}
+
+// ReplaceDietaryPreferences 整体替换当前用户的个人饮食偏好。
+func (s *AuthServer) ReplaceDietaryPreferences(ctx context.Context, req *authv1.ReplaceDietaryPreferencesRequest) (*authv1.ReplaceDietaryPreferencesResponse, error) {
+	inputs := make([]service.UserDietaryPreferenceInput, 0, len(req.GetPreferences()))
+	for _, preference := range req.GetPreferences() {
+		inputs = append(inputs, service.UserDietaryPreferenceInput{
+			PreferenceType:  int8(preference.GetPreferenceType()),
+			PreferenceValue: preference.GetPreferenceValue(),
+			Note:            preference.GetNote(),
+		})
+	}
+	preferences, err := s.svc.ReplaceDietaryPreferences(ctx, uint64(req.GetUserId()), inputs)
+	if err != nil {
+		return &authv1.ReplaceDietaryPreferencesResponse{Code: mapErrorCode(err), Message: dietaryPreferenceErrorMessage(err)}, nil
+	}
+	return &authv1.ReplaceDietaryPreferencesResponse{
+		Code: CodeSuccess, Message: "保存成功", Preferences: toDietaryPreferenceInfos(preferences),
+	}, nil
+}
+
+// dietaryPreferenceErrorMessage 只向客户端暴露可操作的偏好校验错误，隐藏数据库错误细节。
+func dietaryPreferenceErrorMessage(err error) string {
+	if errors.Is(err, service.ErrDietaryPreferenceUnavailable) ||
+		errors.Is(err, service.ErrDietaryPreferenceType) ||
+		errors.Is(err, service.ErrDietaryPreferenceValue) ||
+		errors.Is(err, service.ErrDietaryPreferenceDuplicate) {
+		return err.Error()
+	}
+	return "服务内部错误"
+}
+
 // mapErrorCode 将业务错误映射为状态码
 func mapErrorCode(err error) int32 {
 	switch {
@@ -220,9 +265,33 @@ func mapErrorCode(err error) int32 {
 		return CodeRefreshReused
 	case errors.Is(err, service.ErrSessionUnavailable):
 		return CodeSessionUnavailable
+	case errors.Is(err, service.ErrDietaryPreferenceUnavailable):
+		return CodeDietaryUnavailable
+	case errors.Is(err, service.ErrDietaryPreferenceType):
+		return CodeDietaryTypeInvalid
+	case errors.Is(err, service.ErrDietaryPreferenceValue):
+		return CodeDietaryValueInvalid
+	case errors.Is(err, service.ErrDietaryPreferenceDuplicate):
+		return CodeDietaryDuplicate
 	default:
 		return CodeInternalError
 	}
+}
+
+// toDietaryPreferenceInfos 将个人饮食偏好业务结果转换为 Proto 列表。
+func toDietaryPreferenceInfos(preferences []service.UserDietaryPreferenceResult) []*authv1.DietaryPreferenceInfo {
+	result := make([]*authv1.DietaryPreferenceInfo, 0, len(preferences))
+	for _, preference := range preferences {
+		result = append(result, &authv1.DietaryPreferenceInfo{
+			Id:              int64(preference.ID),
+			PreferenceType:  int32(preference.PreferenceType),
+			PreferenceValue: preference.PreferenceValue,
+			Note:            preference.Note,
+			CreatedAt:       preference.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:       preference.UpdatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+	return result
 }
 
 // toUserInfo 将 model.User 转为 proto UserInfo

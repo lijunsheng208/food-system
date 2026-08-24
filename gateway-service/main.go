@@ -89,6 +89,8 @@ func main() {
 		{
 			protectedAuth.GET("/profile", authHandler.GetProfile)
 			protectedAuth.PUT("/profile", authHandler.UpdateProfile)
+			protectedAuth.GET("/dietary-preferences", authHandler.ListDietaryPreferences)
+			protectedAuth.PUT("/dietary-preferences", authHandler.ReplaceDietaryPreferences)
 		}
 
 		dish := api.Group("/dish")

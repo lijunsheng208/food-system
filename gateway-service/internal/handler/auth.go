@@ -298,6 +298,91 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 	})
 }
 
+// ListDietaryPreferences GET /api/v1/auth/dietary-preferences
+func (h *AuthHandler) ListDietaryPreferences(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.ListDietaryPreferences(ctx, &authv1.ListDietaryPreferencesRequest{
+		UserId: int64(middleware.CurrentUserID(c)),
+	})
+	if err != nil {
+		log.Printf("gRPC ListDietaryPreferences 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	c.JSON(dietaryPreferenceHTTPStatus(resp.GetCode()), gin.H{
+		"code": resp.GetCode(), "message": resp.GetMessage(),
+		"preferences": dietaryPreferencesJSON(resp.GetPreferences()),
+	})
+}
+
+// ReplaceDietaryPreferences PUT /api/v1/auth/dietary-preferences
+func (h *AuthHandler) ReplaceDietaryPreferences(c *gin.Context) {
+	var body struct {
+		Preferences []struct {
+			PreferenceType  int32  `json:"preference_type"`
+			PreferenceValue string `json:"preference_value"`
+			Note            string `json:"note"`
+		} `json:"preferences"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请求格式错误"})
+		return
+	}
+	preferences := make([]*authv1.DietaryPreferenceInput, 0, len(body.Preferences))
+	for _, preference := range body.Preferences {
+		preferences = append(preferences, &authv1.DietaryPreferenceInput{
+			PreferenceType:  preference.PreferenceType,
+			PreferenceValue: preference.PreferenceValue,
+			Note:            preference.Note,
+		})
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.ReplaceDietaryPreferences(ctx, &authv1.ReplaceDietaryPreferencesRequest{
+		UserId: int64(middleware.CurrentUserID(c)), Preferences: preferences,
+	})
+	if err != nil {
+		log.Printf("gRPC ReplaceDietaryPreferences 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	c.JSON(dietaryPreferenceHTTPStatus(resp.GetCode()), gin.H{
+		"code": resp.GetCode(), "message": resp.GetMessage(),
+		"preferences": dietaryPreferencesJSON(resp.GetPreferences()),
+	})
+}
+
+// dietaryPreferenceHTTPStatus 将个人偏好业务错误映射为 HTTP 状态码。
+func dietaryPreferenceHTTPStatus(code int32) int {
+	switch code {
+	case 0:
+		return http.StatusOK
+	case 1020:
+		return http.StatusServiceUnavailable
+	case 1021, 1022, 1023:
+		return http.StatusBadRequest
+	default:
+		return http.StatusInternalServerError
+	}
+}
+
+// dietaryPreferencesJSON 将 Proto 偏好列表转换为稳定的 HTTP JSON 结构。
+func dietaryPreferencesJSON(preferences []*authv1.DietaryPreferenceInfo) []gin.H {
+	result := make([]gin.H, 0, len(preferences))
+	for _, preference := range preferences {
+		result = append(result, gin.H{
+			"id":               preference.GetId(),
+			"preference_type":  preference.GetPreferenceType(),
+			"preference_value": preference.GetPreferenceValue(),
+			"note":             preference.GetNote(),
+			"created_at":       preference.GetCreatedAt(),
+			"updated_at":       preference.GetUpdatedAt(),
+		})
+	}
+	return result
+}
+
 // Login POST /api/v1/auth/login
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req authv1.LoginRequest

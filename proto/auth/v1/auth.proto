@@ -22,6 +22,10 @@ service AuthService {
   rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
   // UpdateProfile 更新用户个人信息
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+  // ListDietaryPreferences 查询用户个人饮食偏好
+  rpc ListDietaryPreferences(ListDietaryPreferencesRequest) returns (ListDietaryPreferencesResponse);
+  // ReplaceDietaryPreferences 整体保存用户个人饮食偏好
+  rpc ReplaceDietaryPreferences(ReplaceDietaryPreferencesRequest) returns (ReplaceDietaryPreferencesResponse);
 }
 
 // ========== SMS Code ==========
@@ -139,6 +143,44 @@ message UpdateProfileRequest {
 message UpdateProfileResponse {
   int32  code    = 1;
   string message = 2;
+}
+
+// ========== Dietary Preferences ==========
+
+message DietaryPreferenceInfo {
+  int64 id = 1;
+  int32 preference_type = 2;
+  string preference_value = 3;
+  string note = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message DietaryPreferenceInput {
+  int32 preference_type = 1;
+  string preference_value = 2;
+  string note = 3;
+}
+
+message ListDietaryPreferencesRequest {
+  int64 user_id = 1;
+}
+
+message ListDietaryPreferencesResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated DietaryPreferenceInfo preferences = 3;
+}
+
+message ReplaceDietaryPreferencesRequest {
+  int64 user_id = 1;
+  repeated DietaryPreferenceInput preferences = 2;
+}
+
+message ReplaceDietaryPreferencesResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated DietaryPreferenceInfo preferences = 3;
 }
 
 // ========== UserInfo ==========
