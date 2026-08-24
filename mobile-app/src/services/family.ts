@@ -15,6 +15,21 @@ import type {
   ShoppingItemInfo,
   ShoppingListInfo,
 } from '../types/family';
+import type { FamilyDietaryProfile, FamilyDietaryProfileInput } from '../types/familyDietary';
+
+// getFamilyDietaryProfile 查询当前家庭的预算和饮食说明。
+export async function getFamilyDietaryProfile(familyId: number): Promise<FamilyDietaryProfile | null> {
+  const { data } = await api.get<{ code: number; message: string; profile: FamilyDietaryProfile | null }>(`/family/${familyId}/dietary-profile`);
+  if (data.code !== 0) throw new Error(data.message || '查询家庭饮食设置失败');
+  return data.profile;
+}
+
+// saveFamilyDietaryProfile 保存当前家庭的预算和饮食说明。
+export async function saveFamilyDietaryProfile(familyId: number, input: FamilyDietaryProfileInput): Promise<FamilyDietaryProfile> {
+  const { data } = await api.put<{ code: number; message: string; profile: FamilyDietaryProfile }>(`/family/${familyId}/dietary-profile`, input);
+  if (data.code !== 0) throw new Error(data.message || '保存家庭饮食设置失败');
+  return data.profile;
+}
 
 // ─── 查询我的家庭 ────────────────────────────────────────────
 

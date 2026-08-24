@@ -591,6 +591,22 @@ export default function FamilyManagementScreen() {
           )}
         </View>
 
+        {/* 家庭饮食设置独立入口，避免与头像和家庭身份信息混在同一张卡片里。 */}
+        <TouchableOpacity
+          style={styles.dietaryEntry}
+          onPress={() => navigation.navigate('FamilyDietaryProfile', { familyId: family.id })}
+          activeOpacity={0.78}
+        >
+          <View style={styles.dietaryIcon}>
+            <Ionicons name="options-outline" size={19} color={colors.primary} />
+          </View>
+          <View style={styles.dietaryCopy}>
+            <Text style={styles.dietaryTitle}>家庭饮食设置</Text>
+            <Text style={styles.dietaryHint}>预算与全家共同的饮食要求</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+        </TouchableOpacity>
+
         {/* 危险操作区 */}
         <View style={styles.dangerSection}>
           {!isOwner && (
@@ -645,6 +661,28 @@ const styles = StyleSheet.create({
     ...typography.h2,
     color: colors.textPrimary,
   },
+  dietaryEntry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  dietaryIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySubtle,
+  },
+  dietaryCopy: { flex: 1, marginLeft: spacing.sm },
+  dietaryTitle: { ...typography.body, color: colors.textPrimary, fontWeight: '700' },
+  dietaryHint: { ...typography.caption, color: colors.textSecondary, marginTop: 1 },
 
   /* 加载态 */
   loadingContainer: {

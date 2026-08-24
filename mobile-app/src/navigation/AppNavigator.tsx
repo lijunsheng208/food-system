@@ -17,6 +17,7 @@ import CookingModeScreen from '../screens/CookingModeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import ProfileDetailScreen from '../screens/ProfileDetailScreen';
 import DietaryPreferencesScreen from '../screens/DietaryPreferencesScreen';
+import FamilyDietaryProfileScreen from '../screens/FamilyDietaryProfileScreen';
 import FamilyManagementScreen from '../screens/FamilyManagementScreen';
 import CreateFamilyScreen from '../screens/CreateFamilyScreen';
 import EditFamilyScreen from '../screens/EditFamilyScreen';
@@ -157,6 +158,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="DietaryPreferences"
         component={DietaryPreferencesScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="FamilyDietaryProfile"
+        component={FamilyDietaryProfileScreen}
         options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen

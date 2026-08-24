@@ -71,6 +71,75 @@ func (h *FamilyHandler) GetMyFamily(c *gin.Context) {
 	})
 }
 
+// GetDietaryProfile GET /api/v1/family/{family_id}/dietary-profile。
+func (h *FamilyHandler) GetDietaryProfile(c *gin.Context) {
+	familyID, err := strconv.ParseInt(c.Param("family_id"), 10, 64)
+	if err != nil || familyID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的 family_id"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.GetDietaryProfile(ctx, &familyv1.GetDietaryProfileRequest{FamilyId: familyID, UserId: int64(middleware.CurrentUserID(c))})
+	if err != nil {
+		log.Printf("gRPC GetDietaryProfile 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "profile": familyDietaryProfileJSON(resp.GetProfile())})
+}
+
+// SaveDietaryProfile PUT /api/v1/family/{family_id}/dietary-profile。
+func (h *FamilyHandler) SaveDietaryProfile(c *gin.Context) {
+	familyID, err := strconv.ParseInt(c.Param("family_id"), 10, 64)
+	if err != nil || familyID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的 family_id"})
+		return
+	}
+	var body struct {
+		BudgetMin      *float64 `json:"budget_min"`
+		BudgetMax      *float64 `json:"budget_max"`
+		BudgetCurrency string   `json:"budget_currency"`
+		BudgetPeriod   int32    `json:"budget_period"`
+		Notes          string   `json:"notes"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请求格式错误"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	req := &familyv1.SaveDietaryProfileRequest{FamilyId: familyID, UserId: int64(middleware.CurrentUserID(c)), BudgetCurrency: body.BudgetCurrency, BudgetPeriod: body.BudgetPeriod, Notes: body.Notes}
+	if body.BudgetMin != nil {
+		req.BudgetMin = body.BudgetMin
+	}
+	if body.BudgetMax != nil {
+		req.BudgetMax = body.BudgetMax
+	}
+	resp, err := h.client.SaveDietaryProfile(ctx, req)
+	if err != nil {
+		log.Printf("gRPC SaveDietaryProfile 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "profile": familyDietaryProfileJSON(resp.GetProfile())})
+}
+
+// familyDietaryProfileJSON 将家庭饮食档案转换为 HTTP JSON。
+func familyDietaryProfileJSON(profile *familyv1.FamilyDietaryProfileInfo) gin.H {
+	if profile == nil {
+		return nil
+	}
+	result := gin.H{"id": profile.GetId(), "family_id": profile.GetFamilyId(), "budget_currency": profile.GetBudgetCurrency(), "budget_period": profile.GetBudgetPeriod(), "notes": profile.GetNotes(), "updated_by": profile.GetUpdatedBy(), "created_at": profile.GetCreatedAt(), "updated_at": profile.GetUpdatedAt()}
+	if profile.BudgetMin != nil {
+		result["budget_min"] = profile.GetBudgetMin()
+	}
+	if profile.BudgetMax != nil {
+		result["budget_max"] = profile.GetBudgetMax()
+	}
+	return result
+}
+
 // CreateFamily POST /api/v1/family/create
 func (h *FamilyHandler) CreateFamily(c *gin.Context) {
 	var req familyv1.CreateFamilyRequest

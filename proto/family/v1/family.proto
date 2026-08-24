@@ -26,6 +26,10 @@ service FamilyService {
   rpc RemoveMember(RemoveMemberRequest) returns (CommonResponse);
   // ResetInviteCode 重置邀请码
   rpc ResetInviteCode(ResetInviteCodeRequest) returns (ResetInviteCodeResponse);
+  // GetDietaryProfile 查询家庭饮食档案
+  rpc GetDietaryProfile(GetDietaryProfileRequest) returns (GetDietaryProfileResponse);
+  // SaveDietaryProfile 保存家庭饮食档案
+  rpc SaveDietaryProfile(SaveDietaryProfileRequest) returns (SaveDietaryProfileResponse);
   // CreateMealPlan 将菜谱加入家庭菜单
   rpc CreateMealPlan(CreateMealPlanRequest) returns (CreateMealPlanResponse);
   rpc ListMealPlans(ListMealPlansRequest) returns (ListMealPlansResponse);
@@ -169,6 +173,42 @@ message ResetInviteCodeResponse {
   string message                 = 2;
   string invite_code             = 3;
   string invite_code_expired_at  = 4;
+}
+
+// ========== Dietary Profile ==========
+
+message FamilyDietaryProfileInfo {
+  int64 id = 1;
+  int64 family_id = 2;
+  optional double budget_min = 3;
+  optional double budget_max = 4;
+  string budget_currency = 5;
+  int32 budget_period = 6;
+  string notes = 7;
+  int64 updated_by = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message GetDietaryProfileRequest { int64 family_id = 1; int64 user_id = 2; }
+message GetDietaryProfileResponse {
+  int32 code = 1;
+  string message = 2;
+  FamilyDietaryProfileInfo profile = 3;
+}
+message SaveDietaryProfileRequest {
+  int64 family_id = 1;
+  int64 user_id = 2;
+  optional double budget_min = 3;
+  optional double budget_max = 4;
+  string budget_currency = 5;
+  int32 budget_period = 6;
+  string notes = 7;
+}
+message SaveDietaryProfileResponse {
+  int32 code = 1;
+  string message = 2;
+  FamilyDietaryProfileInfo profile = 3;
 }
 
 // ========== Meal Plan ==========

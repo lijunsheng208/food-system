@@ -15,15 +15,16 @@ const (
 	FamilyCodeSuccess = 0
 
 	// 家庭业务错误（对齐文档 2001-2009）
-	FamilyCodeNotFound       = 2001
-	FamilyCodeAlreadyIn      = 2002
-	FamilyCodeNotIn          = 2003
-	FamilyCodeNoPermission   = 2004
-	FamilyCodeInvalidCode    = 2005
-	FamilyCodeFull           = 2006
-	FamilyCodeCannotOpOwner  = 2007
-	FamilyCodeInvalidName    = 2008
-	FamilyCodeMemberNotFound = 2009
+	FamilyCodeNotFound              = 2001
+	FamilyCodeAlreadyIn             = 2002
+	FamilyCodeNotIn                 = 2003
+	FamilyCodeNoPermission          = 2004
+	FamilyCodeInvalidCode           = 2005
+	FamilyCodeFull                  = 2006
+	FamilyCodeCannotOpOwner         = 2007
+	FamilyCodeInvalidName           = 2008
+	FamilyCodeMemberNotFound        = 2009
+	FamilyCodeInvalidDietaryProfile = 2010
 
 	MealPlanCodeInvalidDate     = 2101
 	MealPlanCodeInvalidType     = 2102
@@ -214,6 +215,37 @@ func (s *FamilyServer) ListMembers(ctx context.Context, req *familyv1.ListMember
 		Message: "查询成功",
 		Members: infos,
 	}, nil
+}
+
+// GetDietaryProfile 查询家庭饮食档案。
+func (s *FamilyServer) GetDietaryProfile(ctx context.Context, req *familyv1.GetDietaryProfileRequest) (*familyv1.GetDietaryProfileResponse, error) {
+	profile, err := s.svc.GetDietaryProfile(ctx, uint64(req.GetUserId()), uint64(req.GetFamilyId()))
+	if err != nil {
+		return &familyv1.GetDietaryProfileResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	response := &familyv1.GetDietaryProfileResponse{Code: FamilyCodeSuccess, Message: "查询成功"}
+	if profile != nil {
+		response.Profile = toFamilyDietaryProfileInfo(profile)
+	}
+	return response, nil
+}
+
+// SaveDietaryProfile 保存家庭饮食档案。
+func (s *FamilyServer) SaveDietaryProfile(ctx context.Context, req *familyv1.SaveDietaryProfileRequest) (*familyv1.SaveDietaryProfileResponse, error) {
+	profile := model.FamilyDietaryProfile{BudgetPeriod: int8(req.GetBudgetPeriod()), BudgetCurrency: req.GetBudgetCurrency(), Notes: req.GetNotes()}
+	if req.BudgetMin != nil {
+		value := req.GetBudgetMin()
+		profile.BudgetMin = &value
+	}
+	if req.BudgetMax != nil {
+		value := req.GetBudgetMax()
+		profile.BudgetMax = &value
+	}
+	saved, err := s.svc.SaveDietaryProfile(ctx, uint64(req.GetUserId()), uint64(req.GetFamilyId()), profile)
+	if err != nil {
+		return &familyv1.SaveDietaryProfileResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.SaveDietaryProfileResponse{Code: FamilyCodeSuccess, Message: "保存成功", Profile: toFamilyDietaryProfileInfo(saved)}, nil
 }
 
 // ─── UpdateMember ────────────────────────────────────────────
@@ -457,6 +489,8 @@ func mapFamilyErrorCode(err error) int32 {
 		return FamilyCodeAlreadyIn
 	case errors.Is(err, service.ErrUserNotInFamily):
 		return FamilyCodeNotIn
+	case errors.Is(err, service.ErrInvalidDietaryProfile):
+		return FamilyCodeInvalidDietaryProfile
 	case errors.Is(err, service.ErrNoFamilyPermission):
 		return FamilyCodeNoPermission
 	case errors.Is(err, service.ErrInvalidInviteCode):
@@ -490,6 +524,20 @@ func mapFamilyErrorCode(err error) int32 {
 	default:
 		return CodeInternalError
 	}
+}
+
+// toFamilyDietaryProfileInfo 将家庭饮食档案转换为 Proto 响应。
+func toFamilyDietaryProfileInfo(profile *model.FamilyDietaryProfile) *familyv1.FamilyDietaryProfileInfo {
+	info := &familyv1.FamilyDietaryProfileInfo{Id: int64(profile.ID), FamilyId: int64(profile.FamilyID), BudgetCurrency: profile.BudgetCurrency, BudgetPeriod: int32(profile.BudgetPeriod), Notes: profile.Notes, UpdatedBy: int64(profile.UpdatedBy), CreatedAt: profile.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: profile.UpdatedAt.Format("2006-01-02 15:04:05")}
+	if profile.BudgetMin != nil {
+		value := *profile.BudgetMin
+		info.BudgetMin = &value
+	}
+	if profile.BudgetMax != nil {
+		value := *profile.BudgetMax
+		info.BudgetMax = &value
+	}
+	return info
 }
 
 // mapShoppingErrorCode 将购物清单错误转换为对外业务码。

@@ -115,6 +115,8 @@ func main() {
 			family.POST("/shopping-list-items", familyHandler.AddManualShoppingItem)
 			family.DELETE("/shopping-list-items/:id", familyHandler.DeleteShoppingItem)
 			family.GET("/my", familyHandler.GetMyFamily)
+			family.GET("/:family_id/dietary-profile", familyHandler.GetDietaryProfile)
+			family.PUT("/:family_id/dietary-profile", familyHandler.SaveDietaryProfile)
 			family.POST("/meal-plans", familyHandler.CreateMealPlan)
 			family.GET("/:family_id/meal-plans", familyHandler.ListMealPlans)
 			family.PATCH("/meal-plans/:id", familyHandler.UpdateMealPlan)

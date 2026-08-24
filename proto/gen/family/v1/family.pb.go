@@ -1169,6 +1169,386 @@ func (x *ResetInviteCodeResponse) GetInviteCodeExpiredAt() string {
 	return ""
 }
 
+type FamilyDietaryProfileInfo struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	FamilyId       int64                  `protobuf:"varint,2,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	BudgetMin      *float64               `protobuf:"fixed64,3,opt,name=budget_min,json=budgetMin,proto3,oneof" json:"budget_min,omitempty"`
+	BudgetMax      *float64               `protobuf:"fixed64,4,opt,name=budget_max,json=budgetMax,proto3,oneof" json:"budget_max,omitempty"`
+	BudgetCurrency string                 `protobuf:"bytes,5,opt,name=budget_currency,json=budgetCurrency,proto3" json:"budget_currency,omitempty"`
+	BudgetPeriod   int32                  `protobuf:"varint,6,opt,name=budget_period,json=budgetPeriod,proto3" json:"budget_period,omitempty"`
+	Notes          string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
+	UpdatedBy      int64                  `protobuf:"varint,8,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	CreatedAt      string                 `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt      string                 `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *FamilyDietaryProfileInfo) Reset() {
+	*x = FamilyDietaryProfileInfo{}
+	mi := &file_family_v1_family_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FamilyDietaryProfileInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FamilyDietaryProfileInfo) ProtoMessage() {}
+
+func (x *FamilyDietaryProfileInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FamilyDietaryProfileInfo.ProtoReflect.Descriptor instead.
+func (*FamilyDietaryProfileInfo) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *FamilyDietaryProfileInfo) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetBudgetMin() float64 {
+	if x != nil && x.BudgetMin != nil {
+		return *x.BudgetMin
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetBudgetMax() float64 {
+	if x != nil && x.BudgetMax != nil {
+		return *x.BudgetMax
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetBudgetCurrency() string {
+	if x != nil {
+		return x.BudgetCurrency
+	}
+	return ""
+}
+
+func (x *FamilyDietaryProfileInfo) GetBudgetPeriod() int32 {
+	if x != nil {
+		return x.BudgetPeriod
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetNotes() string {
+	if x != nil {
+		return x.Notes
+	}
+	return ""
+}
+
+func (x *FamilyDietaryProfileInfo) GetUpdatedBy() int64 {
+	if x != nil {
+		return x.UpdatedBy
+	}
+	return 0
+}
+
+func (x *FamilyDietaryProfileInfo) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *FamilyDietaryProfileInfo) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+type GetDietaryProfileRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FamilyId      int64                  `protobuf:"varint,1,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDietaryProfileRequest) Reset() {
+	*x = GetDietaryProfileRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDietaryProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDietaryProfileRequest) ProtoMessage() {}
+
+func (x *GetDietaryProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDietaryProfileRequest.ProtoReflect.Descriptor instead.
+func (*GetDietaryProfileRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *GetDietaryProfileRequest) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *GetDietaryProfileRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetDietaryProfileResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Code          int32                     `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                    `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Profile       *FamilyDietaryProfileInfo `protobuf:"bytes,3,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDietaryProfileResponse) Reset() {
+	*x = GetDietaryProfileResponse{}
+	mi := &file_family_v1_family_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDietaryProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDietaryProfileResponse) ProtoMessage() {}
+
+func (x *GetDietaryProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDietaryProfileResponse.ProtoReflect.Descriptor instead.
+func (*GetDietaryProfileResponse) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetDietaryProfileResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *GetDietaryProfileResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *GetDietaryProfileResponse) GetProfile() *FamilyDietaryProfileInfo {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type SaveDietaryProfileRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	FamilyId       int64                  `protobuf:"varint,1,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
+	UserId         int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	BudgetMin      *float64               `protobuf:"fixed64,3,opt,name=budget_min,json=budgetMin,proto3,oneof" json:"budget_min,omitempty"`
+	BudgetMax      *float64               `protobuf:"fixed64,4,opt,name=budget_max,json=budgetMax,proto3,oneof" json:"budget_max,omitempty"`
+	BudgetCurrency string                 `protobuf:"bytes,5,opt,name=budget_currency,json=budgetCurrency,proto3" json:"budget_currency,omitempty"`
+	BudgetPeriod   int32                  `protobuf:"varint,6,opt,name=budget_period,json=budgetPeriod,proto3" json:"budget_period,omitempty"`
+	Notes          string                 `protobuf:"bytes,7,opt,name=notes,proto3" json:"notes,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *SaveDietaryProfileRequest) Reset() {
+	*x = SaveDietaryProfileRequest{}
+	mi := &file_family_v1_family_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveDietaryProfileRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveDietaryProfileRequest) ProtoMessage() {}
+
+func (x *SaveDietaryProfileRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveDietaryProfileRequest.ProtoReflect.Descriptor instead.
+func (*SaveDietaryProfileRequest) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *SaveDietaryProfileRequest) GetFamilyId() int64 {
+	if x != nil {
+		return x.FamilyId
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileRequest) GetBudgetMin() float64 {
+	if x != nil && x.BudgetMin != nil {
+		return *x.BudgetMin
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileRequest) GetBudgetMax() float64 {
+	if x != nil && x.BudgetMax != nil {
+		return *x.BudgetMax
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileRequest) GetBudgetCurrency() string {
+	if x != nil {
+		return x.BudgetCurrency
+	}
+	return ""
+}
+
+func (x *SaveDietaryProfileRequest) GetBudgetPeriod() int32 {
+	if x != nil {
+		return x.BudgetPeriod
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileRequest) GetNotes() string {
+	if x != nil {
+		return x.Notes
+	}
+	return ""
+}
+
+type SaveDietaryProfileResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Code          int32                     `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                    `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Profile       *FamilyDietaryProfileInfo `protobuf:"bytes,3,opt,name=profile,proto3" json:"profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SaveDietaryProfileResponse) Reset() {
+	*x = SaveDietaryProfileResponse{}
+	mi := &file_family_v1_family_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SaveDietaryProfileResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SaveDietaryProfileResponse) ProtoMessage() {}
+
+func (x *SaveDietaryProfileResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_family_v1_family_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SaveDietaryProfileResponse.ProtoReflect.Descriptor instead.
+func (*SaveDietaryProfileResponse) Descriptor() ([]byte, []int) {
+	return file_family_v1_family_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *SaveDietaryProfileResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *SaveDietaryProfileResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *SaveDietaryProfileResponse) GetProfile() *FamilyDietaryProfileInfo {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
 type CreateMealPlanRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	FamilyId      int64                  `protobuf:"varint,1,opt,name=family_id,json=familyId,proto3" json:"family_id,omitempty"`
@@ -1184,7 +1564,7 @@ type CreateMealPlanRequest struct {
 
 func (x *CreateMealPlanRequest) Reset() {
 	*x = CreateMealPlanRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[17]
+	mi := &file_family_v1_family_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1196,7 +1576,7 @@ func (x *CreateMealPlanRequest) String() string {
 func (*CreateMealPlanRequest) ProtoMessage() {}
 
 func (x *CreateMealPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[17]
+	mi := &file_family_v1_family_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1209,7 +1589,7 @@ func (x *CreateMealPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMealPlanRequest.ProtoReflect.Descriptor instead.
 func (*CreateMealPlanRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{17}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateMealPlanRequest) GetFamilyId() int64 {
@@ -1283,7 +1663,7 @@ type FamilyMealPlanInfo struct {
 
 func (x *FamilyMealPlanInfo) Reset() {
 	*x = FamilyMealPlanInfo{}
-	mi := &file_family_v1_family_proto_msgTypes[18]
+	mi := &file_family_v1_family_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1295,7 +1675,7 @@ func (x *FamilyMealPlanInfo) String() string {
 func (*FamilyMealPlanInfo) ProtoMessage() {}
 
 func (x *FamilyMealPlanInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[18]
+	mi := &file_family_v1_family_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1308,7 +1688,7 @@ func (x *FamilyMealPlanInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FamilyMealPlanInfo.ProtoReflect.Descriptor instead.
 func (*FamilyMealPlanInfo) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{18}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *FamilyMealPlanInfo) GetId() int64 {
@@ -1420,7 +1800,7 @@ type CreateMealPlanResponse struct {
 
 func (x *CreateMealPlanResponse) Reset() {
 	*x = CreateMealPlanResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[19]
+	mi := &file_family_v1_family_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1432,7 +1812,7 @@ func (x *CreateMealPlanResponse) String() string {
 func (*CreateMealPlanResponse) ProtoMessage() {}
 
 func (x *CreateMealPlanResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[19]
+	mi := &file_family_v1_family_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1445,7 +1825,7 @@ func (x *CreateMealPlanResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMealPlanResponse.ProtoReflect.Descriptor instead.
 func (*CreateMealPlanResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{19}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CreateMealPlanResponse) GetCode() int32 {
@@ -1481,7 +1861,7 @@ type ListMealPlansRequest struct {
 
 func (x *ListMealPlansRequest) Reset() {
 	*x = ListMealPlansRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[20]
+	mi := &file_family_v1_family_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1493,7 +1873,7 @@ func (x *ListMealPlansRequest) String() string {
 func (*ListMealPlansRequest) ProtoMessage() {}
 
 func (x *ListMealPlansRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[20]
+	mi := &file_family_v1_family_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1506,7 +1886,7 @@ func (x *ListMealPlansRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMealPlansRequest.ProtoReflect.Descriptor instead.
 func (*ListMealPlansRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{20}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListMealPlansRequest) GetFamilyId() int64 {
@@ -1548,7 +1928,7 @@ type ListMealPlansResponse struct {
 
 func (x *ListMealPlansResponse) Reset() {
 	*x = ListMealPlansResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[21]
+	mi := &file_family_v1_family_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1560,7 +1940,7 @@ func (x *ListMealPlansResponse) String() string {
 func (*ListMealPlansResponse) ProtoMessage() {}
 
 func (x *ListMealPlansResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[21]
+	mi := &file_family_v1_family_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1573,7 +1953,7 @@ func (x *ListMealPlansResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMealPlansResponse.ProtoReflect.Descriptor instead.
 func (*ListMealPlansResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{21}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ListMealPlansResponse) GetCode() int32 {
@@ -1611,7 +1991,7 @@ type UpdateMealPlanRequest struct {
 
 func (x *UpdateMealPlanRequest) Reset() {
 	*x = UpdateMealPlanRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[22]
+	mi := &file_family_v1_family_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1623,7 +2003,7 @@ func (x *UpdateMealPlanRequest) String() string {
 func (*UpdateMealPlanRequest) ProtoMessage() {}
 
 func (x *UpdateMealPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[22]
+	mi := &file_family_v1_family_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1636,7 +2016,7 @@ func (x *UpdateMealPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMealPlanRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMealPlanRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{22}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *UpdateMealPlanRequest) GetId() int64 {
@@ -1691,7 +2071,7 @@ type DeleteMealPlanRequest struct {
 
 func (x *DeleteMealPlanRequest) Reset() {
 	*x = DeleteMealPlanRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[23]
+	mi := &file_family_v1_family_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1703,7 +2083,7 @@ func (x *DeleteMealPlanRequest) String() string {
 func (*DeleteMealPlanRequest) ProtoMessage() {}
 
 func (x *DeleteMealPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[23]
+	mi := &file_family_v1_family_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1716,7 +2096,7 @@ func (x *DeleteMealPlanRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteMealPlanRequest.ProtoReflect.Descriptor instead.
 func (*DeleteMealPlanRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{23}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *DeleteMealPlanRequest) GetId() int64 {
@@ -1750,7 +2130,7 @@ type ShoppingListInfo struct {
 
 func (x *ShoppingListInfo) Reset() {
 	*x = ShoppingListInfo{}
-	mi := &file_family_v1_family_proto_msgTypes[24]
+	mi := &file_family_v1_family_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1762,7 +2142,7 @@ func (x *ShoppingListInfo) String() string {
 func (*ShoppingListInfo) ProtoMessage() {}
 
 func (x *ShoppingListInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[24]
+	mi := &file_family_v1_family_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1775,7 +2155,7 @@ func (x *ShoppingListInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShoppingListInfo.ProtoReflect.Descriptor instead.
 func (*ShoppingListInfo) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{24}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ShoppingListInfo) GetId() int64 {
@@ -1861,7 +2241,7 @@ type ShoppingItemInfo struct {
 
 func (x *ShoppingItemInfo) Reset() {
 	*x = ShoppingItemInfo{}
-	mi := &file_family_v1_family_proto_msgTypes[25]
+	mi := &file_family_v1_family_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1873,7 +2253,7 @@ func (x *ShoppingItemInfo) String() string {
 func (*ShoppingItemInfo) ProtoMessage() {}
 
 func (x *ShoppingItemInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[25]
+	mi := &file_family_v1_family_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1886,7 +2266,7 @@ func (x *ShoppingItemInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShoppingItemInfo.ProtoReflect.Descriptor instead.
 func (*ShoppingItemInfo) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{25}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ShoppingItemInfo) GetId() int64 {
@@ -1985,7 +2365,7 @@ type ShoppingListResponse struct {
 
 func (x *ShoppingListResponse) Reset() {
 	*x = ShoppingListResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[26]
+	mi := &file_family_v1_family_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1997,7 +2377,7 @@ func (x *ShoppingListResponse) String() string {
 func (*ShoppingListResponse) ProtoMessage() {}
 
 func (x *ShoppingListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[26]
+	mi := &file_family_v1_family_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2010,7 +2390,7 @@ func (x *ShoppingListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShoppingListResponse.ProtoReflect.Descriptor instead.
 func (*ShoppingListResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{26}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ShoppingListResponse) GetCode() int32 {
@@ -2052,7 +2432,7 @@ type ShoppingListsResponse struct {
 
 func (x *ShoppingListsResponse) Reset() {
 	*x = ShoppingListsResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[27]
+	mi := &file_family_v1_family_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2064,7 +2444,7 @@ func (x *ShoppingListsResponse) String() string {
 func (*ShoppingListsResponse) ProtoMessage() {}
 
 func (x *ShoppingListsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[27]
+	mi := &file_family_v1_family_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2077,7 +2457,7 @@ func (x *ShoppingListsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShoppingListsResponse.ProtoReflect.Descriptor instead.
 func (*ShoppingListsResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{27}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ShoppingListsResponse) GetCode() int32 {
@@ -2114,7 +2494,7 @@ type GenerateShoppingListRequest struct {
 
 func (x *GenerateShoppingListRequest) Reset() {
 	*x = GenerateShoppingListRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[28]
+	mi := &file_family_v1_family_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2126,7 +2506,7 @@ func (x *GenerateShoppingListRequest) String() string {
 func (*GenerateShoppingListRequest) ProtoMessage() {}
 
 func (x *GenerateShoppingListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[28]
+	mi := &file_family_v1_family_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2139,7 +2519,7 @@ func (x *GenerateShoppingListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateShoppingListRequest.ProtoReflect.Descriptor instead.
 func (*GenerateShoppingListRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{28}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GenerateShoppingListRequest) GetFamilyId() int64 {
@@ -2187,7 +2567,7 @@ type ListShoppingListsRequest struct {
 
 func (x *ListShoppingListsRequest) Reset() {
 	*x = ListShoppingListsRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[29]
+	mi := &file_family_v1_family_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2199,7 +2579,7 @@ func (x *ListShoppingListsRequest) String() string {
 func (*ListShoppingListsRequest) ProtoMessage() {}
 
 func (x *ListShoppingListsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[29]
+	mi := &file_family_v1_family_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2212,7 +2592,7 @@ func (x *ListShoppingListsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListShoppingListsRequest.ProtoReflect.Descriptor instead.
 func (*ListShoppingListsRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{29}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListShoppingListsRequest) GetFamilyId() int64 {
@@ -2239,7 +2619,7 @@ type GetShoppingListRequest struct {
 
 func (x *GetShoppingListRequest) Reset() {
 	*x = GetShoppingListRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[30]
+	mi := &file_family_v1_family_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2251,7 +2631,7 @@ func (x *GetShoppingListRequest) String() string {
 func (*GetShoppingListRequest) ProtoMessage() {}
 
 func (x *GetShoppingListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[30]
+	mi := &file_family_v1_family_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2264,7 +2644,7 @@ func (x *GetShoppingListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetShoppingListRequest.ProtoReflect.Descriptor instead.
 func (*GetShoppingListRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{30}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *GetShoppingListRequest) GetId() int64 {
@@ -2293,7 +2673,7 @@ type UpdateShoppingItemPurchasedRequest struct {
 
 func (x *UpdateShoppingItemPurchasedRequest) Reset() {
 	*x = UpdateShoppingItemPurchasedRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[31]
+	mi := &file_family_v1_family_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2305,7 +2685,7 @@ func (x *UpdateShoppingItemPurchasedRequest) String() string {
 func (*UpdateShoppingItemPurchasedRequest) ProtoMessage() {}
 
 func (x *UpdateShoppingItemPurchasedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[31]
+	mi := &file_family_v1_family_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2318,7 +2698,7 @@ func (x *UpdateShoppingItemPurchasedRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use UpdateShoppingItemPurchasedRequest.ProtoReflect.Descriptor instead.
 func (*UpdateShoppingItemPurchasedRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{31}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UpdateShoppingItemPurchasedRequest) GetItemId() int64 {
@@ -2363,7 +2743,7 @@ type AddManualShoppingItemRequest struct {
 
 func (x *AddManualShoppingItemRequest) Reset() {
 	*x = AddManualShoppingItemRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[32]
+	mi := &file_family_v1_family_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2375,7 +2755,7 @@ func (x *AddManualShoppingItemRequest) String() string {
 func (*AddManualShoppingItemRequest) ProtoMessage() {}
 
 func (x *AddManualShoppingItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[32]
+	mi := &file_family_v1_family_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2388,7 +2768,7 @@ func (x *AddManualShoppingItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddManualShoppingItemRequest.ProtoReflect.Descriptor instead.
 func (*AddManualShoppingItemRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{32}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *AddManualShoppingItemRequest) GetShoppingListId() int64 {
@@ -2444,7 +2824,7 @@ type ShoppingItemResponse struct {
 
 func (x *ShoppingItemResponse) Reset() {
 	*x = ShoppingItemResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[33]
+	mi := &file_family_v1_family_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2456,7 +2836,7 @@ func (x *ShoppingItemResponse) String() string {
 func (*ShoppingItemResponse) ProtoMessage() {}
 
 func (x *ShoppingItemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[33]
+	mi := &file_family_v1_family_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2469,7 +2849,7 @@ func (x *ShoppingItemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ShoppingItemResponse.ProtoReflect.Descriptor instead.
 func (*ShoppingItemResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{33}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ShoppingItemResponse) GetCode() int32 {
@@ -2503,7 +2883,7 @@ type DeleteShoppingItemRequest struct {
 
 func (x *DeleteShoppingItemRequest) Reset() {
 	*x = DeleteShoppingItemRequest{}
-	mi := &file_family_v1_family_proto_msgTypes[34]
+	mi := &file_family_v1_family_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2515,7 +2895,7 @@ func (x *DeleteShoppingItemRequest) String() string {
 func (*DeleteShoppingItemRequest) ProtoMessage() {}
 
 func (x *DeleteShoppingItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[34]
+	mi := &file_family_v1_family_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2528,7 +2908,7 @@ func (x *DeleteShoppingItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteShoppingItemRequest.ProtoReflect.Descriptor instead.
 func (*DeleteShoppingItemRequest) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{34}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *DeleteShoppingItemRequest) GetItemId() int64 {
@@ -2555,7 +2935,7 @@ type CommonResponse struct {
 
 func (x *CommonResponse) Reset() {
 	*x = CommonResponse{}
-	mi := &file_family_v1_family_proto_msgTypes[35]
+	mi := &file_family_v1_family_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2567,7 +2947,7 @@ func (x *CommonResponse) String() string {
 func (*CommonResponse) ProtoMessage() {}
 
 func (x *CommonResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_family_v1_family_proto_msgTypes[35]
+	mi := &file_family_v1_family_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2580,7 +2960,7 @@ func (x *CommonResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommonResponse.ProtoReflect.Descriptor instead.
 func (*CommonResponse) Descriptor() ([]byte, []int) {
-	return file_family_v1_family_proto_rawDescGZIP(), []int{35}
+	return file_family_v1_family_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *CommonResponse) GetCode() int32 {
@@ -2693,7 +3073,49 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
 	"\vinvite_code\x18\x03 \x01(\tR\n" +
 	"inviteCode\x123\n" +
-	"\x16invite_code_expired_at\x18\x04 \x01(\tR\x13inviteCodeExpiredAt\"\xfa\x01\n" +
+	"\x16invite_code_expired_at\x18\x04 \x01(\tR\x13inviteCodeExpiredAt\"\xee\x02\n" +
+	"\x18FamilyDietaryProfileInfo\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
+	"\tfamily_id\x18\x02 \x01(\x03R\bfamilyId\x12\"\n" +
+	"\n" +
+	"budget_min\x18\x03 \x01(\x01H\x00R\tbudgetMin\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"budget_max\x18\x04 \x01(\x01H\x01R\tbudgetMax\x88\x01\x01\x12'\n" +
+	"\x0fbudget_currency\x18\x05 \x01(\tR\x0ebudgetCurrency\x12#\n" +
+	"\rbudget_period\x18\x06 \x01(\x05R\fbudgetPeriod\x12\x14\n" +
+	"\x05notes\x18\a \x01(\tR\x05notes\x12\x1d\n" +
+	"\n" +
+	"updated_by\x18\b \x01(\x03R\tupdatedBy\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\t \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\n" +
+	" \x01(\tR\tupdatedAtB\r\n" +
+	"\v_budget_minB\r\n" +
+	"\v_budget_max\"P\n" +
+	"\x18GetDietaryProfileRequest\x12\x1b\n" +
+	"\tfamily_id\x18\x01 \x01(\x03R\bfamilyId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x88\x01\n" +
+	"\x19GetDietaryProfileResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12=\n" +
+	"\aprofile\x18\x03 \x01(\v2#.family.v1.FamilyDietaryProfileInfoR\aprofile\"\x9b\x02\n" +
+	"\x19SaveDietaryProfileRequest\x12\x1b\n" +
+	"\tfamily_id\x18\x01 \x01(\x03R\bfamilyId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\"\n" +
+	"\n" +
+	"budget_min\x18\x03 \x01(\x01H\x00R\tbudgetMin\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"budget_max\x18\x04 \x01(\x01H\x01R\tbudgetMax\x88\x01\x01\x12'\n" +
+	"\x0fbudget_currency\x18\x05 \x01(\tR\x0ebudgetCurrency\x12#\n" +
+	"\rbudget_period\x18\x06 \x01(\x05R\fbudgetPeriod\x12\x14\n" +
+	"\x05notes\x18\a \x01(\tR\x05notesB\r\n" +
+	"\v_budget_minB\r\n" +
+	"\v_budget_max\"\x89\x01\n" +
+	"\x1aSaveDietaryProfileResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12=\n" +
+	"\aprofile\x18\x03 \x01(\v2#.family.v1.FamilyDietaryProfileInfoR\aprofile\"\xfa\x01\n" +
 	"\x15CreateMealPlanRequest\x12\x1b\n" +
 	"\tfamily_id\x18\x01 \x01(\x03R\bfamilyId\x12\x17\n" +
 	"\adish_id\x18\x02 \x01(\x03R\x06dishId\x12\x1b\n" +
@@ -2835,7 +3257,7 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\">\n" +
 	"\x0eCommonResponse\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xa2\r\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xe5\x0e\n" +
 	"\rFamilyService\x12L\n" +
 	"\vGetMyFamily\x12\x1d.family.v1.GetMyFamilyRequest\x1a\x1e.family.v1.GetMyFamilyResponse\x12O\n" +
 	"\fCreateFamily\x12\x1e.family.v1.CreateFamilyRequest\x1a\x1f.family.v1.CreateFamilyResponse\x12I\n" +
@@ -2847,7 +3269,9 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\vListMembers\x12\x1d.family.v1.ListMembersRequest\x1a\x1e.family.v1.ListMembersResponse\x12I\n" +
 	"\fUpdateMember\x12\x1e.family.v1.UpdateMemberRequest\x1a\x19.family.v1.CommonResponse\x12I\n" +
 	"\fRemoveMember\x12\x1e.family.v1.RemoveMemberRequest\x1a\x19.family.v1.CommonResponse\x12X\n" +
-	"\x0fResetInviteCode\x12!.family.v1.ResetInviteCodeRequest\x1a\".family.v1.ResetInviteCodeResponse\x12U\n" +
+	"\x0fResetInviteCode\x12!.family.v1.ResetInviteCodeRequest\x1a\".family.v1.ResetInviteCodeResponse\x12^\n" +
+	"\x11GetDietaryProfile\x12#.family.v1.GetDietaryProfileRequest\x1a$.family.v1.GetDietaryProfileResponse\x12a\n" +
+	"\x12SaveDietaryProfile\x12$.family.v1.SaveDietaryProfileRequest\x1a%.family.v1.SaveDietaryProfileResponse\x12U\n" +
 	"\x0eCreateMealPlan\x12 .family.v1.CreateMealPlanRequest\x1a!.family.v1.CreateMealPlanResponse\x12R\n" +
 	"\rListMealPlans\x12\x1f.family.v1.ListMealPlansRequest\x1a .family.v1.ListMealPlansResponse\x12U\n" +
 	"\x0eUpdateMealPlan\x12 .family.v1.UpdateMealPlanRequest\x1a!.family.v1.CreateMealPlanResponse\x12M\n" +
@@ -2871,7 +3295,7 @@ func file_family_v1_family_proto_rawDescGZIP() []byte {
 	return file_family_v1_family_proto_rawDescData
 }
 
-var file_family_v1_family_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_family_v1_family_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_family_v1_family_proto_goTypes = []any{
 	(*FamilyInfo)(nil),                         // 0: family.v1.FamilyInfo
 	(*GetMyFamilyRequest)(nil),                 // 1: family.v1.GetMyFamilyRequest
@@ -2890,80 +3314,91 @@ var file_family_v1_family_proto_goTypes = []any{
 	(*DissolveFamilyRequest)(nil),              // 14: family.v1.DissolveFamilyRequest
 	(*ResetInviteCodeRequest)(nil),             // 15: family.v1.ResetInviteCodeRequest
 	(*ResetInviteCodeResponse)(nil),            // 16: family.v1.ResetInviteCodeResponse
-	(*CreateMealPlanRequest)(nil),              // 17: family.v1.CreateMealPlanRequest
-	(*FamilyMealPlanInfo)(nil),                 // 18: family.v1.FamilyMealPlanInfo
-	(*CreateMealPlanResponse)(nil),             // 19: family.v1.CreateMealPlanResponse
-	(*ListMealPlansRequest)(nil),               // 20: family.v1.ListMealPlansRequest
-	(*ListMealPlansResponse)(nil),              // 21: family.v1.ListMealPlansResponse
-	(*UpdateMealPlanRequest)(nil),              // 22: family.v1.UpdateMealPlanRequest
-	(*DeleteMealPlanRequest)(nil),              // 23: family.v1.DeleteMealPlanRequest
-	(*ShoppingListInfo)(nil),                   // 24: family.v1.ShoppingListInfo
-	(*ShoppingItemInfo)(nil),                   // 25: family.v1.ShoppingItemInfo
-	(*ShoppingListResponse)(nil),               // 26: family.v1.ShoppingListResponse
-	(*ShoppingListsResponse)(nil),              // 27: family.v1.ShoppingListsResponse
-	(*GenerateShoppingListRequest)(nil),        // 28: family.v1.GenerateShoppingListRequest
-	(*ListShoppingListsRequest)(nil),           // 29: family.v1.ListShoppingListsRequest
-	(*GetShoppingListRequest)(nil),             // 30: family.v1.GetShoppingListRequest
-	(*UpdateShoppingItemPurchasedRequest)(nil), // 31: family.v1.UpdateShoppingItemPurchasedRequest
-	(*AddManualShoppingItemRequest)(nil),       // 32: family.v1.AddManualShoppingItemRequest
-	(*ShoppingItemResponse)(nil),               // 33: family.v1.ShoppingItemResponse
-	(*DeleteShoppingItemRequest)(nil),          // 34: family.v1.DeleteShoppingItemRequest
-	(*CommonResponse)(nil),                     // 35: family.v1.CommonResponse
+	(*FamilyDietaryProfileInfo)(nil),           // 17: family.v1.FamilyDietaryProfileInfo
+	(*GetDietaryProfileRequest)(nil),           // 18: family.v1.GetDietaryProfileRequest
+	(*GetDietaryProfileResponse)(nil),          // 19: family.v1.GetDietaryProfileResponse
+	(*SaveDietaryProfileRequest)(nil),          // 20: family.v1.SaveDietaryProfileRequest
+	(*SaveDietaryProfileResponse)(nil),         // 21: family.v1.SaveDietaryProfileResponse
+	(*CreateMealPlanRequest)(nil),              // 22: family.v1.CreateMealPlanRequest
+	(*FamilyMealPlanInfo)(nil),                 // 23: family.v1.FamilyMealPlanInfo
+	(*CreateMealPlanResponse)(nil),             // 24: family.v1.CreateMealPlanResponse
+	(*ListMealPlansRequest)(nil),               // 25: family.v1.ListMealPlansRequest
+	(*ListMealPlansResponse)(nil),              // 26: family.v1.ListMealPlansResponse
+	(*UpdateMealPlanRequest)(nil),              // 27: family.v1.UpdateMealPlanRequest
+	(*DeleteMealPlanRequest)(nil),              // 28: family.v1.DeleteMealPlanRequest
+	(*ShoppingListInfo)(nil),                   // 29: family.v1.ShoppingListInfo
+	(*ShoppingItemInfo)(nil),                   // 30: family.v1.ShoppingItemInfo
+	(*ShoppingListResponse)(nil),               // 31: family.v1.ShoppingListResponse
+	(*ShoppingListsResponse)(nil),              // 32: family.v1.ShoppingListsResponse
+	(*GenerateShoppingListRequest)(nil),        // 33: family.v1.GenerateShoppingListRequest
+	(*ListShoppingListsRequest)(nil),           // 34: family.v1.ListShoppingListsRequest
+	(*GetShoppingListRequest)(nil),             // 35: family.v1.GetShoppingListRequest
+	(*UpdateShoppingItemPurchasedRequest)(nil), // 36: family.v1.UpdateShoppingItemPurchasedRequest
+	(*AddManualShoppingItemRequest)(nil),       // 37: family.v1.AddManualShoppingItemRequest
+	(*ShoppingItemResponse)(nil),               // 38: family.v1.ShoppingItemResponse
+	(*DeleteShoppingItemRequest)(nil),          // 39: family.v1.DeleteShoppingItemRequest
+	(*CommonResponse)(nil),                     // 40: family.v1.CommonResponse
 }
 var file_family_v1_family_proto_depIdxs = []int32{
 	0,  // 0: family.v1.GetMyFamilyResponse.family:type_name -> family.v1.FamilyInfo
 	6,  // 1: family.v1.ListMembersResponse.members:type_name -> family.v1.FamilyMemberInfo
-	18, // 2: family.v1.CreateMealPlanResponse.meal_plan:type_name -> family.v1.FamilyMealPlanInfo
-	18, // 3: family.v1.ListMealPlansResponse.meal_plans:type_name -> family.v1.FamilyMealPlanInfo
-	24, // 4: family.v1.ShoppingListResponse.shopping_list:type_name -> family.v1.ShoppingListInfo
-	25, // 5: family.v1.ShoppingListResponse.items:type_name -> family.v1.ShoppingItemInfo
-	24, // 6: family.v1.ShoppingListsResponse.shopping_lists:type_name -> family.v1.ShoppingListInfo
-	25, // 7: family.v1.ShoppingItemResponse.item:type_name -> family.v1.ShoppingItemInfo
-	1,  // 8: family.v1.FamilyService.GetMyFamily:input_type -> family.v1.GetMyFamilyRequest
-	3,  // 9: family.v1.FamilyService.CreateFamily:input_type -> family.v1.CreateFamilyRequest
-	5,  // 10: family.v1.FamilyService.UpdateFamily:input_type -> family.v1.UpdateFamilyRequest
-	11, // 11: family.v1.FamilyService.JoinFamily:input_type -> family.v1.JoinFamilyRequest
-	13, // 12: family.v1.FamilyService.LeaveFamily:input_type -> family.v1.LeaveFamilyRequest
-	14, // 13: family.v1.FamilyService.DissolveFamily:input_type -> family.v1.DissolveFamilyRequest
-	7,  // 14: family.v1.FamilyService.ListMembers:input_type -> family.v1.ListMembersRequest
-	9,  // 15: family.v1.FamilyService.UpdateMember:input_type -> family.v1.UpdateMemberRequest
-	10, // 16: family.v1.FamilyService.RemoveMember:input_type -> family.v1.RemoveMemberRequest
-	15, // 17: family.v1.FamilyService.ResetInviteCode:input_type -> family.v1.ResetInviteCodeRequest
-	17, // 18: family.v1.FamilyService.CreateMealPlan:input_type -> family.v1.CreateMealPlanRequest
-	20, // 19: family.v1.FamilyService.ListMealPlans:input_type -> family.v1.ListMealPlansRequest
-	22, // 20: family.v1.FamilyService.UpdateMealPlan:input_type -> family.v1.UpdateMealPlanRequest
-	23, // 21: family.v1.FamilyService.DeleteMealPlan:input_type -> family.v1.DeleteMealPlanRequest
-	28, // 22: family.v1.FamilyService.GenerateShoppingList:input_type -> family.v1.GenerateShoppingListRequest
-	29, // 23: family.v1.FamilyService.ListShoppingLists:input_type -> family.v1.ListShoppingListsRequest
-	30, // 24: family.v1.FamilyService.GetShoppingList:input_type -> family.v1.GetShoppingListRequest
-	31, // 25: family.v1.FamilyService.UpdateShoppingItemPurchased:input_type -> family.v1.UpdateShoppingItemPurchasedRequest
-	32, // 26: family.v1.FamilyService.AddManualShoppingItem:input_type -> family.v1.AddManualShoppingItemRequest
-	34, // 27: family.v1.FamilyService.DeleteShoppingItem:input_type -> family.v1.DeleteShoppingItemRequest
-	2,  // 28: family.v1.FamilyService.GetMyFamily:output_type -> family.v1.GetMyFamilyResponse
-	4,  // 29: family.v1.FamilyService.CreateFamily:output_type -> family.v1.CreateFamilyResponse
-	35, // 30: family.v1.FamilyService.UpdateFamily:output_type -> family.v1.CommonResponse
-	12, // 31: family.v1.FamilyService.JoinFamily:output_type -> family.v1.JoinFamilyResponse
-	35, // 32: family.v1.FamilyService.LeaveFamily:output_type -> family.v1.CommonResponse
-	35, // 33: family.v1.FamilyService.DissolveFamily:output_type -> family.v1.CommonResponse
-	8,  // 34: family.v1.FamilyService.ListMembers:output_type -> family.v1.ListMembersResponse
-	35, // 35: family.v1.FamilyService.UpdateMember:output_type -> family.v1.CommonResponse
-	35, // 36: family.v1.FamilyService.RemoveMember:output_type -> family.v1.CommonResponse
-	16, // 37: family.v1.FamilyService.ResetInviteCode:output_type -> family.v1.ResetInviteCodeResponse
-	19, // 38: family.v1.FamilyService.CreateMealPlan:output_type -> family.v1.CreateMealPlanResponse
-	21, // 39: family.v1.FamilyService.ListMealPlans:output_type -> family.v1.ListMealPlansResponse
-	19, // 40: family.v1.FamilyService.UpdateMealPlan:output_type -> family.v1.CreateMealPlanResponse
-	35, // 41: family.v1.FamilyService.DeleteMealPlan:output_type -> family.v1.CommonResponse
-	26, // 42: family.v1.FamilyService.GenerateShoppingList:output_type -> family.v1.ShoppingListResponse
-	27, // 43: family.v1.FamilyService.ListShoppingLists:output_type -> family.v1.ShoppingListsResponse
-	26, // 44: family.v1.FamilyService.GetShoppingList:output_type -> family.v1.ShoppingListResponse
-	35, // 45: family.v1.FamilyService.UpdateShoppingItemPurchased:output_type -> family.v1.CommonResponse
-	33, // 46: family.v1.FamilyService.AddManualShoppingItem:output_type -> family.v1.ShoppingItemResponse
-	35, // 47: family.v1.FamilyService.DeleteShoppingItem:output_type -> family.v1.CommonResponse
-	28, // [28:48] is the sub-list for method output_type
-	8,  // [8:28] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	17, // 2: family.v1.GetDietaryProfileResponse.profile:type_name -> family.v1.FamilyDietaryProfileInfo
+	17, // 3: family.v1.SaveDietaryProfileResponse.profile:type_name -> family.v1.FamilyDietaryProfileInfo
+	23, // 4: family.v1.CreateMealPlanResponse.meal_plan:type_name -> family.v1.FamilyMealPlanInfo
+	23, // 5: family.v1.ListMealPlansResponse.meal_plans:type_name -> family.v1.FamilyMealPlanInfo
+	29, // 6: family.v1.ShoppingListResponse.shopping_list:type_name -> family.v1.ShoppingListInfo
+	30, // 7: family.v1.ShoppingListResponse.items:type_name -> family.v1.ShoppingItemInfo
+	29, // 8: family.v1.ShoppingListsResponse.shopping_lists:type_name -> family.v1.ShoppingListInfo
+	30, // 9: family.v1.ShoppingItemResponse.item:type_name -> family.v1.ShoppingItemInfo
+	1,  // 10: family.v1.FamilyService.GetMyFamily:input_type -> family.v1.GetMyFamilyRequest
+	3,  // 11: family.v1.FamilyService.CreateFamily:input_type -> family.v1.CreateFamilyRequest
+	5,  // 12: family.v1.FamilyService.UpdateFamily:input_type -> family.v1.UpdateFamilyRequest
+	11, // 13: family.v1.FamilyService.JoinFamily:input_type -> family.v1.JoinFamilyRequest
+	13, // 14: family.v1.FamilyService.LeaveFamily:input_type -> family.v1.LeaveFamilyRequest
+	14, // 15: family.v1.FamilyService.DissolveFamily:input_type -> family.v1.DissolveFamilyRequest
+	7,  // 16: family.v1.FamilyService.ListMembers:input_type -> family.v1.ListMembersRequest
+	9,  // 17: family.v1.FamilyService.UpdateMember:input_type -> family.v1.UpdateMemberRequest
+	10, // 18: family.v1.FamilyService.RemoveMember:input_type -> family.v1.RemoveMemberRequest
+	15, // 19: family.v1.FamilyService.ResetInviteCode:input_type -> family.v1.ResetInviteCodeRequest
+	18, // 20: family.v1.FamilyService.GetDietaryProfile:input_type -> family.v1.GetDietaryProfileRequest
+	20, // 21: family.v1.FamilyService.SaveDietaryProfile:input_type -> family.v1.SaveDietaryProfileRequest
+	22, // 22: family.v1.FamilyService.CreateMealPlan:input_type -> family.v1.CreateMealPlanRequest
+	25, // 23: family.v1.FamilyService.ListMealPlans:input_type -> family.v1.ListMealPlansRequest
+	27, // 24: family.v1.FamilyService.UpdateMealPlan:input_type -> family.v1.UpdateMealPlanRequest
+	28, // 25: family.v1.FamilyService.DeleteMealPlan:input_type -> family.v1.DeleteMealPlanRequest
+	33, // 26: family.v1.FamilyService.GenerateShoppingList:input_type -> family.v1.GenerateShoppingListRequest
+	34, // 27: family.v1.FamilyService.ListShoppingLists:input_type -> family.v1.ListShoppingListsRequest
+	35, // 28: family.v1.FamilyService.GetShoppingList:input_type -> family.v1.GetShoppingListRequest
+	36, // 29: family.v1.FamilyService.UpdateShoppingItemPurchased:input_type -> family.v1.UpdateShoppingItemPurchasedRequest
+	37, // 30: family.v1.FamilyService.AddManualShoppingItem:input_type -> family.v1.AddManualShoppingItemRequest
+	39, // 31: family.v1.FamilyService.DeleteShoppingItem:input_type -> family.v1.DeleteShoppingItemRequest
+	2,  // 32: family.v1.FamilyService.GetMyFamily:output_type -> family.v1.GetMyFamilyResponse
+	4,  // 33: family.v1.FamilyService.CreateFamily:output_type -> family.v1.CreateFamilyResponse
+	40, // 34: family.v1.FamilyService.UpdateFamily:output_type -> family.v1.CommonResponse
+	12, // 35: family.v1.FamilyService.JoinFamily:output_type -> family.v1.JoinFamilyResponse
+	40, // 36: family.v1.FamilyService.LeaveFamily:output_type -> family.v1.CommonResponse
+	40, // 37: family.v1.FamilyService.DissolveFamily:output_type -> family.v1.CommonResponse
+	8,  // 38: family.v1.FamilyService.ListMembers:output_type -> family.v1.ListMembersResponse
+	40, // 39: family.v1.FamilyService.UpdateMember:output_type -> family.v1.CommonResponse
+	40, // 40: family.v1.FamilyService.RemoveMember:output_type -> family.v1.CommonResponse
+	16, // 41: family.v1.FamilyService.ResetInviteCode:output_type -> family.v1.ResetInviteCodeResponse
+	19, // 42: family.v1.FamilyService.GetDietaryProfile:output_type -> family.v1.GetDietaryProfileResponse
+	21, // 43: family.v1.FamilyService.SaveDietaryProfile:output_type -> family.v1.SaveDietaryProfileResponse
+	24, // 44: family.v1.FamilyService.CreateMealPlan:output_type -> family.v1.CreateMealPlanResponse
+	26, // 45: family.v1.FamilyService.ListMealPlans:output_type -> family.v1.ListMealPlansResponse
+	24, // 46: family.v1.FamilyService.UpdateMealPlan:output_type -> family.v1.CreateMealPlanResponse
+	40, // 47: family.v1.FamilyService.DeleteMealPlan:output_type -> family.v1.CommonResponse
+	31, // 48: family.v1.FamilyService.GenerateShoppingList:output_type -> family.v1.ShoppingListResponse
+	32, // 49: family.v1.FamilyService.ListShoppingLists:output_type -> family.v1.ShoppingListsResponse
+	31, // 50: family.v1.FamilyService.GetShoppingList:output_type -> family.v1.ShoppingListResponse
+	40, // 51: family.v1.FamilyService.UpdateShoppingItemPurchased:output_type -> family.v1.CommonResponse
+	38, // 52: family.v1.FamilyService.AddManualShoppingItem:output_type -> family.v1.ShoppingItemResponse
+	40, // 53: family.v1.FamilyService.DeleteShoppingItem:output_type -> family.v1.CommonResponse
+	32, // [32:54] is the sub-list for method output_type
+	10, // [10:32] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_family_v1_family_proto_init() }
@@ -2972,18 +3407,20 @@ func file_family_v1_family_proto_init() {
 		return
 	}
 	file_family_v1_family_proto_msgTypes[17].OneofWrappers = []any{}
-	file_family_v1_family_proto_msgTypes[18].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[20].OneofWrappers = []any{}
 	file_family_v1_family_proto_msgTypes[22].OneofWrappers = []any{}
-	file_family_v1_family_proto_msgTypes[25].OneofWrappers = []any{}
-	file_family_v1_family_proto_msgTypes[31].OneofWrappers = []any{}
-	file_family_v1_family_proto_msgTypes[32].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[23].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[27].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[30].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[36].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[37].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_family_v1_family_proto_rawDesc), len(file_family_v1_family_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   36,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

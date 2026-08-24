@@ -13,21 +13,23 @@ import (
 
 // 家庭模块业务错误
 var (
-	ErrFamilyNotFound     = errors.New("家庭不存在")
-	ErrUserAlreadyInFamily = errors.New("用户已加入家庭")
-	ErrUserNotInFamily    = errors.New("用户未加入家庭")
-	ErrNoFamilyPermission = errors.New("无家庭操作权限")
-	ErrInvalidInviteCode  = errors.New("邀请码无效或已过期")
-	ErrFamilyFull         = errors.New("家庭成员数量已达上限")
-	ErrCannotOperateOwner = errors.New("不能操作家庭所有者")
-	ErrInvalidFamilyName  = errors.New("家庭名称不合法")
-	ErrMemberNotFound     = errors.New("成员不存在")
+	ErrFamilyNotFound        = errors.New("家庭不存在")
+	ErrUserAlreadyInFamily   = errors.New("用户已加入家庭")
+	ErrUserNotInFamily       = errors.New("用户未加入家庭")
+	ErrNoFamilyPermission    = errors.New("无家庭操作权限")
+	ErrInvalidInviteCode     = errors.New("邀请码无效或已过期")
+	ErrFamilyFull            = errors.New("家庭成员数量已达上限")
+	ErrCannotOperateOwner    = errors.New("不能操作家庭所有者")
+	ErrInvalidFamilyName     = errors.New("家庭名称不合法")
+	ErrMemberNotFound        = errors.New("成员不存在")
+	ErrInvalidDietaryProfile = errors.New("家庭饮食档案不合法")
 )
 
 // FamilyService 家庭业务逻辑
 type FamilyService struct {
-	familyRepo *repository.FamilyRepo
-	userRepo   *repository.UserRepo
+	familyRepo         *repository.FamilyRepo
+	userRepo           *repository.UserRepo
+	dietaryProfileRepo *repository.FamilyDietaryProfileRepo
 }
 
 // NewFamilyService 创建 FamilyService
@@ -36,6 +38,57 @@ func NewFamilyService(familyRepo *repository.FamilyRepo, userRepo *repository.Us
 		familyRepo: familyRepo,
 		userRepo:   userRepo,
 	}
+}
+
+// ConfigureDietaryProfile 注入家庭饮食档案仓储。
+func (s *FamilyService) ConfigureDietaryProfile(repo *repository.FamilyDietaryProfileRepo) {
+	s.dietaryProfileRepo = repo
+}
+
+// GetDietaryProfile 查询家庭饮食档案，家庭成员均可查看。
+func (s *FamilyService) GetDietaryProfile(ctx context.Context, userID, familyID uint64) (*model.FamilyDietaryProfile, error) {
+	if s.dietaryProfileRepo == nil {
+		return nil, ErrInvalidDietaryProfile
+	}
+	member, err := s.familyRepo.GetMember(ctx, familyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if member == nil {
+		return nil, ErrUserNotInFamily
+	}
+	return s.dietaryProfileRepo.GetByFamily(ctx, familyID)
+}
+
+// SaveDietaryProfile 校验并保存家庭饮食档案，仅所有者和管理员可修改。
+func (s *FamilyService) SaveDietaryProfile(ctx context.Context, userID, familyID uint64, profile model.FamilyDietaryProfile) (*model.FamilyDietaryProfile, error) {
+	if s.dietaryProfileRepo == nil {
+		return nil, ErrInvalidDietaryProfile
+	}
+	member, err := s.familyRepo.GetMember(ctx, familyID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if member == nil {
+		return nil, ErrUserNotInFamily
+	}
+	if !canManageFamily(member.Role) {
+		return nil, ErrNoFamilyPermission
+	}
+	if profile.BudgetMin != nil && *profile.BudgetMin < 0 || profile.BudgetMax != nil && *profile.BudgetMax < 0 || profile.BudgetMin != nil && profile.BudgetMax != nil && *profile.BudgetMin > *profile.BudgetMax {
+		return nil, ErrInvalidDietaryProfile
+	}
+	if profile.BudgetPeriod < model.DietaryBudgetDaily || profile.BudgetPeriod > model.DietaryBudgetMonthly || len([]rune(profile.Notes)) > 500 {
+		return nil, ErrInvalidDietaryProfile
+	}
+	profile.FamilyID, profile.UpdatedBy = familyID, userID
+	if profile.BudgetCurrency == "" {
+		profile.BudgetCurrency = "CNY"
+	}
+	if err := s.dietaryProfileRepo.Save(ctx, &profile); err != nil {
+		return nil, err
+	}
+	return s.dietaryProfileRepo.GetByFamily(ctx, familyID)
 }
 
 // ─── 查询我的家庭 ─────────────────────────────────────────────
@@ -109,18 +162,18 @@ func (s *FamilyService) CreateFamily(ctx context.Context, userID uint64, name st
 
 	// 5. 事务创建
 	family := &model.Family{
-		Name:        name,
-		Avatar:      avatar,
-		Description: description,
-		OwnerUserID: userID,
-		InviteCode:  inviteCode,
-		MemberCount: 1,
+		Name:           name,
+		Avatar:         avatar,
+		Description:    description,
+		OwnerUserID:    userID,
+		InviteCode:     inviteCode,
+		MemberCount:    1,
 		MaxMemberCount: 20,
-		Status:      model.FamilyStatusNormal,
+		Status:         model.FamilyStatusNormal,
 	}
 	member := &model.FamilyMember{
-		UserID: userID,
-		Role:   model.FamilyRoleOwner,
+		UserID:   userID,
+		Role:     model.FamilyRoleOwner,
 		JoinedAt: time.Now(),
 	}
 

@@ -29,6 +29,8 @@ const (
 	FamilyService_UpdateMember_FullMethodName                = "/family.v1.FamilyService/UpdateMember"
 	FamilyService_RemoveMember_FullMethodName                = "/family.v1.FamilyService/RemoveMember"
 	FamilyService_ResetInviteCode_FullMethodName             = "/family.v1.FamilyService/ResetInviteCode"
+	FamilyService_GetDietaryProfile_FullMethodName           = "/family.v1.FamilyService/GetDietaryProfile"
+	FamilyService_SaveDietaryProfile_FullMethodName          = "/family.v1.FamilyService/SaveDietaryProfile"
 	FamilyService_CreateMealPlan_FullMethodName              = "/family.v1.FamilyService/CreateMealPlan"
 	FamilyService_ListMealPlans_FullMethodName               = "/family.v1.FamilyService/ListMealPlans"
 	FamilyService_UpdateMealPlan_FullMethodName              = "/family.v1.FamilyService/UpdateMealPlan"
@@ -67,6 +69,10 @@ type FamilyServiceClient interface {
 	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*CommonResponse, error)
 	// ResetInviteCode 重置邀请码
 	ResetInviteCode(ctx context.Context, in *ResetInviteCodeRequest, opts ...grpc.CallOption) (*ResetInviteCodeResponse, error)
+	// GetDietaryProfile 查询家庭饮食档案
+	GetDietaryProfile(ctx context.Context, in *GetDietaryProfileRequest, opts ...grpc.CallOption) (*GetDietaryProfileResponse, error)
+	// SaveDietaryProfile 保存家庭饮食档案
+	SaveDietaryProfile(ctx context.Context, in *SaveDietaryProfileRequest, opts ...grpc.CallOption) (*SaveDietaryProfileResponse, error)
 	// CreateMealPlan 将菜谱加入家庭菜单
 	CreateMealPlan(ctx context.Context, in *CreateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error)
 	ListMealPlans(ctx context.Context, in *ListMealPlansRequest, opts ...grpc.CallOption) (*ListMealPlansResponse, error)
@@ -188,6 +194,26 @@ func (c *familyServiceClient) ResetInviteCode(ctx context.Context, in *ResetInvi
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResetInviteCodeResponse)
 	err := c.cc.Invoke(ctx, FamilyService_ResetInviteCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) GetDietaryProfile(ctx context.Context, in *GetDietaryProfileRequest, opts ...grpc.CallOption) (*GetDietaryProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDietaryProfileResponse)
+	err := c.cc.Invoke(ctx, FamilyService_GetDietaryProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) SaveDietaryProfile(ctx context.Context, in *SaveDietaryProfileRequest, opts ...grpc.CallOption) (*SaveDietaryProfileResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveDietaryProfileResponse)
+	err := c.cc.Invoke(ctx, FamilyService_SaveDietaryProfile_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -320,6 +346,10 @@ type FamilyServiceServer interface {
 	RemoveMember(context.Context, *RemoveMemberRequest) (*CommonResponse, error)
 	// ResetInviteCode 重置邀请码
 	ResetInviteCode(context.Context, *ResetInviteCodeRequest) (*ResetInviteCodeResponse, error)
+	// GetDietaryProfile 查询家庭饮食档案
+	GetDietaryProfile(context.Context, *GetDietaryProfileRequest) (*GetDietaryProfileResponse, error)
+	// SaveDietaryProfile 保存家庭饮食档案
+	SaveDietaryProfile(context.Context, *SaveDietaryProfileRequest) (*SaveDietaryProfileResponse, error)
 	// CreateMealPlan 将菜谱加入家庭菜单
 	CreateMealPlan(context.Context, *CreateMealPlanRequest) (*CreateMealPlanResponse, error)
 	ListMealPlans(context.Context, *ListMealPlansRequest) (*ListMealPlansResponse, error)
@@ -376,6 +406,12 @@ func (UnimplementedFamilyServiceServer) RemoveMember(context.Context, *RemoveMem
 }
 func (UnimplementedFamilyServiceServer) ResetInviteCode(context.Context, *ResetInviteCodeRequest) (*ResetInviteCodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ResetInviteCode not implemented")
+}
+func (UnimplementedFamilyServiceServer) GetDietaryProfile(context.Context, *GetDietaryProfileRequest) (*GetDietaryProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDietaryProfile not implemented")
+}
+func (UnimplementedFamilyServiceServer) SaveDietaryProfile(context.Context, *SaveDietaryProfileRequest) (*SaveDietaryProfileResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SaveDietaryProfile not implemented")
 }
 func (UnimplementedFamilyServiceServer) CreateMealPlan(context.Context, *CreateMealPlanRequest) (*CreateMealPlanResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateMealPlan not implemented")
@@ -608,6 +644,42 @@ func _FamilyService_ResetInviteCode_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FamilyService_GetDietaryProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDietaryProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).GetDietaryProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_GetDietaryProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).GetDietaryProfile(ctx, req.(*GetDietaryProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_SaveDietaryProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveDietaryProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).SaveDietaryProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_SaveDietaryProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).SaveDietaryProfile(ctx, req.(*SaveDietaryProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FamilyService_CreateMealPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateMealPlanRequest)
 	if err := dec(in); err != nil {
@@ -834,6 +906,14 @@ var FamilyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResetInviteCode",
 			Handler:    _FamilyService_ResetInviteCode_Handler,
+		},
+		{
+			MethodName: "GetDietaryProfile",
+			Handler:    _FamilyService_GetDietaryProfile_Handler,
+		},
+		{
+			MethodName: "SaveDietaryProfile",
+			Handler:    _FamilyService_SaveDietaryProfile_Handler,
 		},
 		{
 			MethodName: "CreateMealPlan",

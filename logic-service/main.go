@@ -63,6 +63,7 @@ func main() {
 	userRepo := repository.NewUserRepo(db)
 	dietaryPreferenceRepo := repository.NewUserDietaryPreferenceRepo(db)
 	familyRepo := repository.NewFamilyRepo(db)
+	familyDietaryProfileRepo := repository.NewFamilyDietaryProfileRepo(db)
 
 	authSvc := service.NewAuthService(userRepo, familyRepo, cfg.JWT.Secret)
 	authSvc.ConfigureDietaryPreferences(dietaryPreferenceRepo)
@@ -98,6 +99,7 @@ func main() {
 	shoppingRepo := repository.NewShoppingListRepo(db)
 	shoppingSvc := service.NewShoppingListService(shoppingRepo, familyRepo, mealPlanRepo, dishRepo)
 	familySvc := service.NewFamilyService(familyRepo, userRepo)
+	familySvc.ConfigureDietaryProfile(familyDietaryProfileRepo)
 	familyServer := server.NewFamilyServer(familySvc, mealPlanSvc, shoppingSvc)
 
 	// 4. 启动 gRPC Server
