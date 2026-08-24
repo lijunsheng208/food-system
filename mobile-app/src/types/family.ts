@@ -58,6 +58,35 @@ export interface FamilyMealPlanInfo {
   updated_at: string;
 }
 
+/** 购物清单信息 */
+export interface ShoppingListInfo {
+  id: number;
+  family_id: number;
+  created_by: number;
+  name: string;
+  start_date: string;
+  end_date: string;
+  status: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** 购物清单项目 */
+export interface ShoppingItemInfo {
+  id: number;
+  shopping_list_id: number;
+  ingredient_name: string;
+  quantity: number | null;
+  quantity_text: string;
+  unit: string;
+  purchased_quantity: number;
+  is_purchased: boolean;
+  source: 'meal_plan' | 'manual' | string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const MealTypeLabel: Record<MealType, string> = {
   1: '早餐',
   2: '午餐',

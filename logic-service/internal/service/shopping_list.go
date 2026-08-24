@@ -65,11 +65,52 @@ func (s *ShoppingListService) GenerateShoppingList(ctx context.Context, userID, 
 	if err != nil {
 		return nil, err
 	}
-	list := &model.ShoppingList{FamilyID: familyID, CreatedBy: userID, Name: name, StartDate: startDate, EndDate: endDate, Status: model.ShoppingListStatusActive}
-	if err := s.shoppingRepo.CreateWithItems(ctx, list, items); err != nil {
+	list, err := s.shoppingRepo.FindByFamilyDates(ctx, familyID, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	// 只从即将更新的目标清单继承购买进度，避免历史重复清单污染当前结果。
+	if list != nil {
+		_, previousItems, getErr := s.shoppingRepo.GetWithItems(ctx, list.ID)
+		if getErr != nil {
+			return nil, getErr
+		}
+		purchased := make(map[string]float64, len(previousItems))
+		for _, item := range previousItems {
+			if item.PurchasedQuantity > 0 || item.IsPurchased == model.ShoppingItemPurchased {
+				value := item.PurchasedQuantity
+				if value == 0 && item.IsPurchased == model.ShoppingItemPurchased && item.Quantity != nil {
+					value = *item.Quantity
+				}
+				purchased[shoppingItemKey(item.IngredientName, item.Unit)] = value
+			}
+		}
+		for index := range items {
+			if value, ok := purchased[shoppingItemKey(items[index].IngredientName, items[index].Unit)]; ok {
+				if items[index].Quantity != nil && value > *items[index].Quantity {
+					value = *items[index].Quantity
+				}
+				items[index].PurchasedQuantity = value
+				if items[index].Quantity != nil && value >= *items[index].Quantity {
+					items[index].IsPurchased = model.ShoppingItemPurchased
+				}
+			}
+		}
+	}
+	if list == nil {
+		list = &model.ShoppingList{FamilyID: familyID, CreatedBy: userID, Name: name, StartDate: startDate, EndDate: endDate, Status: model.ShoppingListStatusActive}
+		if err := s.shoppingRepo.CreateWithItems(ctx, list, items); err != nil {
+			return nil, err
+		}
+	} else if err := s.shoppingRepo.ReplaceItems(ctx, list, items); err != nil {
 		return nil, err
 	}
 	return &ShoppingListResult{List: list, Items: items}, nil
+}
+
+// shoppingItemKey 生成食材和单位匹配键，用于跨菜单数量变化继承购买进度。
+func shoppingItemKey(name, unit string) string {
+	return strings.TrimSpace(name) + "\x00" + strings.TrimSpace(unit)
 }
 
 // ListShoppingLists 查询当前用户所属家庭的购物清单。
@@ -96,7 +137,7 @@ func (s *ShoppingListService) GetShoppingList(ctx context.Context, userID, listI
 }
 
 // UpdateItemPurchased 更新清单项目的购买状态。
-func (s *ShoppingListService) UpdateItemPurchased(ctx context.Context, userID, itemID uint64, purchased bool) error {
+func (s *ShoppingListService) UpdateItemPurchased(ctx context.Context, userID, itemID uint64, purchasedQuantity float64, purchased bool) error {
 	_, familyID, err := s.shoppingRepo.GetItemOwner(ctx, itemID)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return ErrShoppingItemNotFound
@@ -107,7 +148,10 @@ func (s *ShoppingListService) UpdateItemPurchased(ctx context.Context, userID, i
 	if err := s.requireFamilyMember(ctx, userID, familyID); err != nil {
 		return err
 	}
-	if err := s.shoppingRepo.UpdateItemPurchased(ctx, itemID, purchased); errors.Is(err, gorm.ErrRecordNotFound) {
+	if purchasedQuantity < 0 {
+		return ErrInvalidShoppingItem
+	}
+	if err := s.shoppingRepo.UpdateItemPurchased(ctx, itemID, purchasedQuantity, purchased); errors.Is(err, gorm.ErrRecordNotFound) {
 		return ErrShoppingItemNotFound
 	} else {
 		return err

@@ -255,6 +255,7 @@ message ShoppingItemInfo {
   string quantity_text   = 5;
   string unit            = 6;
   bool   is_purchased    = 7;
+  double purchased_quantity = 12;
   string source          = 8;
   int32  sort_order      = 9;
   string created_at      = 10;
@@ -296,6 +297,7 @@ message UpdateShoppingItemPurchasedRequest {
   int64 item_id = 1;
   int64 user_id = 2;
   bool is_purchased = 3;
+  optional double purchased_quantity = 4;
 }
 
 message AddManualShoppingItemRequest {

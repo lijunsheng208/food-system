@@ -79,6 +79,7 @@ export type AuthStackParamList = {
     servings: number;
   };
   FamilyMealPlan: { initialDate?: string } | undefined;
+  ShoppingList: { listId?: number } | undefined;
   ProfileDetail: undefined;
   FamilyManagement: undefined;
   CreateFamily: undefined;

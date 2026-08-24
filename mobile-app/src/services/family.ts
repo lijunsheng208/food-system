@@ -12,6 +12,8 @@ import type {
   ApiResponse,
   FamilyMealPlanInfo,
   MealType,
+  ShoppingItemInfo,
+  ShoppingListInfo,
 } from '../types/family';
 
 // ─── 查询我的家庭 ────────────────────────────────────────────
@@ -188,4 +190,68 @@ export async function updateMealPlan(
 export async function deleteMealPlan(id: number) {
   const { data } = await api.delete<ApiResponse>(`/family/meal-plans/${id}`);
   if (data.code !== 0) throw new Error(data.message || '删除家庭菜单失败');
+}
+
+// generateShoppingList 根据指定日期范围内的家庭菜单生成购物清单。
+export async function generateShoppingList(params: {
+  family_id: number;
+  start_date: string;
+  end_date: string;
+  name?: string;
+}) {
+  const { data } = await api.post<ApiResponse & {
+    shopping_list: ShoppingListInfo;
+    items: ShoppingItemInfo[];
+  }>('/family/shopping-lists/generate', params);
+  if (data.code !== 0) throw new Error(data.message || '生成购物清单失败');
+  return { list: data.shopping_list, items: data.items ?? [] };
+}
+
+// listShoppingLists 查询当前家庭已有购物清单。
+export async function listShoppingLists(familyId: number) {
+  const { data } = await api.get<ApiResponse & { shopping_lists: ShoppingListInfo[] }>(
+    '/family/shopping-lists', { params: { family_id: familyId } },
+  );
+  if (data.code !== 0) throw new Error(data.message || '查询购物清单失败');
+  return data.shopping_lists ?? [];
+}
+
+// getShoppingList 查询购物清单及其项目。
+export async function getShoppingList(listId: number) {
+  const { data } = await api.get<ApiResponse & {
+    shopping_list: ShoppingListInfo;
+    items: ShoppingItemInfo[];
+  }>(`/family/shopping-lists/${listId}`);
+  if (data.code !== 0) throw new Error(data.message || '查询购物清单详情失败');
+  return { list: data.shopping_list, items: data.items ?? [] };
+}
+
+// updateShoppingItemPurchased 更新项目的已购买状态。
+export async function updateShoppingItemPurchased(itemId: number, purchasedQuantity: number, isPurchased: boolean) {
+  const { data } = await api.patch<ApiResponse>(`/family/shopping-list-items/${itemId}`, {
+    purchased_quantity: purchasedQuantity,
+    is_purchased: isPurchased,
+  });
+  if (data.code !== 0) throw new Error(data.message || '更新购买状态失败');
+}
+
+// addManualShoppingItem 添加一个手动购物项目。
+export async function addManualShoppingItem(params: {
+  shopping_list_id: number;
+  ingredient_name: string;
+  quantity?: number;
+  quantity_text?: string;
+  unit?: string;
+}) {
+  const { data } = await api.post<ApiResponse & { item: ShoppingItemInfo }>(
+    '/family/shopping-list-items', params,
+  );
+  if (data.code !== 0) throw new Error(data.message || '添加购物项目失败');
+  return data.item;
+}
+
+// deleteShoppingItem 删除购物清单项目。
+export async function deleteShoppingItem(itemId: number) {
+  const { data } = await api.delete<ApiResponse>(`/family/shopping-list-items/${itemId}`);
+  if (data.code !== 0) throw new Error(data.message || '删除购物项目失败');
 }

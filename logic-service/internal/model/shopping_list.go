@@ -20,17 +20,18 @@ func (ShoppingList) TableName() string { return "shopping_list" }
 
 // ShoppingListItem 购物清单项目模型。
 type ShoppingListItem struct {
-	ID             uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	ShoppingListID uint64    `gorm:"column:shopping_list_id;not null;index:idx_shopping_item_list_purchased,priority:1" json:"shopping_list_id"`
-	IngredientName string    `gorm:"column:ingredient_name;type:varchar(100);not null" json:"ingredient_name"`
-	Quantity       *float64  `gorm:"column:quantity;type:decimal(10,2)" json:"quantity"`
-	QuantityText   string    `gorm:"column:quantity_text;type:varchar(50);not null;default:''" json:"quantity_text"`
-	Unit           string    `gorm:"column:unit;type:varchar(20);not null;default:''" json:"unit"`
-	IsPurchased    int8      `gorm:"column:is_purchased;type:tinyint;not null;default:0;index:idx_shopping_item_list_purchased,priority:2" json:"is_purchased"`
-	Source         string    `gorm:"column:source;type:varchar(20);not null;default:'manual'" json:"source"`
-	SortOrder      int       `gorm:"column:sort_order;type:int;not null;default:0;index:idx_shopping_item_list_purchased,priority:3" json:"sort_order"`
-	CreatedAt      time.Time `gorm:"column:created_at;not null" json:"created_at"`
-	UpdatedAt      time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
+	ID                uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
+	ShoppingListID    uint64    `gorm:"column:shopping_list_id;not null;index:idx_shopping_item_list_purchased,priority:1" json:"shopping_list_id"`
+	IngredientName    string    `gorm:"column:ingredient_name;type:varchar(100);not null" json:"ingredient_name"`
+	Quantity          *float64  `gorm:"column:quantity;type:decimal(10,2)" json:"quantity"`
+	QuantityText      string    `gorm:"column:quantity_text;type:varchar(50);not null;default:''" json:"quantity_text"`
+	Unit              string    `gorm:"column:unit;type:varchar(20);not null;default:''" json:"unit"`
+	PurchasedQuantity float64   `gorm:"column:purchased_quantity;type:decimal(10,2);not null;default:0" json:"purchased_quantity"`
+	IsPurchased       int8      `gorm:"column:is_purchased;type:tinyint;not null;default:0;index:idx_shopping_item_list_purchased,priority:2" json:"is_purchased"`
+	Source            string    `gorm:"column:source;type:varchar(20);not null;default:'manual'" json:"source"`
+	SortOrder         int       `gorm:"column:sort_order;type:int;not null;default:0;index:idx_shopping_item_list_purchased,priority:3" json:"sort_order"`
+	CreatedAt         time.Time `gorm:"column:created_at;not null" json:"created_at"`
+	UpdatedAt         time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }
 
 // TableName 指定购物清单项目表名。

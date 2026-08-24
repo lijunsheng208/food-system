@@ -87,7 +87,8 @@ func (h *FamilyHandler) UpdateShoppingItemPurchased(c *gin.Context) {
 		return
 	}
 	var body struct {
-		IsPurchased *bool `json:"is_purchased"`
+		IsPurchased       *bool    `json:"is_purchased"`
+		PurchasedQuantity *float64 `json:"purchased_quantity"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil || body.IsPurchased == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "is_purchased 必须是布尔值"})
@@ -95,7 +96,8 @@ func (h *FamilyHandler) UpdateShoppingItemPurchased(c *gin.Context) {
 	}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
-	resp, err := h.client.UpdateShoppingItemPurchased(ctx, &familyv1.UpdateShoppingItemPurchasedRequest{ItemId: id, UserId: int64(middleware.CurrentUserID(c)), IsPurchased: *body.IsPurchased})
+	request := &familyv1.UpdateShoppingItemPurchasedRequest{ItemId: id, UserId: int64(middleware.CurrentUserID(c)), IsPurchased: *body.IsPurchased, PurchasedQuantity: body.PurchasedQuantity}
+	resp, err := h.client.UpdateShoppingItemPurchased(ctx, request)
 	if err != nil {
 		log.Printf("gRPC UpdateShoppingItemPurchased 调用失败: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
@@ -177,5 +179,5 @@ func shoppingItemJSON(item *familyv1.ShoppingItemInfo) gin.H {
 	if item.Quantity != nil {
 		quantity = item.GetQuantity()
 	}
-	return gin.H{"id": item.GetId(), "shopping_list_id": item.GetShoppingListId(), "ingredient_name": item.GetIngredientName(), "quantity": quantity, "quantity_text": item.GetQuantityText(), "unit": item.GetUnit(), "is_purchased": item.GetIsPurchased(), "source": item.GetSource(), "sort_order": item.GetSortOrder(), "created_at": item.GetCreatedAt(), "updated_at": item.GetUpdatedAt()}
+	return gin.H{"id": item.GetId(), "shopping_list_id": item.GetShoppingListId(), "ingredient_name": item.GetIngredientName(), "quantity": quantity, "quantity_text": item.GetQuantityText(), "unit": item.GetUnit(), "purchased_quantity": item.GetPurchasedQuantity(), "is_purchased": item.GetIsPurchased(), "source": item.GetSource(), "sort_order": item.GetSortOrder(), "created_at": item.GetCreatedAt(), "updated_at": item.GetUpdatedAt()}
 }

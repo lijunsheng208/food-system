@@ -1842,20 +1842,21 @@ func (x *ShoppingListInfo) GetUpdatedAt() string {
 }
 
 type ShoppingItemInfo struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	ShoppingListId int64                  `protobuf:"varint,2,opt,name=shopping_list_id,json=shoppingListId,proto3" json:"shopping_list_id,omitempty"`
-	IngredientName string                 `protobuf:"bytes,3,opt,name=ingredient_name,json=ingredientName,proto3" json:"ingredient_name,omitempty"`
-	Quantity       *float64               `protobuf:"fixed64,4,opt,name=quantity,proto3,oneof" json:"quantity,omitempty"`
-	QuantityText   string                 `protobuf:"bytes,5,opt,name=quantity_text,json=quantityText,proto3" json:"quantity_text,omitempty"`
-	Unit           string                 `protobuf:"bytes,6,opt,name=unit,proto3" json:"unit,omitempty"`
-	IsPurchased    bool                   `protobuf:"varint,7,opt,name=is_purchased,json=isPurchased,proto3" json:"is_purchased,omitempty"`
-	Source         string                 `protobuf:"bytes,8,opt,name=source,proto3" json:"source,omitempty"`
-	SortOrder      int32                  `protobuf:"varint,9,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
-	CreatedAt      string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt      string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ShoppingListId    int64                  `protobuf:"varint,2,opt,name=shopping_list_id,json=shoppingListId,proto3" json:"shopping_list_id,omitempty"`
+	IngredientName    string                 `protobuf:"bytes,3,opt,name=ingredient_name,json=ingredientName,proto3" json:"ingredient_name,omitempty"`
+	Quantity          *float64               `protobuf:"fixed64,4,opt,name=quantity,proto3,oneof" json:"quantity,omitempty"`
+	QuantityText      string                 `protobuf:"bytes,5,opt,name=quantity_text,json=quantityText,proto3" json:"quantity_text,omitempty"`
+	Unit              string                 `protobuf:"bytes,6,opt,name=unit,proto3" json:"unit,omitempty"`
+	IsPurchased       bool                   `protobuf:"varint,7,opt,name=is_purchased,json=isPurchased,proto3" json:"is_purchased,omitempty"`
+	PurchasedQuantity float64                `protobuf:"fixed64,12,opt,name=purchased_quantity,json=purchasedQuantity,proto3" json:"purchased_quantity,omitempty"`
+	Source            string                 `protobuf:"bytes,8,opt,name=source,proto3" json:"source,omitempty"`
+	SortOrder         int32                  `protobuf:"varint,9,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"`
+	CreatedAt         string                 `protobuf:"bytes,10,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         string                 `protobuf:"bytes,11,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ShoppingItemInfo) Reset() {
@@ -1935,6 +1936,13 @@ func (x *ShoppingItemInfo) GetIsPurchased() bool {
 		return x.IsPurchased
 	}
 	return false
+}
+
+func (x *ShoppingItemInfo) GetPurchasedQuantity() float64 {
+	if x != nil {
+		return x.PurchasedQuantity
+	}
+	return 0
 }
 
 func (x *ShoppingItemInfo) GetSource() string {
@@ -2274,12 +2282,13 @@ func (x *GetShoppingListRequest) GetUserId() int64 {
 }
 
 type UpdateShoppingItemPurchasedRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ItemId        int64                  `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
-	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	IsPurchased   bool                   `protobuf:"varint,3,opt,name=is_purchased,json=isPurchased,proto3" json:"is_purchased,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ItemId            int64                  `protobuf:"varint,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	UserId            int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	IsPurchased       bool                   `protobuf:"varint,3,opt,name=is_purchased,json=isPurchased,proto3" json:"is_purchased,omitempty"`
+	PurchasedQuantity *float64               `protobuf:"fixed64,4,opt,name=purchased_quantity,json=purchasedQuantity,proto3,oneof" json:"purchased_quantity,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *UpdateShoppingItemPurchasedRequest) Reset() {
@@ -2331,6 +2340,13 @@ func (x *UpdateShoppingItemPurchasedRequest) GetIsPurchased() bool {
 		return x.IsPurchased
 	}
 	return false
+}
+
+func (x *UpdateShoppingItemPurchasedRequest) GetPurchasedQuantity() float64 {
+	if x != nil && x.PurchasedQuantity != nil {
+		return *x.PurchasedQuantity
+	}
+	return 0
 }
 
 type AddManualShoppingItemRequest struct {
@@ -2755,7 +2771,7 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt\"\xf4\x02\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\"\xa3\x03\n" +
 	"\x10ShoppingItemInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12(\n" +
 	"\x10shopping_list_id\x18\x02 \x01(\x03R\x0eshoppingListId\x12'\n" +
@@ -2763,7 +2779,8 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\bquantity\x18\x04 \x01(\x01H\x00R\bquantity\x88\x01\x01\x12#\n" +
 	"\rquantity_text\x18\x05 \x01(\tR\fquantityText\x12\x12\n" +
 	"\x04unit\x18\x06 \x01(\tR\x04unit\x12!\n" +
-	"\fis_purchased\x18\a \x01(\bR\visPurchased\x12\x16\n" +
+	"\fis_purchased\x18\a \x01(\bR\visPurchased\x12-\n" +
+	"\x12purchased_quantity\x18\f \x01(\x01R\x11purchasedQuantity\x12\x16\n" +
 	"\x06source\x18\b \x01(\tR\x06source\x12\x1d\n" +
 	"\n" +
 	"sort_order\x18\t \x01(\x05R\tsortOrder\x12\x1d\n" +
@@ -2794,11 +2811,13 @@ const file_family_v1_family_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\"A\n" +
 	"\x16GetShoppingListRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"y\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xc4\x01\n" +
 	"\"UpdateShoppingItemPurchasedRequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\x03R\x06itemId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12!\n" +
-	"\fis_purchased\x18\x03 \x01(\bR\visPurchased\"\xf1\x01\n" +
+	"\fis_purchased\x18\x03 \x01(\bR\visPurchased\x122\n" +
+	"\x12purchased_quantity\x18\x04 \x01(\x01H\x00R\x11purchasedQuantity\x88\x01\x01B\x15\n" +
+	"\x13_purchased_quantity\"\xf1\x01\n" +
 	"\x1cAddManualShoppingItemRequest\x12(\n" +
 	"\x10shopping_list_id\x18\x01 \x01(\x03R\x0eshoppingListId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12'\n" +
@@ -2956,6 +2975,7 @@ func file_family_v1_family_proto_init() {
 	file_family_v1_family_proto_msgTypes[18].OneofWrappers = []any{}
 	file_family_v1_family_proto_msgTypes[22].OneofWrappers = []any{}
 	file_family_v1_family_proto_msgTypes[25].OneofWrappers = []any{}
+	file_family_v1_family_proto_msgTypes[31].OneofWrappers = []any{}
 	file_family_v1_family_proto_msgTypes[32].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

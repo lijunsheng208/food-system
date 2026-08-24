@@ -412,7 +412,13 @@ func (s *FamilyServer) GetShoppingList(ctx context.Context, req *familyv1.GetSho
 
 // UpdateShoppingItemPurchased 更新购物项目的购买状态。
 func (s *FamilyServer) UpdateShoppingItemPurchased(ctx context.Context, req *familyv1.UpdateShoppingItemPurchasedRequest) (*familyv1.CommonResponse, error) {
-	err := s.shoppingSvc.UpdateItemPurchased(ctx, uint64(req.GetUserId()), uint64(req.GetItemId()), req.GetIsPurchased())
+	purchasedQuantity := 0.0
+	purchased := req.GetIsPurchased()
+	if req.PurchasedQuantity != nil {
+		purchasedQuantity = req.GetPurchasedQuantity()
+		purchased = purchasedQuantity > 0
+	}
+	err := s.shoppingSvc.UpdateItemPurchased(ctx, uint64(req.GetUserId()), uint64(req.GetItemId()), purchasedQuantity, purchased)
 	if err != nil {
 		return &familyv1.CommonResponse{Code: mapShoppingErrorCode(err), Message: err.Error()}, nil
 	}
@@ -522,7 +528,7 @@ func toShoppingListInfo(list *model.ShoppingList) *familyv1.ShoppingListInfo {
 
 // toShoppingItemInfo 将购物项目模型转换为 Proto 信息。
 func toShoppingItemInfo(item *model.ShoppingListItem) *familyv1.ShoppingItemInfo {
-	info := &familyv1.ShoppingItemInfo{Id: int64(item.ID), ShoppingListId: int64(item.ShoppingListID), IngredientName: item.IngredientName, QuantityText: item.QuantityText, Unit: item.Unit, IsPurchased: item.IsPurchased == model.ShoppingItemPurchased, Source: item.Source, SortOrder: int32(item.SortOrder), CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: item.UpdatedAt.Format("2006-01-02 15:04:05")}
+	info := &familyv1.ShoppingItemInfo{Id: int64(item.ID), ShoppingListId: int64(item.ShoppingListID), IngredientName: item.IngredientName, QuantityText: item.QuantityText, Unit: item.Unit, IsPurchased: item.IsPurchased == model.ShoppingItemPurchased, PurchasedQuantity: item.PurchasedQuantity, Source: item.Source, SortOrder: int32(item.SortOrder), CreatedAt: item.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: item.UpdatedAt.Format("2006-01-02 15:04:05")}
 	if item.Quantity != nil {
 		value := *item.Quantity
 		info.Quantity = &value

@@ -22,6 +22,7 @@ import EditFamilyScreen from '../screens/EditFamilyScreen';
 import JoinFamilyScreen from '../screens/JoinFamilyScreen';
 import FamilyMemberEditScreen from '../screens/FamilyMemberEditScreen';
 import FamilyMealPlanScreen from '../screens/FamilyMealPlanScreen';
+import ShoppingListScreen from '../screens/ShoppingListScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -140,6 +141,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="FamilyMealPlan"
         component={FamilyMealPlanScreen}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="ShoppingList"
+        component={ShoppingListScreen}
         options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen

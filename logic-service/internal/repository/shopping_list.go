@@ -35,6 +35,34 @@ func (r *ShoppingListRepo) CreateWithItems(ctx context.Context, list *model.Shop
 	})
 }
 
+// FindByFamilyDates 查询家庭指定日期范围的现有清单。
+func (r *ShoppingListRepo) FindByFamilyDates(ctx context.Context, familyID uint64, startDate, endDate time.Time) (*model.ShoppingList, error) {
+	var list model.ShoppingList
+	err := r.db.WithContext(ctx).Where("family_id = ? AND start_date = ? AND end_date = ?", familyID, startDate, endDate).Order("id DESC").First(&list).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &list, err
+}
+
+// ReplaceItems 在事务中替换指定清单的项目，确保生成过程不会留下半成品。
+func (r *ShoppingListRepo) ReplaceItems(ctx context.Context, list *model.ShoppingList, items []model.ShoppingListItem) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("shopping_list_id = ?", list.ID).Delete(&model.ShoppingListItem{}).Error; err != nil {
+			return err
+		}
+		for index := range items {
+			items[index].ShoppingListID = list.ID
+		}
+		if len(items) > 0 {
+			if err := tx.Create(&items).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Model(list).Updates(map[string]interface{}{"name": list.Name, "updated_at": time.Now()}).Error
+	})
+}
+
 // ListByFamily 查询家庭的购物清单，按最近更新时间倒序排列。
 func (r *ShoppingListRepo) ListByFamily(ctx context.Context, familyID uint64) ([]model.ShoppingList, error) {
 	var lists []model.ShoppingList
@@ -58,13 +86,13 @@ func (r *ShoppingListRepo) GetWithItems(ctx context.Context, id uint64) (*model.
 	return &list, items, nil
 }
 
-// UpdateItemPurchased 更新项目的购买状态。
-func (r *ShoppingListRepo) UpdateItemPurchased(ctx context.Context, itemID uint64, purchased bool) error {
-	value := model.ShoppingItemUnpurchased
+// UpdateItemPurchased 更新项目的已购买数量及完成状态。
+func (r *ShoppingListRepo) UpdateItemPurchased(ctx context.Context, itemID uint64, purchasedQuantity float64, purchased bool) error {
+	updates := map[string]interface{}{"purchased_quantity": purchasedQuantity, "is_purchased": model.ShoppingItemUnpurchased}
 	if purchased {
-		value = model.ShoppingItemPurchased
+		updates["is_purchased"] = model.ShoppingItemPurchased
 	}
-	result := r.db.WithContext(ctx).Model(&model.ShoppingListItem{}).Where("id = ?", itemID).Update("is_purchased", value)
+	result := r.db.WithContext(ctx).Model(&model.ShoppingListItem{}).Where("id = ?", itemID).Updates(updates)
 	if result.Error != nil {
 		return result.Error
 	}

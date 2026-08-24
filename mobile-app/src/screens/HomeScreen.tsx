@@ -174,6 +174,19 @@ export default function HomeScreen() {
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.shoppingFooter}
+                onPress={() => navigation.navigate('ShoppingList', {})}
+                accessibilityRole="button"
+                accessibilityLabel="查看购物清单"
+              >
+                <View style={styles.shoppingFooterIcon}><Ionicons name="basket-outline" size={18} color={colors.primary} /></View>
+                <View style={styles.weekMenuCopy}>
+                  <Text style={styles.weekMenuTitle}>查看购物清单</Text>
+                  <Text style={styles.weekMenuHint}>按本周菜单整理采购项</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -452,6 +465,24 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 15,
     marginTop: 1,
+  },
+  shoppingFooter: {
+    minHeight: 64,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+  },
+  shoppingFooterIcon: {
+    width: 34,
+    height: 34,
+    marginRight: spacing.sm,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySubtle,
   },
   messagePanel: {
     minHeight: 112,
