@@ -35,6 +35,10 @@ service FamilyService {
   rpc ListMealPlans(ListMealPlansRequest) returns (ListMealPlansResponse);
   rpc UpdateMealPlan(UpdateMealPlanRequest) returns (CreateMealPlanResponse);
   rpc DeleteMealPlan(DeleteMealPlanRequest) returns (CommonResponse);
+  // UpsertMealPlanRating 保存或更新当前用户对已完成家庭菜单的评价
+  rpc UpsertMealPlanRating(UpsertMealPlanRatingRequest) returns (MealPlanRatingResponse);
+  // ListMealPlanRatings 查询某次家庭菜单的成员评价
+  rpc ListMealPlanRatings(ListMealPlanRatingsRequest) returns (MealPlanRatingsResponse);
   // GenerateShoppingList 根据家庭菜单生成购物清单
   rpc GenerateShoppingList(GenerateShoppingListRequest) returns (ShoppingListResponse);
   // ListShoppingLists 查询家庭购物清单
@@ -266,11 +270,51 @@ message UpdateMealPlanRequest {
   optional int32 meal_type = 4;
   optional int32 servings = 5;
   optional int64 cook_user_id = 6; // 0 表示清空负责人
+  optional int32 status = 7; // 做菜状态：0待开始、1烹饪中、2已完成、3已取消
 }
 
 message DeleteMealPlanRequest {
   int64 id = 1;
   int64 user_id = 2;
+}
+
+message MealPlanRatingInfo {
+  int64 id = 1;
+  int64 meal_plan_id = 2;
+  int64 user_id = 3;
+  string user_name = 4;
+  int32 rating = 5;
+  string comment = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message UpsertMealPlanRatingRequest {
+  int64 meal_plan_id = 1;
+  int64 user_id = 2;
+  int32 rating = 3;
+  string comment = 4;
+}
+
+message MealPlanRatingResponse {
+  int32 code = 1;
+  string message = 2;
+  MealPlanRatingInfo rating = 3;
+}
+
+message ListMealPlanRatingsRequest {
+  int64 meal_plan_id = 1;
+  int64 user_id = 2;
+}
+
+message MealPlanRatingsResponse {
+  int32 code = 1;
+  string message = 2;
+  repeated MealPlanRatingInfo ratings = 3;
+  double average_rating = 4;
+  int32 rating_count = 5;
+  optional int32 my_rating = 6;
+  string my_comment = 7;
 }
 
 // ========== Shopping List ==========

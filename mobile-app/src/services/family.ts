@@ -14,6 +14,7 @@ import type {
   MealType,
   ShoppingItemInfo,
   ShoppingListInfo,
+  FamilyMealPlanRating,
 } from '../types/family';
 import type { FamilyDietaryProfile, FamilyDietaryProfileInput } from '../types/familyDietary';
 
@@ -193,6 +194,7 @@ export async function updateMealPlan(
     meal_type?: MealType;
     servings?: number;
     cook_user_id?: number;
+    status?: 0 | 1 | 2 | 3;
   },
 ) {
   const { data } = await api.patch<ApiResponse & { meal_plan: FamilyMealPlanInfo }>(
@@ -200,6 +202,28 @@ export async function updateMealPlan(
   );
   if (data.code !== 0) throw new Error(data.message || '修改家庭菜单失败');
   return data.meal_plan;
+}
+
+// upsertMealPlanRating 保存或更新当前用户对已完成家庭菜单的评分和文字评价。
+export async function upsertMealPlanRating(mealPlanId: number, rating: number, comment = '') {
+  const { data } = await api.post<ApiResponse & { rating: FamilyMealPlanRating }>(
+    `/family/meal-plans/${mealPlanId}/rating`, { rating, comment },
+  );
+  if (data.code !== 0) throw new Error(data.message || '保存评价失败');
+  return data.rating;
+}
+
+// listMealPlanRatings 查询某次家庭菜单的成员评价和平均分。
+export async function listMealPlanRatings(mealPlanId: number) {
+  const { data } = await api.get<ApiResponse & {
+    ratings: FamilyMealPlanRating[];
+    average_rating: number;
+    rating_count: number;
+    my_rating: number | null;
+    my_comment: string;
+  }>(`/family/meal-plans/${mealPlanId}/ratings`);
+  if (data.code !== 0) throw new Error(data.message || '查询评价失败');
+  return data;
 }
 
 export async function deleteMealPlan(id: number) {

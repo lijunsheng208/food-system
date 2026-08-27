@@ -121,6 +121,8 @@ func main() {
 			family.GET("/:family_id/meal-plans", familyHandler.ListMealPlans)
 			family.PATCH("/meal-plans/:id", familyHandler.UpdateMealPlan)
 			family.DELETE("/meal-plans/:id", familyHandler.DeleteMealPlan)
+			family.POST("/meal-plans/:id/rating", familyHandler.UpsertMealPlanRating)
+			family.GET("/meal-plans/:id/ratings", familyHandler.ListMealPlanRatings)
 			family.POST("/create", familyHandler.CreateFamily)
 			family.PUT("/:family_id", familyHandler.UpdateFamily)
 			family.DELETE("/:family_id", familyHandler.DissolveFamily)

@@ -10,14 +10,18 @@ import (
 )
 
 var (
-	ErrInvalidMealPlanIDs   = errors.New("家庭、菜谱、创建人和负责人ID必须有效")
-	ErrInvalidMealDate      = errors.New("用餐日期格式不正确")
-	ErrInvalidMealType      = errors.New("餐次类型不正确")
-	ErrInvalidMealServings  = errors.New("用餐人数必须在1到20之间")
-	ErrMealPlanDishNotFound = errors.New("菜谱不存在或已下架")
-	ErrCookUserNotInFamily  = errors.New("做饭负责人不是该家庭成员")
-	ErrMealPlanNotFound     = errors.New("家庭菜单记录不存在")
-	ErrInvalidMealDateRange = errors.New("日期范围不正确")
+	ErrInvalidMealPlanIDs      = errors.New("家庭、菜谱、创建人和负责人ID必须有效")
+	ErrInvalidMealDate         = errors.New("用餐日期格式不正确")
+	ErrInvalidMealType         = errors.New("餐次类型不正确")
+	ErrInvalidMealServings     = errors.New("用餐人数必须在1到20之间")
+	ErrMealPlanDishNotFound    = errors.New("菜谱不存在或已下架")
+	ErrCookUserNotInFamily     = errors.New("做饭负责人不是该家庭成员")
+	ErrMealPlanNotFound        = errors.New("家庭菜单记录不存在")
+	ErrInvalidMealDateRange    = errors.New("日期范围不正确")
+	ErrInvalidMealPlanStatus   = errors.New("做菜状态不正确")
+	ErrCookOnlyCanUpdateStatus = errors.New("只有指定做菜人可以修改做菜状态")
+	ErrMealPlanNotCompleted    = errors.New("菜谱完成后才可以评价")
+	ErrInvalidMealPlanRating   = errors.New("评分必须在1到5分之间")
 )
 
 // MealPlanService 家庭菜单计划业务逻辑。
@@ -25,6 +29,7 @@ type MealPlanService struct {
 	mealPlanRepo *repository.MealPlanRepo
 	familyRepo   *repository.FamilyRepo
 	dishRepo     *repository.DishRepo
+	ratingRepo   *repository.FamilyMealPlanRatingRepo
 }
 
 func (s *MealPlanService) ListMealPlans(ctx context.Context, familyID, userID uint64, startDateText, endDateText string) ([]model.FamilyMealPlanView, error) {
@@ -48,7 +53,7 @@ func (s *MealPlanService) ListMealPlans(ctx context.Context, familyID, userID ui
 	return s.mealPlanRepo.ListWithDetails(ctx, familyID, startDate, endDate)
 }
 
-func (s *MealPlanService) UpdateMealPlan(ctx context.Context, id, userID uint64, mealDateText *string, mealType *int32, servings *int, cookUserID *uint64) (*model.FamilyMealPlan, error) {
+func (s *MealPlanService) UpdateMealPlan(ctx context.Context, id, userID uint64, mealDateText *string, mealType *int32, servings *int, cookUserID *uint64, status *int32) (*model.FamilyMealPlan, error) {
 	if id == 0 || userID == 0 {
 		return nil, ErrInvalidMealPlanIDs
 	}
@@ -61,6 +66,18 @@ func (s *MealPlanService) UpdateMealPlan(ctx context.Context, id, userID uint64,
 	}
 	if err := s.requireFamilyMember(ctx, plan.FamilyID, userID); err != nil {
 		return nil, err
+	}
+	// 状态权限必须基于更新前的负责人，禁止通过同一个请求先给自己分配任务再越权改状态。
+	if status != nil {
+		if cookUserID != nil {
+			return nil, ErrInvalidMealPlanStatus
+		}
+		if plan.CookUserID == nil || *plan.CookUserID != userID {
+			return nil, ErrCookOnlyCanUpdateStatus
+		}
+		if *status < int32(model.MealPlanStatusPending) || *status > int32(model.MealPlanStatusCancelled) || !validMealPlanTransition(plan.Status, int8(*status)) {
+			return nil, ErrInvalidMealPlanStatus
+		}
 	}
 	values := make(map[string]any)
 	if mealDateText != nil {
@@ -101,6 +118,10 @@ func (s *MealPlanService) UpdateMealPlan(ctx context.Context, id, userID uint64,
 			plan.CookUserID = cookUserID
 		}
 	}
+	if status != nil {
+		values["status"] = int8(*status)
+		plan.Status = int8(*status)
+	}
 	if len(values) > 0 {
 		if err := s.mealPlanRepo.Update(ctx, id, values); err != nil {
 			return nil, err
@@ -108,6 +129,99 @@ func (s *MealPlanService) UpdateMealPlan(ctx context.Context, id, userID uint64,
 		plan.UpdatedAt = time.Now()
 	}
 	return plan, nil
+}
+
+// ConfigureRatingRepo 注入评价仓储，保持菜单服务的依赖边界清晰。
+func (s *MealPlanService) ConfigureRatingRepo(ratingRepo *repository.FamilyMealPlanRatingRepo) {
+	s.ratingRepo = ratingRepo
+}
+
+// UpsertRating 保存当前家庭成员对已完成菜单的评分。
+func (s *MealPlanService) UpsertRating(ctx context.Context, mealPlanID, userID uint64, rating int32, comment string) (*model.FamilyMealPlanRating, error) {
+	if mealPlanID == 0 || userID == 0 {
+		return nil, ErrInvalidMealPlanIDs
+	}
+	if rating < 1 || rating > 5 {
+		return nil, ErrInvalidMealPlanRating
+	}
+	if s.ratingRepo == nil {
+		return nil, errors.New("评价服务未配置")
+	}
+	plan, err := s.mealPlanRepo.GetByID(ctx, mealPlanID)
+	if err != nil {
+		return nil, err
+	}
+	if plan == nil {
+		return nil, ErrMealPlanNotFound
+	}
+	if err := s.requireFamilyMember(ctx, plan.FamilyID, userID); err != nil {
+		return nil, err
+	}
+	if plan.Status != model.MealPlanStatusCompleted {
+		return nil, ErrMealPlanNotCompleted
+	}
+	value, err := s.ratingRepo.GetByMealPlanUser(ctx, mealPlanID, userID)
+	if err != nil {
+		return nil, err
+	}
+	if value == nil {
+		value = &model.FamilyMealPlanRating{MealPlanID: mealPlanID, UserID: userID}
+	}
+	value.Rating = int8(rating)
+	value.Comment = comment
+	if err := s.ratingRepo.Save(ctx, value); err != nil {
+		return nil, err
+	}
+	return value, nil
+}
+
+// ListRatings 查询某次已完成菜单的评价并返回当前用户评价。
+func (s *MealPlanService) ListRatings(ctx context.Context, mealPlanID, userID uint64) ([]model.FamilyMealPlanRatingView, float64, int, *int8, string, error) {
+	if mealPlanID == 0 || userID == 0 {
+		return nil, 0, 0, nil, "", ErrInvalidMealPlanIDs
+	}
+	if s.ratingRepo == nil {
+		return nil, 0, 0, nil, "", errors.New("评价服务未配置")
+	}
+	plan, err := s.mealPlanRepo.GetByID(ctx, mealPlanID)
+	if err != nil {
+		return nil, 0, 0, nil, "", err
+	}
+	if plan == nil {
+		return nil, 0, 0, nil, "", ErrMealPlanNotFound
+	}
+	if err := s.requireFamilyMember(ctx, plan.FamilyID, userID); err != nil {
+		return nil, 0, 0, nil, "", err
+	}
+	values, err := s.ratingRepo.ListByMealPlan(ctx, mealPlanID)
+	if err != nil {
+		return nil, 0, 0, nil, "", err
+	}
+	var total int
+	var myRating *int8
+	var myComment string
+	for i := range values {
+		total += int(values[i].Rating)
+		if values[i].UserID == userID {
+			value := values[i].Rating
+			myRating = &value
+			myComment = values[i].Comment
+		}
+	}
+	var average float64
+	if len(values) > 0 {
+		average = float64(total) / float64(len(values))
+	}
+	return values, average, len(values), myRating, myComment, nil
+}
+
+// validMealPlanTransition 限制做菜状态只能按业务流程向前流转。
+func validMealPlanTransition(current, next int8) bool {
+	if current == next {
+		return true
+	}
+	return (current == model.MealPlanStatusPending && (next == model.MealPlanStatusCooking || next == model.MealPlanStatusCancelled)) ||
+		(current == model.MealPlanStatusCooking && next == model.MealPlanStatusCompleted)
 }
 
 func (s *MealPlanService) DeleteMealPlan(ctx context.Context, id, userID uint64) error {

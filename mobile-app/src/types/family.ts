@@ -58,6 +58,18 @@ export interface FamilyMealPlanInfo {
   updated_at: string;
 }
 
+/** 家庭成员对某次家庭菜单的评价。 */
+export interface FamilyMealPlanRating {
+  id: number;
+  meal_plan_id: number;
+  user_id: number;
+  user_name: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** 购物清单信息 */
 export interface ShoppingListInfo {
   id: number;

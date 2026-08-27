@@ -34,6 +34,10 @@ const (
 	MealPlanCodeInvalidIDs      = 2106
 	MealPlanCodeNotFound        = 2107
 	MealPlanCodeInvalidRange    = 2108
+	MealPlanCodeInvalidStatus   = 2109
+	MealPlanCodeCookOnlyStatus  = 2110
+	MealPlanCodeNotCompleted    = 2111
+	MealPlanCodeInvalidRating   = 2112
 
 	ShoppingCodeListNotFound = 2201
 	ShoppingCodeItemNotFound = 2202
@@ -397,11 +401,38 @@ func (s *FamilyServer) UpdateMealPlan(ctx context.Context, req *familyv1.UpdateM
 		value := uint64(req.GetCookUserId())
 		cookUserID = &value
 	}
-	plan, err := s.mealPlanSvc.UpdateMealPlan(ctx, uint64(req.GetId()), uint64(req.GetUserId()), req.MealDate, req.MealType, servings, cookUserID)
+	plan, err := s.mealPlanSvc.UpdateMealPlan(ctx, uint64(req.GetId()), uint64(req.GetUserId()), req.MealDate, req.MealType, servings, cookUserID, req.Status)
 	if err != nil {
 		return &familyv1.CreateMealPlanResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
 	}
 	return &familyv1.CreateMealPlanResponse{Code: FamilyCodeSuccess, Message: "修改成功", MealPlan: toFamilyMealPlanInfo(plan)}, nil
+}
+
+// UpsertMealPlanRating 保存或更新当前用户对已完成家庭菜单的评价。
+func (s *FamilyServer) UpsertMealPlanRating(ctx context.Context, req *familyv1.UpsertMealPlanRatingRequest) (*familyv1.MealPlanRatingResponse, error) {
+	value, err := s.mealPlanSvc.UpsertRating(ctx, uint64(req.GetMealPlanId()), uint64(req.GetUserId()), req.GetRating(), req.GetComment())
+	if err != nil {
+		return &familyv1.MealPlanRatingResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	return &familyv1.MealPlanRatingResponse{Code: FamilyCodeSuccess, Message: "评价已保存", Rating: toMealPlanRatingInfo(value)}, nil
+}
+
+// ListMealPlanRatings 查询某次家庭菜单的成员评价。
+func (s *FamilyServer) ListMealPlanRatings(ctx context.Context, req *familyv1.ListMealPlanRatingsRequest) (*familyv1.MealPlanRatingsResponse, error) {
+	values, average, count, myRating, myComment, err := s.mealPlanSvc.ListRatings(ctx, uint64(req.GetMealPlanId()), uint64(req.GetUserId()))
+	if err != nil {
+		return &familyv1.MealPlanRatingsResponse{Code: mapFamilyErrorCode(err), Message: err.Error()}, nil
+	}
+	result := make([]*familyv1.MealPlanRatingInfo, 0, len(values))
+	for i := range values {
+		result = append(result, toMealPlanRatingViewInfo(&values[i]))
+	}
+	response := &familyv1.MealPlanRatingsResponse{Code: FamilyCodeSuccess, Message: "查询成功", Ratings: result, AverageRating: average, RatingCount: int32(count), MyComment: myComment}
+	if myRating != nil {
+		value := int32(*myRating)
+		response.MyRating = &value
+	}
+	return response, nil
 }
 
 func (s *FamilyServer) DeleteMealPlan(ctx context.Context, req *familyv1.DeleteMealPlanRequest) (*familyv1.CommonResponse, error) {
@@ -519,11 +550,31 @@ func mapFamilyErrorCode(err error) int32 {
 		return MealPlanCodeNotFound
 	case errors.Is(err, service.ErrInvalidMealDateRange):
 		return MealPlanCodeInvalidRange
+	case errors.Is(err, service.ErrInvalidMealPlanStatus):
+		return MealPlanCodeInvalidStatus
+	case errors.Is(err, service.ErrCookOnlyCanUpdateStatus):
+		return MealPlanCodeCookOnlyStatus
+	case errors.Is(err, service.ErrMealPlanNotCompleted):
+		return MealPlanCodeNotCompleted
+	case errors.Is(err, service.ErrInvalidMealPlanRating):
+		return MealPlanCodeInvalidRating
 	case errors.Is(err, service.ErrUserNotFound):
 		return CodeUserNotFound
 	default:
 		return CodeInternalError
 	}
+}
+
+// toMealPlanRatingInfo 将评价模型转换为 Proto 响应。
+func toMealPlanRatingInfo(value *model.FamilyMealPlanRating) *familyv1.MealPlanRatingInfo {
+	return &familyv1.MealPlanRatingInfo{Id: int64(value.ID), MealPlanId: int64(value.MealPlanID), UserId: int64(value.UserID), Rating: int32(value.Rating), Comment: value.Comment, CreatedAt: value.CreatedAt.Format("2006-01-02 15:04:05"), UpdatedAt: value.UpdatedAt.Format("2006-01-02 15:04:05")}
+}
+
+// toMealPlanRatingViewInfo 将带用户昵称的评价模型转换为 Proto 响应。
+func toMealPlanRatingViewInfo(value *model.FamilyMealPlanRatingView) *familyv1.MealPlanRatingInfo {
+	result := toMealPlanRatingInfo(&value.FamilyMealPlanRating)
+	result.UserName = value.UserName
+	return result
 }
 
 // toFamilyDietaryProfileInfo 将家庭饮食档案转换为 Proto 响应。

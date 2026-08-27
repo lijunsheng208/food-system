@@ -5,7 +5,7 @@
  */
 
 // 你的电脑局域网 IP（真机 Expo Go 扫码用这个）
-const DEV_HOST = '192.168.1.5';
+const DEV_HOST = '192.168.1.6';
 
 // Android 模拟器用 10.0.2.2，iOS 模拟器用 localhost
 const EMULATOR_HOST = '10.0.2.2';

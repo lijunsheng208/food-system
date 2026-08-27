@@ -96,6 +96,7 @@ func main() {
 
 	mealPlanRepo := repository.NewMealPlanRepo(db)
 	mealPlanSvc := service.NewMealPlanService(mealPlanRepo, familyRepo, dishRepo)
+	mealPlanSvc.ConfigureRatingRepo(repository.NewFamilyMealPlanRatingRepo(db))
 	shoppingRepo := repository.NewShoppingListRepo(db)
 	shoppingSvc := service.NewShoppingListService(shoppingRepo, familyRepo, mealPlanRepo, dishRepo)
 	familySvc := service.NewFamilyService(familyRepo, userRepo)

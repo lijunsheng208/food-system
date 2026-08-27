@@ -295,12 +295,13 @@ func (h *FamilyHandler) UpdateMealPlan(c *gin.Context) {
 		MealType   *int32  `json:"meal_type"`
 		Servings   *int32  `json:"servings"`
 		CookUserID *int64  `json:"cook_user_id"`
+		Status     *int32  `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请求格式错误"})
 		return
 	}
-	req := &familyv1.UpdateMealPlanRequest{Id: id, UserId: int64(middleware.CurrentUserID(c)), MealDate: body.MealDate, MealType: body.MealType, Servings: body.Servings, CookUserId: body.CookUserID}
+	req := &familyv1.UpdateMealPlanRequest{Id: id, UserId: int64(middleware.CurrentUserID(c)), MealDate: body.MealDate, MealType: body.MealType, Servings: body.Servings, CookUserId: body.CookUserID, Status: body.Status}
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 	resp, err := h.client.UpdateMealPlan(ctx, req)
@@ -314,6 +315,66 @@ func (h *FamilyHandler) UpdateMealPlan(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 0, "message": resp.GetMessage(), "meal_plan": mealPlanJSON(resp.GetMealPlan())})
+}
+
+// UpsertMealPlanRating POST /api/v1/family/meal-plans/{id}/rating。
+func (h *FamilyHandler) UpsertMealPlanRating(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的菜单记录ID"})
+		return
+	}
+	var body struct {
+		Rating  int32  `json:"rating"`
+		Comment string `json:"comment"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "评价格式不正确"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.UpsertMealPlanRating(ctx, &familyv1.UpsertMealPlanRatingRequest{MealPlanId: id, UserId: int64(middleware.CurrentUserID(c)), Rating: body.Rating, Comment: body.Comment})
+	if err != nil {
+		log.Printf("gRPC UpsertMealPlanRating 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	if resp.GetCode() != 0 || resp.GetRating() == nil {
+		c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "rating": mealPlanRatingJSON(resp.GetRating())})
+}
+
+// ListMealPlanRatings GET /api/v1/family/meal-plans/{id}/ratings。
+func (h *FamilyHandler) ListMealPlanRatings(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "请提供有效的菜单记录ID"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.ListMealPlanRatings(ctx, &familyv1.ListMealPlanRatingsRequest{MealPlanId: id, UserId: int64(middleware.CurrentUserID(c))})
+	if err != nil {
+		log.Printf("gRPC ListMealPlanRatings 调用失败: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 1999, "message": "服务内部错误"})
+		return
+	}
+	if resp.GetCode() != 0 {
+		c.JSON(familyHTTPStatus(resp.GetCode()), gin.H{"code": resp.GetCode(), "message": resp.GetMessage()})
+		return
+	}
+	ratings := make([]gin.H, 0, len(resp.GetRatings()))
+	for _, value := range resp.GetRatings() {
+		ratings = append(ratings, mealPlanRatingJSON(value))
+	}
+	var myRating any
+	if resp.MyRating != nil {
+		myRating = resp.GetMyRating()
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": resp.GetMessage(), "ratings": ratings, "average_rating": resp.GetAverageRating(), "rating_count": resp.GetRatingCount(), "my_rating": myRating, "my_comment": resp.GetMyComment()})
 }
 
 // DeleteMealPlan DELETE /api/v1/family/meal-plans/{id}
@@ -343,8 +404,10 @@ func familyHTTPStatus(code int32) int {
 		return http.StatusNotFound
 	case 2002, 2006:
 		return http.StatusConflict
-	case 2003, 2004, 2007:
+	case 2003, 2004, 2007, 2110:
 		return http.StatusForbidden
+	case 2111:
+		return http.StatusConflict
 	case 1999:
 		return http.StatusInternalServerError
 	default:
@@ -365,6 +428,11 @@ func mealPlanJSON(plan *familyv1.FamilyMealPlanInfo) gin.H {
 		"cook_user_id": cookUserID, "cook_user_name": plan.GetCookUserName(), "status": plan.GetStatus(),
 		"created_by": plan.GetCreatedBy(), "created_at": plan.GetCreatedAt(), "updated_at": plan.GetUpdatedAt(),
 	}
+}
+
+// mealPlanRatingJSON 将评价 Proto 转换为稳定的 HTTP JSON 响应。
+func mealPlanRatingJSON(value *familyv1.MealPlanRatingInfo) gin.H {
+	return gin.H{"id": value.GetId(), "meal_plan_id": value.GetMealPlanId(), "user_id": value.GetUserId(), "user_name": value.GetUserName(), "rating": value.GetRating(), "comment": value.GetComment(), "created_at": value.GetCreatedAt(), "updated_at": value.GetUpdatedAt()}
 }
 
 // UpdateFamily PUT /api/v1/family/{family_id}

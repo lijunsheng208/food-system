@@ -35,6 +35,8 @@ const (
 	FamilyService_ListMealPlans_FullMethodName               = "/family.v1.FamilyService/ListMealPlans"
 	FamilyService_UpdateMealPlan_FullMethodName              = "/family.v1.FamilyService/UpdateMealPlan"
 	FamilyService_DeleteMealPlan_FullMethodName              = "/family.v1.FamilyService/DeleteMealPlan"
+	FamilyService_UpsertMealPlanRating_FullMethodName        = "/family.v1.FamilyService/UpsertMealPlanRating"
+	FamilyService_ListMealPlanRatings_FullMethodName         = "/family.v1.FamilyService/ListMealPlanRatings"
 	FamilyService_GenerateShoppingList_FullMethodName        = "/family.v1.FamilyService/GenerateShoppingList"
 	FamilyService_ListShoppingLists_FullMethodName           = "/family.v1.FamilyService/ListShoppingLists"
 	FamilyService_GetShoppingList_FullMethodName             = "/family.v1.FamilyService/GetShoppingList"
@@ -78,6 +80,10 @@ type FamilyServiceClient interface {
 	ListMealPlans(ctx context.Context, in *ListMealPlansRequest, opts ...grpc.CallOption) (*ListMealPlansResponse, error)
 	UpdateMealPlan(ctx context.Context, in *UpdateMealPlanRequest, opts ...grpc.CallOption) (*CreateMealPlanResponse, error)
 	DeleteMealPlan(ctx context.Context, in *DeleteMealPlanRequest, opts ...grpc.CallOption) (*CommonResponse, error)
+	// UpsertMealPlanRating 保存或更新当前用户对已完成家庭菜单的评价
+	UpsertMealPlanRating(ctx context.Context, in *UpsertMealPlanRatingRequest, opts ...grpc.CallOption) (*MealPlanRatingResponse, error)
+	// ListMealPlanRatings 查询某次家庭菜单的成员评价
+	ListMealPlanRatings(ctx context.Context, in *ListMealPlanRatingsRequest, opts ...grpc.CallOption) (*MealPlanRatingsResponse, error)
 	// GenerateShoppingList 根据家庭菜单生成购物清单
 	GenerateShoppingList(ctx context.Context, in *GenerateShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error)
 	// ListShoppingLists 查询家庭购物清单
@@ -260,6 +266,26 @@ func (c *familyServiceClient) DeleteMealPlan(ctx context.Context, in *DeleteMeal
 	return out, nil
 }
 
+func (c *familyServiceClient) UpsertMealPlanRating(ctx context.Context, in *UpsertMealPlanRatingRequest, opts ...grpc.CallOption) (*MealPlanRatingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MealPlanRatingResponse)
+	err := c.cc.Invoke(ctx, FamilyService_UpsertMealPlanRating_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *familyServiceClient) ListMealPlanRatings(ctx context.Context, in *ListMealPlanRatingsRequest, opts ...grpc.CallOption) (*MealPlanRatingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MealPlanRatingsResponse)
+	err := c.cc.Invoke(ctx, FamilyService_ListMealPlanRatings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *familyServiceClient) GenerateShoppingList(ctx context.Context, in *GenerateShoppingListRequest, opts ...grpc.CallOption) (*ShoppingListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ShoppingListResponse)
@@ -355,6 +381,10 @@ type FamilyServiceServer interface {
 	ListMealPlans(context.Context, *ListMealPlansRequest) (*ListMealPlansResponse, error)
 	UpdateMealPlan(context.Context, *UpdateMealPlanRequest) (*CreateMealPlanResponse, error)
 	DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error)
+	// UpsertMealPlanRating 保存或更新当前用户对已完成家庭菜单的评价
+	UpsertMealPlanRating(context.Context, *UpsertMealPlanRatingRequest) (*MealPlanRatingResponse, error)
+	// ListMealPlanRatings 查询某次家庭菜单的成员评价
+	ListMealPlanRatings(context.Context, *ListMealPlanRatingsRequest) (*MealPlanRatingsResponse, error)
 	// GenerateShoppingList 根据家庭菜单生成购物清单
 	GenerateShoppingList(context.Context, *GenerateShoppingListRequest) (*ShoppingListResponse, error)
 	// ListShoppingLists 查询家庭购物清单
@@ -424,6 +454,12 @@ func (UnimplementedFamilyServiceServer) UpdateMealPlan(context.Context, *UpdateM
 }
 func (UnimplementedFamilyServiceServer) DeleteMealPlan(context.Context, *DeleteMealPlanRequest) (*CommonResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteMealPlan not implemented")
+}
+func (UnimplementedFamilyServiceServer) UpsertMealPlanRating(context.Context, *UpsertMealPlanRatingRequest) (*MealPlanRatingResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertMealPlanRating not implemented")
+}
+func (UnimplementedFamilyServiceServer) ListMealPlanRatings(context.Context, *ListMealPlanRatingsRequest) (*MealPlanRatingsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListMealPlanRatings not implemented")
 }
 func (UnimplementedFamilyServiceServer) GenerateShoppingList(context.Context, *GenerateShoppingListRequest) (*ShoppingListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateShoppingList not implemented")
@@ -752,6 +788,42 @@ func _FamilyService_DeleteMealPlan_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FamilyService_UpsertMealPlanRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertMealPlanRatingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).UpsertMealPlanRating(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_UpsertMealPlanRating_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).UpsertMealPlanRating(ctx, req.(*UpsertMealPlanRatingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FamilyService_ListMealPlanRatings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMealPlanRatingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FamilyServiceServer).ListMealPlanRatings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FamilyService_ListMealPlanRatings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FamilyServiceServer).ListMealPlanRatings(ctx, req.(*ListMealPlanRatingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FamilyService_GenerateShoppingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GenerateShoppingListRequest)
 	if err := dec(in); err != nil {
@@ -930,6 +1002,14 @@ var FamilyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteMealPlan",
 			Handler:    _FamilyService_DeleteMealPlan_Handler,
+		},
+		{
+			MethodName: "UpsertMealPlanRating",
+			Handler:    _FamilyService_UpsertMealPlanRating_Handler,
+		},
+		{
+			MethodName: "ListMealPlanRatings",
+			Handler:    _FamilyService_ListMealPlanRatings_Handler,
 		},
 		{
 			MethodName: "GenerateShoppingList",
