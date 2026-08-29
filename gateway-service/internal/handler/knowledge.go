@@ -71,3 +71,28 @@ func (h *KnowledgeHandler) CompleteUpload(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "data": gin.H{"document_id": resp.GetDocumentId(), "status": resp.GetStatus(), "index_version": resp.GetIndexVersion()}})
 }
+
+// DeleteDocument DELETE /api/v1/knowledge-documents/:id 请求删除文档及其所有索引版本。
+func (h *KnowledgeHandler) DeleteDocument(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil || id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 1999, "message": "文档ID无效"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+	resp, err := h.client.DeleteDocument(ctx, &knowledgev1.DeleteDocumentRequest{UserId: int64(middleware.CurrentUserID(c)), DocumentId: int64(id)})
+	if err != nil {
+		log.Printf("DeleteDocument gRPC 调用失败: %v", err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "知识库服务暂不可用"})
+		return
+	}
+	status := http.StatusOK
+	if resp.GetCode() == 4003 {
+		status = http.StatusForbidden
+	}
+	if resp.GetCode() == 4004 {
+		status = http.StatusNotFound
+	}
+	c.JSON(status, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "data": gin.H{"document_id": resp.GetDocumentId(), "status": resp.GetStatus()}})
+}

@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -96,12 +97,35 @@ func main() {
 	dishSvc := service.NewDishService(dishRepo)
 	dishServer := server.NewDishServer(dishSvc)
 	var knowledgeServer *server.KnowledgeServer
+	var outboxSender *provider.RocketMQSender
+	var outboxCancel context.CancelFunc
 	if cfg.OSS.Endpoint != "" && cfg.OSS.AccessKeyID != "" && cfg.OSS.BucketName != "" {
 		ossClient, ossErr := oss.NewClient(oss.Config{Endpoint: cfg.OSS.Endpoint, AccessKeyID: cfg.OSS.AccessKeyID, AccessKeySecret: cfg.OSS.AccessKeySecret, BucketName: cfg.OSS.BucketName})
 		if ossErr != nil {
 			log.Fatalf("初始化文档 OSS 失败: %v", ossErr)
 		}
 		knowledgeServer = server.NewKnowledgeServer(service.NewKnowledgeService(repository.NewKnowledgeRepo(db), familyRepo, ossClient, cfg.OSS.BucketName, cfg.OSS.DocumentPrefix, 10*time.Minute))
+	}
+	if cfg.RocketMQ.Endpoint != "" {
+		outboxSender, err = provider.NewRocketMQSender(cfg.RocketMQ.Endpoint, cfg.RocketMQ.AccessKey, cfg.RocketMQ.AccessSecret, []string{"familyos-rag-document"})
+		if err != nil {
+			log.Fatalf("初始化 RocketMQ Publisher 失败: %v", err)
+		}
+		hostname, hostErr := os.Hostname()
+		if hostErr != nil {
+			log.Fatalf("读取主机名失败: %v", hostErr)
+		}
+		outboxCtx, cancel := context.WithCancel(context.Background())
+		outboxCancel = cancel
+		publisher, publisherErr := service.NewOutboxPublisher(repository.NewKnowledgeRepo(db), outboxSender, service.OutboxPublisherConfig{
+			WorkerID: "logic-service-" + hostname + "-" + strconv.Itoa(os.Getpid()), PollInterval: cfg.RocketMQ.PollInterval,
+			LockTimeout: cfg.RocketMQ.LockTimeout, RetryBase: cfg.RocketMQ.RetryBase, RetryMax: cfg.RocketMQ.RetryMax,
+		})
+		if publisherErr != nil {
+			log.Fatalf("初始化 Outbox Publisher 失败: %v", publisherErr)
+		}
+		go publisher.Run(outboxCtx)
+		log.Println("Outbox Publisher 已启动")
 	}
 
 	mealPlanRepo := repository.NewMealPlanRepo(db)
@@ -138,6 +162,14 @@ func main() {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
 		log.Println("正在关闭服务...")
+		if outboxCancel != nil {
+			outboxCancel()
+		}
+		if outboxSender != nil {
+			if closeErr := outboxSender.Close(); closeErr != nil {
+				log.Printf("关闭 RocketMQ Producer 失败: %v", closeErr)
+			}
+		}
 		grpcServer.GracefulStop()
 	}()
 

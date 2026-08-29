@@ -22,6 +22,7 @@ const (
 	KnowledgeService_EnsurePersonalKnowledgeBase_FullMethodName = "/knowledge.v1.KnowledgeService/EnsurePersonalKnowledgeBase"
 	KnowledgeService_CreateUploadTicket_FullMethodName          = "/knowledge.v1.KnowledgeService/CreateUploadTicket"
 	KnowledgeService_CompleteUpload_FullMethodName              = "/knowledge.v1.KnowledgeService/CompleteUpload"
+	KnowledgeService_DeleteDocument_FullMethodName              = "/knowledge.v1.KnowledgeService/DeleteDocument"
 )
 
 // KnowledgeServiceClient is the client API for KnowledgeService service.
@@ -31,6 +32,7 @@ type KnowledgeServiceClient interface {
 	EnsurePersonalKnowledgeBase(ctx context.Context, in *EnsurePersonalKnowledgeBaseRequest, opts ...grpc.CallOption) (*EnsurePersonalKnowledgeBaseResponse, error)
 	CreateUploadTicket(ctx context.Context, in *CreateUploadTicketRequest, opts ...grpc.CallOption) (*CreateUploadTicketResponse, error)
 	CompleteUpload(ctx context.Context, in *CompleteUploadRequest, opts ...grpc.CallOption) (*CompleteUploadResponse, error)
+	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error)
 }
 
 type knowledgeServiceClient struct {
@@ -71,6 +73,16 @@ func (c *knowledgeServiceClient) CompleteUpload(ctx context.Context, in *Complet
 	return out, nil
 }
 
+func (c *knowledgeServiceClient) DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDocumentResponse)
+	err := c.cc.Invoke(ctx, KnowledgeService_DeleteDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnowledgeServiceServer is the server API for KnowledgeService service.
 // All implementations must embed UnimplementedKnowledgeServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type KnowledgeServiceServer interface {
 	EnsurePersonalKnowledgeBase(context.Context, *EnsurePersonalKnowledgeBaseRequest) (*EnsurePersonalKnowledgeBaseResponse, error)
 	CreateUploadTicket(context.Context, *CreateUploadTicketRequest) (*CreateUploadTicketResponse, error)
 	CompleteUpload(context.Context, *CompleteUploadRequest) (*CompleteUploadResponse, error)
+	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)
 	mustEmbedUnimplementedKnowledgeServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedKnowledgeServiceServer) CreateUploadTicket(context.Context, *
 }
 func (UnimplementedKnowledgeServiceServer) CompleteUpload(context.Context, *CompleteUploadRequest) (*CompleteUploadResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CompleteUpload not implemented")
+}
+func (UnimplementedKnowledgeServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteDocument not implemented")
 }
 func (UnimplementedKnowledgeServiceServer) mustEmbedUnimplementedKnowledgeServiceServer() {}
 func (UnimplementedKnowledgeServiceServer) testEmbeddedByValue()                          {}
@@ -172,6 +188,24 @@ func _KnowledgeService_CompleteUpload_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnowledgeService_DeleteDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeServiceServer).DeleteDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeService_DeleteDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeServiceServer).DeleteDocument(ctx, req.(*DeleteDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnowledgeService_ServiceDesc is the grpc.ServiceDesc for KnowledgeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var KnowledgeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CompleteUpload",
 			Handler:    _KnowledgeService_CompleteUpload_Handler,
+		},
+		{
+			MethodName: "DeleteDocument",
+			Handler:    _KnowledgeService_DeleteDocument_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

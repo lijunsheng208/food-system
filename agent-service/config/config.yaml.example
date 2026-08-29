@@ -1,0 +1,11 @@
+database:
+  dsn: "user:password@tcp(127.0.0.1:3306)/familyos_agent?charset=utf8mb4&parseTime=True&loc=Local"
+
+rocketmq:
+  # RocketMQ 4.x NameServer 地址，例如 "localhost:9876"。
+  endpoint: ""
+  access_key: ""
+  access_secret: ""
+  consumer_group: "familyos-agent-document-indexer"
+  topic: "familyos-rag-document"
+  receive_batch_size: 16

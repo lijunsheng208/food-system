@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
+	"net/http"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -102,23 +103,29 @@ func (c *Client) PresignPut(ctx context.Context, input PresignPutInput) (*Presig
 	return &PresignedPut{URL: url, Headers: headers, ExpiresAt: time.Now().Add(input.ExpiresIn)}, nil
 }
 
-// HeadObject 查询对象元数据，用于确认客户端直传结果。
+// HeadObject 查询对象完整元数据，用于确认客户端直传结果及签名约束字段。
 func (c *Client) HeadObject(ctx context.Context, key string) (*ObjectMetadata, error) {
-	header, err := c.bucket.GetObjectMeta(key)
+	header, err := c.bucket.GetObjectDetailedMeta(key)
 	if err != nil {
 		return nil, fmt.Errorf("查询 OSS 对象失败: %w", err)
-	}
-	metadata := make(map[string]string)
-	for key, values := range header {
-		if len(values) > 0 && strings.HasPrefix(strings.ToLower(key), "x-oss-meta-") {
-			metadata[key[len("X-Oss-Meta-"):]] = values[0]
-		}
 	}
 	contentLength, err := strconv.ParseInt(header.Get("Content-Length"), 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("OSS 对象大小无效: %w", err)
 	}
-	return &ObjectMetadata{ContentLength: contentLength, ContentType: header.Get("Content-Type"), ETag: header.Get("ETag"), Metadata: metadata}, nil
+	return &ObjectMetadata{ContentLength: contentLength, ContentType: header.Get("Content-Type"), ETag: header.Get("ETag"), Metadata: extractUserMetadata(header)}, nil
+}
+
+// extractUserMetadata 提取 OSS 自定义元数据，并统一使用小写键供业务层稳定读取。
+func extractUserMetadata(header http.Header) map[string]string {
+	metadata := make(map[string]string)
+	for key, values := range header {
+		lowerKey := strings.ToLower(key)
+		if len(values) > 0 && strings.HasPrefix(lowerKey, "x-oss-meta-") {
+			metadata[strings.TrimPrefix(lowerKey, "x-oss-meta-")] = values[0]
+		}
+	}
+	return metadata
 }
 
 // PresignGet 生成短期私有下载地址，供受信任的 Agent 或客户端使用。

@@ -110,6 +110,7 @@ func main() {
 		knowledge.GET("/knowledge-bases/personal", knowledgeHandler.EnsurePersonalKnowledgeBase)
 		knowledge.POST("/knowledge-bases/:id/documents/upload-ticket", knowledgeHandler.CreateUploadTicket)
 		knowledge.POST("/knowledge-documents/:id/complete-upload", knowledgeHandler.CompleteUpload)
+		knowledge.DELETE("/knowledge-documents/:id", knowledgeHandler.DeleteDocument)
 
 		family := protected.Group("/family")
 		{

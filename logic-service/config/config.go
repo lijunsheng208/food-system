@@ -16,6 +16,7 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	SMS      SMSConfig      `mapstructure:"sms"`
 	OSS      OSSConfig      `mapstructure:"oss"`
+	RocketMQ RocketMQConfig `mapstructure:"rocketmq"`
 }
 type OSSConfig struct {
 	Endpoint        string `mapstructure:"endpoint"`
@@ -23,6 +24,17 @@ type OSSConfig struct {
 	AccessKeySecret string `mapstructure:"access_key_secret"`
 	BucketName      string `mapstructure:"bucket_name"`
 	DocumentPrefix  string `mapstructure:"document_prefix"`
+}
+
+// RocketMQConfig 配置 Outbox Publisher 使用的 RocketMQ 4.x NameServer 地址。
+type RocketMQConfig struct {
+	Endpoint     string        `mapstructure:"endpoint"`
+	AccessKey    string        `mapstructure:"access_key"`
+	AccessSecret string        `mapstructure:"access_secret"`
+	PollInterval time.Duration `mapstructure:"poll_interval"`
+	LockTimeout  time.Duration `mapstructure:"lock_timeout"`
+	RetryBase    time.Duration `mapstructure:"retry_base"`
+	RetryMax     time.Duration `mapstructure:"retry_max"`
 }
 
 // ServerConfig gRPC 服务配置
@@ -103,6 +115,10 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("sms.daily_limit", 10)
 	v.SetDefault("sms.ip_hourly_limit", 30)
 	v.SetDefault("sms.ip_limit_window", "1h")
+	v.SetDefault("rocketmq.poll_interval", "1s")
+	v.SetDefault("rocketmq.lock_timeout", "1m")
+	v.SetDefault("rocketmq.retry_base", "1s")
+	v.SetDefault("rocketmq.retry_max", "5m")
 
 	// 读取配置文件
 	if err := v.ReadInConfig(); err != nil {

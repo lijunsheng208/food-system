@@ -61,19 +61,27 @@ func (KnowledgeDocument) TableName() string { return "knowledge_document" }
 
 // KnowledgeUploadSession 绑定一次临时 OSS 上传授权和目标文档。
 type KnowledgeUploadSession struct {
-	ID               string    `gorm:"column:id;primaryKey"`
-	KnowledgeBaseID  uint64    `gorm:"column:knowledge_base_id"`
-	DocumentID       uint64    `gorm:"column:document_id"`
-	CreatedBy        uint64    `gorm:"column:created_by"`
-	OSSBucket        string    `gorm:"column:oss_bucket"`
-	OSSObjectKey     string    `gorm:"column:oss_object_key"`
-	OriginalFilename string    `gorm:"column:original_filename"`
-	DeclaredMimeType string    `gorm:"column:declared_mime_type"`
-	DeclaredFileSize uint64    `gorm:"column:declared_file_size"`
-	DeclaredSHA256   *string   `gorm:"column:declared_sha256"`
-	Status           int8      `gorm:"column:status"`
-	ExpiresAt        time.Time `gorm:"column:expires_at"`
+	ID               string     `gorm:"column:id;primaryKey"`
+	KnowledgeBaseID  uint64     `gorm:"column:knowledge_base_id"`
+	DocumentID       uint64     `gorm:"column:document_id"`
+	CreatedBy        uint64     `gorm:"column:created_by"`
+	OSSBucket        string     `gorm:"column:oss_bucket"`
+	OSSObjectKey     string     `gorm:"column:oss_object_key"`
+	OriginalFilename string     `gorm:"column:original_filename"`
+	DeclaredMimeType string     `gorm:"column:declared_mime_type"`
+	DeclaredFileSize uint64     `gorm:"column:declared_file_size"`
+	DeclaredSHA256   *string    `gorm:"column:declared_sha256"`
+	Status           int8       `gorm:"column:status"`
+	ExpiresAt        time.Time  `gorm:"column:expires_at"`
+	ConfirmedAt      *time.Time `gorm:"column:confirmed_at"`
 }
+
+const (
+	OutboxPending int8 = 0
+	OutboxSending int8 = 1
+	OutboxSent    int8 = 2
+	OutboxFailed  int8 = 3
+)
 
 // TableName 返回上传会话表名。
 func (KnowledgeUploadSession) TableName() string { return "knowledge_upload_session" }
@@ -94,6 +102,8 @@ type IntegrationOutbox struct {
 	NextRetryAt   time.Time  `gorm:"column:next_retry_at"`
 	LockedBy      *string    `gorm:"column:locked_by"`
 	LockedAt      *time.Time `gorm:"column:locked_at"`
+	LastError     *string    `gorm:"column:last_error"`
+	PublishedAt   *time.Time `gorm:"column:published_at"`
 }
 
 // TableName 返回 Outbox 表名。

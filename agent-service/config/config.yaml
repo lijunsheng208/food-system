@@ -1,0 +1,11 @@
+database:
+  dsn: "root:20020208@tcp(127.0.0.1:3306)/familyos_agent?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
+
+rocketmq:
+  endpoint: "127.0.0.1:8083"
+  access_key: ""
+  access_secret: ""
+  consumer_group: "familyos-agent-document-indexer"
+  topic: "familyos-rag-document"
+  receive_batch_size: 16
+  invisible_duration: "30s"

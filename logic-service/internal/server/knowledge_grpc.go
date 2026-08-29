@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"errors"
+	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
 	knowledgev1 "github.com/lijunsheng/familyos/proto/gen/knowledge/v1"
 )
@@ -53,4 +54,20 @@ func (s *KnowledgeServer) CompleteUpload(ctx context.Context, req *knowledgev1.C
 		return &knowledgev1.CompleteUploadResponse{Code: 4001, Message: err.Error()}, nil
 	}
 	return &knowledgev1.CompleteUploadResponse{Code: 0, Message: "文档已提交处理", DocumentId: int64(doc.ID), Status: int32(doc.Status), IndexVersion: int32(doc.IndexVersion)}, nil
+}
+
+// DeleteDocument 请求删除文档并投递向量清理事件。
+func (s *KnowledgeServer) DeleteDocument(ctx context.Context, req *knowledgev1.DeleteDocumentRequest) (*knowledgev1.DeleteDocumentResponse, error) {
+	doc, err := s.svc.DeleteDocument(ctx, uint64(req.GetUserId()), uint64(req.GetDocumentId()))
+	if err != nil {
+		code := int32(CodeInternalError)
+		if errors.Is(err, service.ErrKnowledgeNotFound) {
+			code = 4004
+		}
+		if errors.Is(err, service.ErrKnowledgePermission) {
+			code = 4003
+		}
+		return &knowledgev1.DeleteDocumentResponse{Code: code, Message: err.Error()}, nil
+	}
+	return &knowledgev1.DeleteDocumentResponse{Code: CodeSuccess, Message: "文档删除已提交", DocumentId: int64(doc.ID), Status: int32(model.DocumentDeleting)}, nil
 }

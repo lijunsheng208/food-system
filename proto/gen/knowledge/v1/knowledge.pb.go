@@ -437,6 +437,126 @@ func (x *CompleteUploadResponse) GetIndexVersion() int32 {
 	return 0
 }
 
+type DeleteDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	DocumentId    int64                  `protobuf:"varint,2,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentRequest) Reset() {
+	*x = DeleteDocumentRequest{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentRequest) ProtoMessage() {}
+
+func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *DeleteDocumentRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *DeleteDocumentRequest) GetDocumentId() int64 {
+	if x != nil {
+		return x.DocumentId
+	}
+	return 0
+}
+
+type DeleteDocumentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	DocumentId    int64                  `protobuf:"varint,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	Status        int32                  `protobuf:"varint,4,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentResponse) Reset() {
+	*x = DeleteDocumentResponse{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentResponse) ProtoMessage() {}
+
+func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentResponse.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *DeleteDocumentResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *DeleteDocumentResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *DeleteDocumentResponse) GetDocumentId() int64 {
+	if x != nil {
+		return x.DocumentId
+	}
+	return 0
+}
+
+func (x *DeleteDocumentResponse) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
 var File_knowledge_v1_knowledge_proto protoreflect.FileDescriptor
 
 const file_knowledge_v1_knowledge_proto_rawDesc = "" +
@@ -480,11 +600,22 @@ const file_knowledge_v1_knowledge_proto_rawDesc = "" +
 	"\vdocument_id\x18\x03 \x01(\x03R\n" +
 	"documentId\x12\x16\n" +
 	"\x06status\x18\x04 \x01(\x05R\x06status\x12#\n" +
-	"\rindex_version\x18\x05 \x01(\x05R\findexVersion2\xdd\x02\n" +
+	"\rindex_version\x18\x05 \x01(\x05R\findexVersion\"Q\n" +
+	"\x15DeleteDocumentRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1f\n" +
+	"\vdocument_id\x18\x02 \x01(\x03R\n" +
+	"documentId\"\x7f\n" +
+	"\x16DeleteDocumentResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
+	"\vdocument_id\x18\x03 \x01(\x03R\n" +
+	"documentId\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status2\xba\x03\n" +
 	"\x10KnowledgeService\x12\x82\x01\n" +
 	"\x1bEnsurePersonalKnowledgeBase\x120.knowledge.v1.EnsurePersonalKnowledgeBaseRequest\x1a1.knowledge.v1.EnsurePersonalKnowledgeBaseResponse\x12g\n" +
 	"\x12CreateUploadTicket\x12'.knowledge.v1.CreateUploadTicketRequest\x1a(.knowledge.v1.CreateUploadTicketResponse\x12[\n" +
-	"\x0eCompleteUpload\x12#.knowledge.v1.CompleteUploadRequest\x1a$.knowledge.v1.CompleteUploadResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
+	"\x0eCompleteUpload\x12#.knowledge.v1.CompleteUploadRequest\x1a$.knowledge.v1.CompleteUploadResponse\x12[\n" +
+	"\x0eDeleteDocument\x12#.knowledge.v1.DeleteDocumentRequest\x1a$.knowledge.v1.DeleteDocumentResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
 
 var (
 	file_knowledge_v1_knowledge_proto_rawDescOnce sync.Once
@@ -498,7 +629,7 @@ func file_knowledge_v1_knowledge_proto_rawDescGZIP() []byte {
 	return file_knowledge_v1_knowledge_proto_rawDescData
 }
 
-var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_knowledge_v1_knowledge_proto_goTypes = []any{
 	(*EnsurePersonalKnowledgeBaseRequest)(nil),  // 0: knowledge.v1.EnsurePersonalKnowledgeBaseRequest
 	(*EnsurePersonalKnowledgeBaseResponse)(nil), // 1: knowledge.v1.EnsurePersonalKnowledgeBaseResponse
@@ -506,18 +637,22 @@ var file_knowledge_v1_knowledge_proto_goTypes = []any{
 	(*CreateUploadTicketResponse)(nil),          // 3: knowledge.v1.CreateUploadTicketResponse
 	(*CompleteUploadRequest)(nil),               // 4: knowledge.v1.CompleteUploadRequest
 	(*CompleteUploadResponse)(nil),              // 5: knowledge.v1.CompleteUploadResponse
-	nil,                                         // 6: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	(*DeleteDocumentRequest)(nil),               // 6: knowledge.v1.DeleteDocumentRequest
+	(*DeleteDocumentResponse)(nil),              // 7: knowledge.v1.DeleteDocumentResponse
+	nil,                                         // 8: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
 }
 var file_knowledge_v1_knowledge_proto_depIdxs = []int32{
-	6, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	8, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
 	0, // 1: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:input_type -> knowledge.v1.EnsurePersonalKnowledgeBaseRequest
 	2, // 2: knowledge.v1.KnowledgeService.CreateUploadTicket:input_type -> knowledge.v1.CreateUploadTicketRequest
 	4, // 3: knowledge.v1.KnowledgeService.CompleteUpload:input_type -> knowledge.v1.CompleteUploadRequest
-	1, // 4: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
-	3, // 5: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
-	5, // 6: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
+	6, // 4: knowledge.v1.KnowledgeService.DeleteDocument:input_type -> knowledge.v1.DeleteDocumentRequest
+	1, // 5: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
+	3, // 6: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
+	5, // 7: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
+	7, // 8: knowledge.v1.KnowledgeService.DeleteDocument:output_type -> knowledge.v1.DeleteDocumentResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -534,7 +669,7 @@ func file_knowledge_v1_knowledge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_knowledge_v1_knowledge_proto_rawDesc), len(file_knowledge_v1_knowledge_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

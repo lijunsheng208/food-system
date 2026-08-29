@@ -40,3 +40,13 @@ oss:
   access_key_secret: ""
   bucket_name: ""
   document_prefix: "knowledge"
+
+rocketmq:
+  # RocketMQ 4.x NameServer 地址，例如 "localhost:9876"。
+  endpoint: ""
+  access_key: ""
+  access_secret: ""
+  poll_interval: "1s"
+  lock_timeout: "1m"
+  retry_base: "1s"
+  retry_max: "5m"
