@@ -21,6 +21,21 @@ var ErrKnowledgeNotFound = errors.New("知识库或文档不存在")
 var ErrKnowledgeExpired = errors.New("上传会话已过期")
 var ErrKnowledgeObjectMissing = errors.New("文件尚未上传成功或已被清理")
 var ErrKnowledgeMetadataMismatch = errors.New("OSS 文件元数据校验失败")
+var ErrKnowledgeVersionStale = errors.New("文档索引版本已过期")
+var ErrKnowledgeNotReady = errors.New("文档尚不可下载处理")
+
+// DocumentDownloadTicket 包含 Agent 下载并校验文档所需的短期授权和非敏感元数据。
+type DocumentDownloadTicket struct {
+	DocumentID       uint64
+	IndexVersion     uint
+	DownloadURL      string
+	OriginalFilename string
+	FileExtension    string
+	ContentType      string
+	FileSize         uint64
+	SHA256           string
+	ExpiresAt        time.Time
+}
 
 // KnowledgeService 负责知识库文档上传票据和确认流程。
 type KnowledgeService struct {
@@ -30,6 +45,38 @@ type KnowledgeService struct {
 	bucket     string
 	prefix     string
 	ttl        time.Duration
+}
+
+// GetDocumentDownloadTicket 为当前索引版本签发短期 OSS 下载地址。
+func (s *KnowledgeService) GetDocumentDownloadTicket(ctx context.Context, documentID uint64, indexVersion uint, ttl time.Duration) (*DocumentDownloadTicket, error) {
+	if documentID == 0 || indexVersion == 0 || ttl <= 0 {
+		return nil, ErrKnowledgeInvalid
+	}
+	doc, err := s.repo.GetDocument(ctx, documentID)
+	if err != nil {
+		return nil, fmt.Errorf("查询待下载文档失败: %w", err)
+	}
+	if doc == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	if doc.IndexVersion != indexVersion {
+		return nil, ErrKnowledgeVersionStale
+	}
+	if doc.Status != model.DocumentPending && doc.Status != model.DocumentProcessing && doc.Status != model.DocumentCompleted {
+		return nil, ErrKnowledgeNotReady
+	}
+	if doc.FileSize == nil || *doc.FileSize == 0 || doc.OSSObjectKey == "" {
+		return nil, ErrKnowledgeNotReady
+	}
+	url, err := s.storage.PresignGet(ctx, doc.OSSObjectKey, ttl)
+	if err != nil {
+		return nil, fmt.Errorf("签发文档下载地址失败: %w", err)
+	}
+	ticket := &DocumentDownloadTicket{DocumentID: doc.ID, IndexVersion: doc.IndexVersion, DownloadURL: url, OriginalFilename: doc.OriginalFilename, FileExtension: doc.FileExtension, ContentType: doc.MimeType, FileSize: *doc.FileSize, ExpiresAt: time.Now().Add(ttl)}
+	if doc.FileSHA256 != nil {
+		ticket.SHA256 = *doc.FileSHA256
+	}
+	return ticket, nil
 }
 
 // EnsurePersonalKnowledgeBase 获取或创建当前用户的默认个人知识库。

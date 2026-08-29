@@ -9,6 +9,10 @@ service KnowledgeService {
   rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse);
 }
 
+service KnowledgeInternalService {
+  rpc GetDocumentDownloadTicket(GetDocumentDownloadTicketRequest) returns (GetDocumentDownloadTicketResponse);
+}
+
 message EnsurePersonalKnowledgeBaseRequest { int64 user_id = 1; }
 message EnsurePersonalKnowledgeBaseResponse { int32 code = 1; string message = 2; int64 knowledge_base_id = 3; }
 
@@ -18,3 +22,18 @@ message CompleteUploadRequest { int64 user_id = 1; int64 document_id = 2; }
 message CompleteUploadResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; int32 index_version = 5; }
 message DeleteDocumentRequest { int64 user_id = 1; int64 document_id = 2; }
 message DeleteDocumentResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; }
+
+message GetDocumentDownloadTicketRequest { int64 document_id = 1; int32 index_version = 2; }
+message GetDocumentDownloadTicketResponse {
+  int32 code = 1;
+  string message = 2;
+  int64 document_id = 3;
+  int32 index_version = 4;
+  string download_url = 5;
+  string original_filename = 6;
+  string file_extension = 7;
+  string content_type = 8;
+  int64 file_size = 9;
+  string sha256 = 10;
+  string expires_at = 11;
+}

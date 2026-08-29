@@ -12,6 +12,23 @@ import (
 type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	RocketMQ RocketMQConfig `mapstructure:"rocketmq"`
+	Logic    LogicConfig    `mapstructure:"logic"`
+	Worker   WorkerConfig   `mapstructure:"worker"`
+}
+
+// LogicConfig 描述 Agent 调用 Logic 内部接口所需的连接配置。
+type LogicConfig struct {
+	Target         string        `mapstructure:"target"`
+	AgentToken     string        `mapstructure:"agent_token"`
+	RequestTimeout time.Duration `mapstructure:"request_timeout"`
+}
+
+// WorkerConfig 描述索引任务的领取、锁恢复和失败退避策略。
+type WorkerConfig struct {
+	PollInterval time.Duration `mapstructure:"poll_interval"`
+	LockTimeout  time.Duration `mapstructure:"lock_timeout"`
+	RetryBase    time.Duration `mapstructure:"retry_base"`
+	RetryMax     time.Duration `mapstructure:"retry_max"`
 }
 
 // DatabaseConfig 描述 Agent 任务表使用的 MySQL 连接。
@@ -47,6 +64,13 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("rocketmq.topic", "familyos-rag-document")
 	v.SetDefault("rocketmq.receive_batch_size", 16)
 	v.SetDefault("rocketmq.invisible_duration", "30s")
+	v.SetDefault("logic.request_timeout", "10s")
+	v.SetDefault("logic.target", "")
+	v.SetDefault("logic.agent_token", "")
+	v.SetDefault("worker.poll_interval", "1s")
+	v.SetDefault("worker.lock_timeout", "5m")
+	v.SetDefault("worker.retry_base", "5s")
+	v.SetDefault("worker.retry_max", "5m")
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -65,6 +89,12 @@ func Load(configPath string) (*Config, error) {
 	}
 	if cfg.RocketMQ.ConsumerGroup == "" || cfg.RocketMQ.Topic == "" || cfg.RocketMQ.ReceiveBatchSize <= 0 || cfg.RocketMQ.InvisibleDuration < 20*time.Second {
 		return nil, fmt.Errorf("rocketmq 消费配置无效")
+	}
+	if (cfg.Logic.Target == "") != (cfg.Logic.AgentToken == "") || (cfg.Logic.Target != "" && cfg.Logic.RequestTimeout <= 0) {
+		return nil, fmt.Errorf("logic.target 和 logic.agent_token 必须同时配置，且 request_timeout 必须有效")
+	}
+	if cfg.Worker.PollInterval <= 0 || cfg.Worker.LockTimeout <= 0 || cfg.Worker.RetryBase <= 0 || cfg.Worker.RetryMax < cfg.Worker.RetryBase {
+		return nil, fmt.Errorf("worker 任务配置无效")
 	}
 	return &cfg, nil
 }

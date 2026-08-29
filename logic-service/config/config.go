@@ -16,14 +16,21 @@ type Config struct {
 	Redis    RedisConfig    `mapstructure:"redis"`
 	SMS      SMSConfig      `mapstructure:"sms"`
 	OSS      OSSConfig      `mapstructure:"oss"`
+	Internal InternalConfig `mapstructure:"internal"`
 	RocketMQ RocketMQConfig `mapstructure:"rocketmq"`
 }
 type OSSConfig struct {
-	Endpoint        string `mapstructure:"endpoint"`
-	AccessKeyID     string `mapstructure:"access_key_id"`
-	AccessKeySecret string `mapstructure:"access_key_secret"`
-	BucketName      string `mapstructure:"bucket_name"`
-	DocumentPrefix  string `mapstructure:"document_prefix"`
+	Endpoint        string        `mapstructure:"endpoint"`
+	AccessKeyID     string        `mapstructure:"access_key_id"`
+	AccessKeySecret string        `mapstructure:"access_key_secret"`
+	BucketName      string        `mapstructure:"bucket_name"`
+	DocumentPrefix  string        `mapstructure:"document_prefix"`
+	DownloadTTL     time.Duration `mapstructure:"download_ttl"`
+}
+
+// InternalConfig 描述服务间内部接口的鉴权配置。
+type InternalConfig struct {
+	AgentToken string `mapstructure:"agent_token"`
 }
 
 // RocketMQConfig 配置 Outbox Publisher 使用的 RocketMQ 4.x NameServer 地址。
@@ -119,6 +126,8 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("rocketmq.lock_timeout", "1m")
 	v.SetDefault("rocketmq.retry_base", "1s")
 	v.SetDefault("rocketmq.retry_max", "5m")
+	v.SetDefault("oss.download_ttl", "5m")
+	v.SetDefault("internal.agent_token", "")
 
 	// 读取配置文件
 	if err := v.ReadInConfig(); err != nil {
@@ -149,6 +158,9 @@ func Load(configPath string) (*Config, error) {
 	}
 	if cfg.SMS.CodeTTL <= 0 || cfg.SMS.Cooldown <= 0 || cfg.SMS.DailyLimit <= 0 || cfg.SMS.IPHourlyLimit <= 0 || cfg.SMS.IPLimitWindow <= 0 {
 		return nil, fmt.Errorf("sms 验证码和限流配置必须大于 0")
+	}
+	if cfg.OSS.Endpoint != "" && (cfg.OSS.DownloadTTL <= 0 || cfg.Internal.AgentToken == "") {
+		return nil, fmt.Errorf("启用 OSS 文档服务时 oss.download_ttl 和 internal.agent_token 必须配置")
 	}
 
 	return &cfg, nil

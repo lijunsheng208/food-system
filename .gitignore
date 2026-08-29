@@ -1,4 +1,39 @@
-# Local service configuration may contain credentials.
+# 本地服务配置可能包含数据库密码、Token 或第三方密钥。
 gateway-service/config/config.yaml
 logic-service/config/config.yaml
+agent-service/config/config.yaml
 
+# 本地环境变量文件；示例模板需要保留在仓库中。
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# 日志和临时运行文件。
+*.log
+*.pid
+*.tmp
+tmp/
+
+# Go 编译和测试产物。
+bin/
+dist/
+coverage.out
+*.test
+*.prof
+
+# Node/Expo 依赖、缓存和构建产物。
+node_modules/
+.expo/
+.expo-shared/
+.metro-cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE 与操作系统生成文件。
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -9,3 +9,16 @@ rocketmq:
   consumer_group: "familyos-agent-document-indexer"
   topic: "familyos-rag-document"
   receive_batch_size: 16
+  invisible_duration: "30s"
+
+logic:
+  target: "127.0.0.1:50051"
+  # 通过 FAMILYOS_AGENT_LOGIC_AGENT_TOKEN 注入，必须与 Logic 配置一致。
+  agent_token: ""
+  request_timeout: "10s"
+
+worker:
+  poll_interval: "1s"
+  lock_timeout: "5m"
+  retry_base: "5s"
+  retry_max: "5m"

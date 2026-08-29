@@ -40,6 +40,11 @@ oss:
   access_key_secret: ""
   bucket_name: ""
   document_prefix: "knowledge"
+  download_ttl: "5m"
+
+internal:
+  # 通过 FAMILYOS_INTERNAL_AGENT_TOKEN 注入，Logic 与 Agent 必须一致。
+  agent_token: ""
 
 rocketmq:
   # RocketMQ 4.x NameServer 地址，例如 "localhost:9876"。

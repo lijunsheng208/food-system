@@ -557,6 +557,182 @@ func (x *DeleteDocumentResponse) GetStatus() int32 {
 	return 0
 }
 
+type GetDocumentDownloadTicketRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    int64                  `protobuf:"varint,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	IndexVersion  int32                  `protobuf:"varint,2,opt,name=index_version,json=indexVersion,proto3" json:"index_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetDocumentDownloadTicketRequest) Reset() {
+	*x = GetDocumentDownloadTicketRequest{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocumentDownloadTicketRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocumentDownloadTicketRequest) ProtoMessage() {}
+
+func (x *GetDocumentDownloadTicketRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocumentDownloadTicketRequest.ProtoReflect.Descriptor instead.
+func (*GetDocumentDownloadTicketRequest) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetDocumentDownloadTicketRequest) GetDocumentId() int64 {
+	if x != nil {
+		return x.DocumentId
+	}
+	return 0
+}
+
+func (x *GetDocumentDownloadTicketRequest) GetIndexVersion() int32 {
+	if x != nil {
+		return x.IndexVersion
+	}
+	return 0
+}
+
+type GetDocumentDownloadTicketResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Code             int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message          string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	DocumentId       int64                  `protobuf:"varint,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	IndexVersion     int32                  `protobuf:"varint,4,opt,name=index_version,json=indexVersion,proto3" json:"index_version,omitempty"`
+	DownloadUrl      string                 `protobuf:"bytes,5,opt,name=download_url,json=downloadUrl,proto3" json:"download_url,omitempty"`
+	OriginalFilename string                 `protobuf:"bytes,6,opt,name=original_filename,json=originalFilename,proto3" json:"original_filename,omitempty"`
+	FileExtension    string                 `protobuf:"bytes,7,opt,name=file_extension,json=fileExtension,proto3" json:"file_extension,omitempty"`
+	ContentType      string                 `protobuf:"bytes,8,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	FileSize         int64                  `protobuf:"varint,9,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
+	Sha256           string                 `protobuf:"bytes,10,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	ExpiresAt        string                 `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *GetDocumentDownloadTicketResponse) Reset() {
+	*x = GetDocumentDownloadTicketResponse{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetDocumentDownloadTicketResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetDocumentDownloadTicketResponse) ProtoMessage() {}
+
+func (x *GetDocumentDownloadTicketResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetDocumentDownloadTicketResponse.ProtoReflect.Descriptor instead.
+func (*GetDocumentDownloadTicketResponse) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetDocumentId() int64 {
+	if x != nil {
+		return x.DocumentId
+	}
+	return 0
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetIndexVersion() int32 {
+	if x != nil {
+		return x.IndexVersion
+	}
+	return 0
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetDownloadUrl() string {
+	if x != nil {
+		return x.DownloadUrl
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetOriginalFilename() string {
+	if x != nil {
+		return x.OriginalFilename
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetFileExtension() string {
+	if x != nil {
+		return x.FileExtension
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetFileSize() int64 {
+	if x != nil {
+		return x.FileSize
+	}
+	return 0
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *GetDocumentDownloadTicketResponse) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
 var File_knowledge_v1_knowledge_proto protoreflect.FileDescriptor
 
 const file_knowledge_v1_knowledge_proto_rawDesc = "" +
@@ -610,12 +786,33 @@ const file_knowledge_v1_knowledge_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
 	"\vdocument_id\x18\x03 \x01(\x03R\n" +
 	"documentId\x12\x16\n" +
-	"\x06status\x18\x04 \x01(\x05R\x06status2\xba\x03\n" +
+	"\x06status\x18\x04 \x01(\x05R\x06status\"h\n" +
+	" GetDocumentDownloadTicketRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\x03R\n" +
+	"documentId\x12#\n" +
+	"\rindex_version\x18\x02 \x01(\x05R\findexVersion\"\x85\x03\n" +
+	"!GetDocumentDownloadTicketResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1f\n" +
+	"\vdocument_id\x18\x03 \x01(\x03R\n" +
+	"documentId\x12#\n" +
+	"\rindex_version\x18\x04 \x01(\x05R\findexVersion\x12!\n" +
+	"\fdownload_url\x18\x05 \x01(\tR\vdownloadUrl\x12+\n" +
+	"\x11original_filename\x18\x06 \x01(\tR\x10originalFilename\x12%\n" +
+	"\x0efile_extension\x18\a \x01(\tR\rfileExtension\x12!\n" +
+	"\fcontent_type\x18\b \x01(\tR\vcontentType\x12\x1b\n" +
+	"\tfile_size\x18\t \x01(\x03R\bfileSize\x12\x16\n" +
+	"\x06sha256\x18\n" +
+	" \x01(\tR\x06sha256\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\v \x01(\tR\texpiresAt2\xba\x03\n" +
 	"\x10KnowledgeService\x12\x82\x01\n" +
 	"\x1bEnsurePersonalKnowledgeBase\x120.knowledge.v1.EnsurePersonalKnowledgeBaseRequest\x1a1.knowledge.v1.EnsurePersonalKnowledgeBaseResponse\x12g\n" +
 	"\x12CreateUploadTicket\x12'.knowledge.v1.CreateUploadTicketRequest\x1a(.knowledge.v1.CreateUploadTicketResponse\x12[\n" +
 	"\x0eCompleteUpload\x12#.knowledge.v1.CompleteUploadRequest\x1a$.knowledge.v1.CompleteUploadResponse\x12[\n" +
-	"\x0eDeleteDocument\x12#.knowledge.v1.DeleteDocumentRequest\x1a$.knowledge.v1.DeleteDocumentResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
+	"\x0eDeleteDocument\x12#.knowledge.v1.DeleteDocumentRequest\x1a$.knowledge.v1.DeleteDocumentResponse2\x98\x01\n" +
+	"\x18KnowledgeInternalService\x12|\n" +
+	"\x19GetDocumentDownloadTicket\x12..knowledge.v1.GetDocumentDownloadTicketRequest\x1a/.knowledge.v1.GetDocumentDownloadTicketResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
 
 var (
 	file_knowledge_v1_knowledge_proto_rawDescOnce sync.Once
@@ -629,7 +826,7 @@ func file_knowledge_v1_knowledge_proto_rawDescGZIP() []byte {
 	return file_knowledge_v1_knowledge_proto_rawDescData
 }
 
-var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_knowledge_v1_knowledge_proto_goTypes = []any{
 	(*EnsurePersonalKnowledgeBaseRequest)(nil),  // 0: knowledge.v1.EnsurePersonalKnowledgeBaseRequest
 	(*EnsurePersonalKnowledgeBaseResponse)(nil), // 1: knowledge.v1.EnsurePersonalKnowledgeBaseResponse
@@ -639,23 +836,27 @@ var file_knowledge_v1_knowledge_proto_goTypes = []any{
 	(*CompleteUploadResponse)(nil),              // 5: knowledge.v1.CompleteUploadResponse
 	(*DeleteDocumentRequest)(nil),               // 6: knowledge.v1.DeleteDocumentRequest
 	(*DeleteDocumentResponse)(nil),              // 7: knowledge.v1.DeleteDocumentResponse
-	nil,                                         // 8: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	(*GetDocumentDownloadTicketRequest)(nil),    // 8: knowledge.v1.GetDocumentDownloadTicketRequest
+	(*GetDocumentDownloadTicketResponse)(nil),   // 9: knowledge.v1.GetDocumentDownloadTicketResponse
+	nil, // 10: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
 }
 var file_knowledge_v1_knowledge_proto_depIdxs = []int32{
-	8, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
-	0, // 1: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:input_type -> knowledge.v1.EnsurePersonalKnowledgeBaseRequest
-	2, // 2: knowledge.v1.KnowledgeService.CreateUploadTicket:input_type -> knowledge.v1.CreateUploadTicketRequest
-	4, // 3: knowledge.v1.KnowledgeService.CompleteUpload:input_type -> knowledge.v1.CompleteUploadRequest
-	6, // 4: knowledge.v1.KnowledgeService.DeleteDocument:input_type -> knowledge.v1.DeleteDocumentRequest
-	1, // 5: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
-	3, // 6: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
-	5, // 7: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
-	7, // 8: knowledge.v1.KnowledgeService.DeleteDocument:output_type -> knowledge.v1.DeleteDocumentResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	10, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	0,  // 1: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:input_type -> knowledge.v1.EnsurePersonalKnowledgeBaseRequest
+	2,  // 2: knowledge.v1.KnowledgeService.CreateUploadTicket:input_type -> knowledge.v1.CreateUploadTicketRequest
+	4,  // 3: knowledge.v1.KnowledgeService.CompleteUpload:input_type -> knowledge.v1.CompleteUploadRequest
+	6,  // 4: knowledge.v1.KnowledgeService.DeleteDocument:input_type -> knowledge.v1.DeleteDocumentRequest
+	8,  // 5: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:input_type -> knowledge.v1.GetDocumentDownloadTicketRequest
+	1,  // 6: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
+	3,  // 7: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
+	5,  // 8: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
+	7,  // 9: knowledge.v1.KnowledgeService.DeleteDocument:output_type -> knowledge.v1.DeleteDocumentResponse
+	9,  // 10: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:output_type -> knowledge.v1.GetDocumentDownloadTicketResponse
+	6,  // [6:11] is the sub-list for method output_type
+	1,  // [1:6] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_knowledge_v1_knowledge_proto_init() }
@@ -669,9 +870,9 @@ func file_knowledge_v1_knowledge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_knowledge_v1_knowledge_proto_rawDesc), len(file_knowledge_v1_knowledge_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_knowledge_v1_knowledge_proto_goTypes,
 		DependencyIndexes: file_knowledge_v1_knowledge_proto_depIdxs,

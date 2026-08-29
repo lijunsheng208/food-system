@@ -233,3 +233,106 @@ var KnowledgeService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "knowledge/v1/knowledge.proto",
 }
+
+const (
+	KnowledgeInternalService_GetDocumentDownloadTicket_FullMethodName = "/knowledge.v1.KnowledgeInternalService/GetDocumentDownloadTicket"
+)
+
+// KnowledgeInternalServiceClient is the client API for KnowledgeInternalService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type KnowledgeInternalServiceClient interface {
+	GetDocumentDownloadTicket(ctx context.Context, in *GetDocumentDownloadTicketRequest, opts ...grpc.CallOption) (*GetDocumentDownloadTicketResponse, error)
+}
+
+type knowledgeInternalServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewKnowledgeInternalServiceClient(cc grpc.ClientConnInterface) KnowledgeInternalServiceClient {
+	return &knowledgeInternalServiceClient{cc}
+}
+
+func (c *knowledgeInternalServiceClient) GetDocumentDownloadTicket(ctx context.Context, in *GetDocumentDownloadTicketRequest, opts ...grpc.CallOption) (*GetDocumentDownloadTicketResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDocumentDownloadTicketResponse)
+	err := c.cc.Invoke(ctx, KnowledgeInternalService_GetDocumentDownloadTicket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// KnowledgeInternalServiceServer is the server API for KnowledgeInternalService service.
+// All implementations must embed UnimplementedKnowledgeInternalServiceServer
+// for forward compatibility.
+type KnowledgeInternalServiceServer interface {
+	GetDocumentDownloadTicket(context.Context, *GetDocumentDownloadTicketRequest) (*GetDocumentDownloadTicketResponse, error)
+	mustEmbedUnimplementedKnowledgeInternalServiceServer()
+}
+
+// UnimplementedKnowledgeInternalServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedKnowledgeInternalServiceServer struct{}
+
+func (UnimplementedKnowledgeInternalServiceServer) GetDocumentDownloadTicket(context.Context, *GetDocumentDownloadTicketRequest) (*GetDocumentDownloadTicketResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDocumentDownloadTicket not implemented")
+}
+func (UnimplementedKnowledgeInternalServiceServer) mustEmbedUnimplementedKnowledgeInternalServiceServer() {
+}
+func (UnimplementedKnowledgeInternalServiceServer) testEmbeddedByValue() {}
+
+// UnsafeKnowledgeInternalServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to KnowledgeInternalServiceServer will
+// result in compilation errors.
+type UnsafeKnowledgeInternalServiceServer interface {
+	mustEmbedUnimplementedKnowledgeInternalServiceServer()
+}
+
+func RegisterKnowledgeInternalServiceServer(s grpc.ServiceRegistrar, srv KnowledgeInternalServiceServer) {
+	// If the following call panics, it indicates UnimplementedKnowledgeInternalServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&KnowledgeInternalService_ServiceDesc, srv)
+}
+
+func _KnowledgeInternalService_GetDocumentDownloadTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDocumentDownloadTicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeInternalServiceServer).GetDocumentDownloadTicket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeInternalService_GetDocumentDownloadTicket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeInternalServiceServer).GetDocumentDownloadTicket(ctx, req.(*GetDocumentDownloadTicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// KnowledgeInternalService_ServiceDesc is the grpc.ServiceDesc for KnowledgeInternalService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var KnowledgeInternalService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "knowledge.v1.KnowledgeInternalService",
+	HandlerType: (*KnowledgeInternalServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetDocumentDownloadTicket",
+			Handler:    _KnowledgeInternalService_GetDocumentDownloadTicket_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "knowledge/v1/knowledge.proto",
+}

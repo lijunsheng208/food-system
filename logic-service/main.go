@@ -97,6 +97,7 @@ func main() {
 	dishSvc := service.NewDishService(dishRepo)
 	dishServer := server.NewDishServer(dishSvc)
 	var knowledgeServer *server.KnowledgeServer
+	var knowledgeInternalServer *server.KnowledgeInternalServer
 	var outboxSender *provider.RocketMQSender
 	var outboxCancel context.CancelFunc
 	if cfg.OSS.Endpoint != "" && cfg.OSS.AccessKeyID != "" && cfg.OSS.BucketName != "" {
@@ -104,7 +105,9 @@ func main() {
 		if ossErr != nil {
 			log.Fatalf("初始化文档 OSS 失败: %v", ossErr)
 		}
-		knowledgeServer = server.NewKnowledgeServer(service.NewKnowledgeService(repository.NewKnowledgeRepo(db), familyRepo, ossClient, cfg.OSS.BucketName, cfg.OSS.DocumentPrefix, 10*time.Minute))
+		knowledgeSvc := service.NewKnowledgeService(repository.NewKnowledgeRepo(db), familyRepo, ossClient, cfg.OSS.BucketName, cfg.OSS.DocumentPrefix, 10*time.Minute)
+		knowledgeServer = server.NewKnowledgeServer(knowledgeSvc)
+		knowledgeInternalServer = server.NewKnowledgeInternalServer(knowledgeSvc, cfg.Internal.AgentToken, cfg.OSS.DownloadTTL)
 	}
 	if cfg.RocketMQ.Endpoint != "" {
 		outboxSender, err = provider.NewRocketMQSender(cfg.RocketMQ.Endpoint, cfg.RocketMQ.AccessKey, cfg.RocketMQ.AccessSecret, []string{"familyos-rag-document"})
@@ -149,6 +152,7 @@ func main() {
 	familyv1.RegisterFamilyServiceServer(grpcServer, familyServer)
 	if knowledgeServer != nil {
 		knowledgev1.RegisterKnowledgeServiceServer(grpcServer, knowledgeServer)
+		knowledgev1.RegisterKnowledgeInternalServiceServer(grpcServer, knowledgeInternalServer)
 	}
 
 	// 注册反射服务（方便 grpcurl 调试）

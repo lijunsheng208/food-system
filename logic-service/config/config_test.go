@@ -4,6 +4,7 @@ import "testing"
 
 func TestLoadReadsSMSSecretFromEnvironment(t *testing.T) {
 	t.Setenv("FAMILYOS_SMS_CODE_HMAC_SECRET", "test-sms-secret")
+	t.Setenv("FAMILYOS_INTERNAL_AGENT_TOKEN", "test-agent-token")
 	cfg, err := Load("")
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
