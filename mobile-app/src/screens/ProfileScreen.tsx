@@ -157,6 +157,17 @@ export default function ProfileScreen() {
 
           <View style={styles.divider} />
 
+          {/* 个人知识库 */}
+          <TouchableOpacity style={styles.menuItem} activeOpacity={0.6} onPress={() => navigation.navigate('PersonalKnowledge')}>
+            <View style={[styles.menuIconBox, { backgroundColor: '#EEF2FF' }]}>
+              <Ionicons name="library-outline" size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.menuText}>个人知识库</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={styles.divider} />
+
           {/* 退出登录 */}
           <TouchableOpacity
             style={styles.menuItem}

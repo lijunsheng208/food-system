@@ -12,6 +12,7 @@
     "axios": "^1.18.1",
     "expo": "~56.0.12",
     "expo-clipboard": "~56.0.4",
+    "expo-document-picker": "~56.0.4",
     "expo-image-picker": "~56.0.19",
     "expo-keep-awake": "~56.0.3",
     "expo-secure-store": "~56.0.4",

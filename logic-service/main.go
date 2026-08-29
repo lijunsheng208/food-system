@@ -15,11 +15,13 @@ import (
 	"github.com/lijunsheng/familyos/logic-service/internal/repository"
 	"github.com/lijunsheng/familyos/logic-service/internal/server"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
+	"github.com/lijunsheng/familyos/pkg/oss"
 	"github.com/redis/go-redis/v9"
 
 	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
 	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
 	familyv1 "github.com/lijunsheng/familyos/proto/gen/family/v1"
+	knowledgev1 "github.com/lijunsheng/familyos/proto/gen/knowledge/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"gorm.io/driver/mysql"
@@ -93,6 +95,14 @@ func main() {
 	dishRepo := repository.NewDishRepo(db)
 	dishSvc := service.NewDishService(dishRepo)
 	dishServer := server.NewDishServer(dishSvc)
+	var knowledgeServer *server.KnowledgeServer
+	if cfg.OSS.Endpoint != "" && cfg.OSS.AccessKeyID != "" && cfg.OSS.BucketName != "" {
+		ossClient, ossErr := oss.NewClient(oss.Config{Endpoint: cfg.OSS.Endpoint, AccessKeyID: cfg.OSS.AccessKeyID, AccessKeySecret: cfg.OSS.AccessKeySecret, BucketName: cfg.OSS.BucketName})
+		if ossErr != nil {
+			log.Fatalf("初始化文档 OSS 失败: %v", ossErr)
+		}
+		knowledgeServer = server.NewKnowledgeServer(service.NewKnowledgeService(repository.NewKnowledgeRepo(db), familyRepo, ossClient, cfg.OSS.BucketName, cfg.OSS.DocumentPrefix, 10*time.Minute))
+	}
 
 	mealPlanRepo := repository.NewMealPlanRepo(db)
 	mealPlanSvc := service.NewMealPlanService(mealPlanRepo, familyRepo, dishRepo)
@@ -113,6 +123,9 @@ func main() {
 	authv1.RegisterAuthServiceServer(grpcServer, authServer)
 	dishv1.RegisterDishServiceServer(grpcServer, dishServer)
 	familyv1.RegisterFamilyServiceServer(grpcServer, familyServer)
+	if knowledgeServer != nil {
+		knowledgev1.RegisterKnowledgeServiceServer(grpcServer, knowledgeServer)
+	}
 
 	// 注册反射服务（方便 grpcurl 调试）
 	reflection.Register(grpcServer)

@@ -15,6 +15,14 @@ type Config struct {
 	JWT      JWTConfig      `mapstructure:"jwt"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	SMS      SMSConfig      `mapstructure:"sms"`
+	OSS      OSSConfig      `mapstructure:"oss"`
+}
+type OSSConfig struct {
+	Endpoint        string `mapstructure:"endpoint"`
+	AccessKeyID     string `mapstructure:"access_key_id"`
+	AccessKeySecret string `mapstructure:"access_key_secret"`
+	BucketName      string `mapstructure:"bucket_name"`
+	DocumentPrefix  string `mapstructure:"document_prefix"`
 }
 
 // ServerConfig gRPC 服务配置

@@ -69,6 +69,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(conn)
 	dishHandler := handler.NewDishHandler(conn)
 	uploadHandler := handler.NewUploadHandler(ossClient)
+	knowledgeHandler := handler.NewKnowledgeHandler(conn)
 	familyHandler := handler.NewFamilyHandler(conn)
 
 	api := r.Group("/api/v1")
@@ -105,6 +106,10 @@ func main() {
 		{
 			upload.POST("/avatar", uploadHandler.UploadAvatar)
 		}
+		knowledge := protected.Group("")
+		knowledge.GET("/knowledge-bases/personal", knowledgeHandler.EnsurePersonalKnowledgeBase)
+		knowledge.POST("/knowledge-bases/:id/documents/upload-ticket", knowledgeHandler.CreateUploadTicket)
+		knowledge.POST("/knowledge-documents/:id/complete-upload", knowledgeHandler.CompleteUpload)
 
 		family := protected.Group("/family")
 		{

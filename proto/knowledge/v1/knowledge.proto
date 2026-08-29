@@ -1,0 +1,17 @@
+syntax = "proto3";
+package knowledge.v1;
+option go_package = "github.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1";
+
+service KnowledgeService {
+  rpc EnsurePersonalKnowledgeBase(EnsurePersonalKnowledgeBaseRequest) returns (EnsurePersonalKnowledgeBaseResponse);
+  rpc CreateUploadTicket(CreateUploadTicketRequest) returns (CreateUploadTicketResponse);
+  rpc CompleteUpload(CompleteUploadRequest) returns (CompleteUploadResponse);
+}
+
+message EnsurePersonalKnowledgeBaseRequest { int64 user_id = 1; }
+message EnsurePersonalKnowledgeBaseResponse { int32 code = 1; string message = 2; int64 knowledge_base_id = 3; }
+
+message CreateUploadTicketRequest { int64 user_id = 1; int64 knowledge_base_id = 2; string filename = 3; string content_type = 4; int64 file_size = 5; string sha256 = 6; }
+message CreateUploadTicketResponse { int32 code = 1; string message = 2; int64 document_id = 3; string upload_session_id = 4; string upload_url = 5; string method = 6; map<string,string> required_headers = 7; string expires_at = 8; }
+message CompleteUploadRequest { int64 user_id = 1; int64 document_id = 2; }
+message CompleteUploadResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; int32 index_version = 5; }

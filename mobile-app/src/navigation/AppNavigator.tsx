@@ -25,6 +25,7 @@ import JoinFamilyScreen from '../screens/JoinFamilyScreen';
 import FamilyMemberEditScreen from '../screens/FamilyMemberEditScreen';
 import FamilyMealPlanScreen from '../screens/FamilyMealPlanScreen';
 import ShoppingListScreen from '../screens/ShoppingListScreen';
+import PersonalKnowledgeScreen from '../screens/PersonalKnowledgeScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -190,6 +191,7 @@ export default function AppNavigator() {
         component={FamilyMemberEditScreen}
         options={{ animation: 'slide_from_right' }}
       />
+      <Stack.Screen name="PersonalKnowledge" component={PersonalKnowledgeScreen} options={{ animation: 'slide_from_right' }} />
     </Stack.Navigator>
   );
 }

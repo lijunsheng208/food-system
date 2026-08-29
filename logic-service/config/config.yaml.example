@@ -5,7 +5,7 @@ server:
   grpc_port: 50051
 
 database:
-  dsn: "root:password@tcp(127.0.0.1:3306)/familyos_logic?charset=utf8mb4&parseTime=true"
+  dsn: "root:password@tcp(127.0.0.1:3306)/familyos_logic?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai"
 
 jwt:
   # Must match the Gateway JWT secret.
@@ -33,3 +33,10 @@ sms:
   daily_limit: 10
   ip_hourly_limit: 30
   ip_limit_window: "1h"
+
+oss:
+  endpoint: "oss-cn-beijing.aliyuncs.com"
+  access_key_id: ""
+  access_key_secret: ""
+  bucket_name: ""
+  document_prefix: "knowledge"

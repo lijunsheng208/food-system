@@ -104,6 +104,7 @@ export type AuthStackParamList = {
     };
     myRole: number;
   };
+  PersonalKnowledge: undefined;
 };
 
 export type MainTabParamList = {
