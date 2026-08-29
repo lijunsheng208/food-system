@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"gorm.io/gorm"
@@ -85,6 +86,30 @@ func (r *KnowledgeRepo) GetDocument(ctx context.Context, id uint64) (*model.Know
 	}
 	return &value, nil
 }
+
+// CompleteDocumentIndex 仅在版本仍匹配时激活 Agent 已完整写入的索引版本。
+func (r *KnowledgeRepo) CompleteDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var document model.KnowledgeDocument
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&document, documentID).Error; err != nil {
+			return err
+		}
+		if document.IndexVersion != indexVersion {
+			return ErrDocumentIndexVersionChanged
+		}
+		// Agent 回报成功但响应丢失时允许幂等重试，避免重复执行完整索引流程。
+		if document.Status == model.DocumentCompleted && document.ActiveIndexVersion == indexVersion {
+			return nil
+		}
+		if document.Status != model.DocumentPending && document.Status != model.DocumentProcessing && document.Status != model.DocumentCompleted {
+			return ErrDocumentIndexVersionChanged
+		}
+		return tx.Model(&model.KnowledgeDocument{}).Where("id = ?", documentID).Updates(map[string]any{"status": model.DocumentCompleted, "active_index_version": indexVersion}).Error
+	})
+}
+
+// ErrDocumentIndexVersionChanged 表示 Agent 完成的版本已不再是 Logic 当前目标版本。
+var ErrDocumentIndexVersionChanged = errors.New("文档索引版本已经变化")
 
 // GetDocumentWithSession 锁定查询文档及其上传会话，供确认和清理使用。
 func (r *KnowledgeRepo) GetDocumentWithSession(ctx context.Context, id uint64) (*model.KnowledgeDocument, *model.KnowledgeUploadSession, error) {

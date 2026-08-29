@@ -79,6 +79,21 @@ func (s *KnowledgeService) GetDocumentDownloadTicket(ctx context.Context, docume
 	return ticket, nil
 }
 
+// CompleteDocumentIndex 激活 Agent 已成功持久化的当前文档索引版本。
+func (s *KnowledgeService) CompleteDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint) error {
+	if documentID == 0 || indexVersion == 0 {
+		return ErrKnowledgeInvalid
+	}
+	err := s.repo.CompleteDocumentIndex(ctx, documentID, indexVersion)
+	if errors.Is(err, repository.ErrDocumentIndexVersionChanged) {
+		return ErrKnowledgeVersionStale
+	}
+	if err != nil {
+		return fmt.Errorf("更新文档索引完成状态失败: %w", err)
+	}
+	return nil
+}
+
 // EnsurePersonalKnowledgeBase 获取或创建当前用户的默认个人知识库。
 func (s *KnowledgeService) EnsurePersonalKnowledgeBase(ctx context.Context, userID uint64) (*model.KnowledgeBase, error) {
 	if userID == 0 {

@@ -236,6 +236,7 @@ var KnowledgeService_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	KnowledgeInternalService_GetDocumentDownloadTicket_FullMethodName = "/knowledge.v1.KnowledgeInternalService/GetDocumentDownloadTicket"
+	KnowledgeInternalService_CompleteDocumentIndex_FullMethodName     = "/knowledge.v1.KnowledgeInternalService/CompleteDocumentIndex"
 )
 
 // KnowledgeInternalServiceClient is the client API for KnowledgeInternalService service.
@@ -243,6 +244,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type KnowledgeInternalServiceClient interface {
 	GetDocumentDownloadTicket(ctx context.Context, in *GetDocumentDownloadTicketRequest, opts ...grpc.CallOption) (*GetDocumentDownloadTicketResponse, error)
+	CompleteDocumentIndex(ctx context.Context, in *CompleteDocumentIndexRequest, opts ...grpc.CallOption) (*CompleteDocumentIndexResponse, error)
 }
 
 type knowledgeInternalServiceClient struct {
@@ -263,11 +265,22 @@ func (c *knowledgeInternalServiceClient) GetDocumentDownloadTicket(ctx context.C
 	return out, nil
 }
 
+func (c *knowledgeInternalServiceClient) CompleteDocumentIndex(ctx context.Context, in *CompleteDocumentIndexRequest, opts ...grpc.CallOption) (*CompleteDocumentIndexResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CompleteDocumentIndexResponse)
+	err := c.cc.Invoke(ctx, KnowledgeInternalService_CompleteDocumentIndex_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnowledgeInternalServiceServer is the server API for KnowledgeInternalService service.
 // All implementations must embed UnimplementedKnowledgeInternalServiceServer
 // for forward compatibility.
 type KnowledgeInternalServiceServer interface {
 	GetDocumentDownloadTicket(context.Context, *GetDocumentDownloadTicketRequest) (*GetDocumentDownloadTicketResponse, error)
+	CompleteDocumentIndex(context.Context, *CompleteDocumentIndexRequest) (*CompleteDocumentIndexResponse, error)
 	mustEmbedUnimplementedKnowledgeInternalServiceServer()
 }
 
@@ -280,6 +293,9 @@ type UnimplementedKnowledgeInternalServiceServer struct{}
 
 func (UnimplementedKnowledgeInternalServiceServer) GetDocumentDownloadTicket(context.Context, *GetDocumentDownloadTicketRequest) (*GetDocumentDownloadTicketResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetDocumentDownloadTicket not implemented")
+}
+func (UnimplementedKnowledgeInternalServiceServer) CompleteDocumentIndex(context.Context, *CompleteDocumentIndexRequest) (*CompleteDocumentIndexResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CompleteDocumentIndex not implemented")
 }
 func (UnimplementedKnowledgeInternalServiceServer) mustEmbedUnimplementedKnowledgeInternalServiceServer() {
 }
@@ -321,6 +337,24 @@ func _KnowledgeInternalService_GetDocumentDownloadTicket_Handler(srv interface{}
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnowledgeInternalService_CompleteDocumentIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteDocumentIndexRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeInternalServiceServer).CompleteDocumentIndex(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeInternalService_CompleteDocumentIndex_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeInternalServiceServer).CompleteDocumentIndex(ctx, req.(*CompleteDocumentIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnowledgeInternalService_ServiceDesc is the grpc.ServiceDesc for KnowledgeInternalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -331,6 +365,10 @@ var KnowledgeInternalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetDocumentDownloadTicket",
 			Handler:    _KnowledgeInternalService_GetDocumentDownloadTicket_Handler,
+		},
+		{
+			MethodName: "CompleteDocumentIndex",
+			Handler:    _KnowledgeInternalService_CompleteDocumentIndex_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

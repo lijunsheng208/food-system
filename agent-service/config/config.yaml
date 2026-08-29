@@ -9,3 +9,28 @@ rocketmq:
   topic: "familyos-rag-document"
   receive_batch_size: 16
   invisible_duration: "30s"
+
+logic:
+  target: "127.0.0.1:50051"
+  agent_token: "281c1ff4d13f5aeeaf5d361c4d25766e50c9554c85a700fe33e3c8e3f2ffabfa"
+  request_timeout: "10s"
+
+rag:
+  enabled: true
+
+  chunk_size: 500
+  chunk_overlap: 50
+
+  max_file_size: 20971520
+  download_timeout: "30s"
+
+  embedding:
+    base_url: "https://llm-vswf2zh46co61bqo.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
+    api_key: "sk-45e14057cb184212b5b366c5fa842cea"
+    model: "qwen3.7-text-embedding"
+    dimensions: 1024
+    batch_size: 16
+    timeout: "30s"
+
+  pgvector:
+    dsn: "host=127.0.0.1 user=familyos password=familyos_dev dbname=familyos_agent_vector port=5432 sslmode=disable"

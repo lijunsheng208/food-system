@@ -56,5 +56,20 @@ func (c *LogicClient) GetDocumentDownloadTicket(ctx context.Context, documentID 
 	return &service.DocumentDownloadTicket{DownloadURL: resp.GetDownloadUrl(), OriginalFilename: resp.GetOriginalFilename(), FileExtension: resp.GetFileExtension(), ContentType: resp.GetContentType(), FileSize: resp.GetFileSize(), SHA256: resp.GetSha256(), ExpiresAt: expiresAt}, nil
 }
 
+// CompleteDocumentIndex 通知 Logic 激活已经完整持久化的索引版本。
+func (c *LogicClient) CompleteDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint) error {
+	requestCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	requestCtx = metadata.AppendToOutgoingContext(requestCtx, internalTokenHeader, c.token)
+	resp, err := c.client.CompleteDocumentIndex(requestCtx, &knowledgev1.CompleteDocumentIndexRequest{DocumentId: int64(documentID), IndexVersion: int32(indexVersion)})
+	if err != nil {
+		return fmt.Errorf("通知 Logic 索引完成失败: %w", err)
+	}
+	if resp.GetCode() != 0 {
+		return fmt.Errorf("Logic 拒绝激活索引版本: code=%d message=%s", resp.GetCode(), resp.GetMessage())
+	}
+	return nil
+}
+
 // Close 关闭 Logic gRPC 连接。
 func (c *LogicClient) Close() error { return c.conn.Close() }

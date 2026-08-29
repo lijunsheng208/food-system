@@ -24,6 +24,7 @@ type DocumentDownloadTicket struct {
 // DocumentTicketProvider 为 Worker 获取与索引版本绑定的下载票据。
 type DocumentTicketProvider interface {
 	GetDocumentDownloadTicket(ctx context.Context, documentID uint64, indexVersion uint) (*DocumentDownloadTicket, error)
+	CompleteDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint) error
 }
 
 // DocumentTaskProcessor 执行下载、解析、切分和索引；成功返回才允许任务完成。
@@ -91,6 +92,9 @@ func (w *DocumentTaskWorker) processAvailable(ctx context.Context) {
 		ticket, err := w.tickets.GetDocumentDownloadTicket(ctx, task.DocumentID, task.IndexVersion)
 		if err == nil {
 			err = w.processor.ProcessDocument(ctx, task, ticket)
+		}
+		if err == nil {
+			err = w.tickets.CompleteDocumentIndex(ctx, task.DocumentID, task.IndexVersion)
 		}
 		if err != nil {
 			nextRetryAt := time.Now().Add(w.retryDelay(task.Attempts))

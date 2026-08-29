@@ -21,6 +21,110 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type CompleteDocumentIndexRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    int64                  `protobuf:"varint,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	IndexVersion  int32                  `protobuf:"varint,2,opt,name=index_version,json=indexVersion,proto3" json:"index_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteDocumentIndexRequest) Reset() {
+	*x = CompleteDocumentIndexRequest{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteDocumentIndexRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteDocumentIndexRequest) ProtoMessage() {}
+
+func (x *CompleteDocumentIndexRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteDocumentIndexRequest.ProtoReflect.Descriptor instead.
+func (*CompleteDocumentIndexRequest) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CompleteDocumentIndexRequest) GetDocumentId() int64 {
+	if x != nil {
+		return x.DocumentId
+	}
+	return 0
+}
+
+func (x *CompleteDocumentIndexRequest) GetIndexVersion() int32 {
+	if x != nil {
+		return x.IndexVersion
+	}
+	return 0
+}
+
+type CompleteDocumentIndexResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CompleteDocumentIndexResponse) Reset() {
+	*x = CompleteDocumentIndexResponse{}
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CompleteDocumentIndexResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CompleteDocumentIndexResponse) ProtoMessage() {}
+
+func (x *CompleteDocumentIndexResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CompleteDocumentIndexResponse.ProtoReflect.Descriptor instead.
+func (*CompleteDocumentIndexResponse) Descriptor() ([]byte, []int) {
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CompleteDocumentIndexResponse) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *CompleteDocumentIndexResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 type EnsurePersonalKnowledgeBaseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -30,7 +134,7 @@ type EnsurePersonalKnowledgeBaseRequest struct {
 
 func (x *EnsurePersonalKnowledgeBaseRequest) Reset() {
 	*x = EnsurePersonalKnowledgeBaseRequest{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[0]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +146,7 @@ func (x *EnsurePersonalKnowledgeBaseRequest) String() string {
 func (*EnsurePersonalKnowledgeBaseRequest) ProtoMessage() {}
 
 func (x *EnsurePersonalKnowledgeBaseRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[0]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +159,7 @@ func (x *EnsurePersonalKnowledgeBaseRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use EnsurePersonalKnowledgeBaseRequest.ProtoReflect.Descriptor instead.
 func (*EnsurePersonalKnowledgeBaseRequest) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{0}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *EnsurePersonalKnowledgeBaseRequest) GetUserId() int64 {
@@ -76,7 +180,7 @@ type EnsurePersonalKnowledgeBaseResponse struct {
 
 func (x *EnsurePersonalKnowledgeBaseResponse) Reset() {
 	*x = EnsurePersonalKnowledgeBaseResponse{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[1]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -88,7 +192,7 @@ func (x *EnsurePersonalKnowledgeBaseResponse) String() string {
 func (*EnsurePersonalKnowledgeBaseResponse) ProtoMessage() {}
 
 func (x *EnsurePersonalKnowledgeBaseResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[1]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -101,7 +205,7 @@ func (x *EnsurePersonalKnowledgeBaseResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use EnsurePersonalKnowledgeBaseResponse.ProtoReflect.Descriptor instead.
 func (*EnsurePersonalKnowledgeBaseResponse) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{1}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *EnsurePersonalKnowledgeBaseResponse) GetCode() int32 {
@@ -139,7 +243,7 @@ type CreateUploadTicketRequest struct {
 
 func (x *CreateUploadTicketRequest) Reset() {
 	*x = CreateUploadTicketRequest{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[2]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -151,7 +255,7 @@ func (x *CreateUploadTicketRequest) String() string {
 func (*CreateUploadTicketRequest) ProtoMessage() {}
 
 func (x *CreateUploadTicketRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[2]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -164,7 +268,7 @@ func (x *CreateUploadTicketRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUploadTicketRequest.ProtoReflect.Descriptor instead.
 func (*CreateUploadTicketRequest) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{2}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateUploadTicketRequest) GetUserId() int64 {
@@ -225,7 +329,7 @@ type CreateUploadTicketResponse struct {
 
 func (x *CreateUploadTicketResponse) Reset() {
 	*x = CreateUploadTicketResponse{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[3]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -237,7 +341,7 @@ func (x *CreateUploadTicketResponse) String() string {
 func (*CreateUploadTicketResponse) ProtoMessage() {}
 
 func (x *CreateUploadTicketResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[3]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -250,7 +354,7 @@ func (x *CreateUploadTicketResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUploadTicketResponse.ProtoReflect.Descriptor instead.
 func (*CreateUploadTicketResponse) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{3}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreateUploadTicketResponse) GetCode() int32 {
@@ -319,7 +423,7 @@ type CompleteUploadRequest struct {
 
 func (x *CompleteUploadRequest) Reset() {
 	*x = CompleteUploadRequest{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[4]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +435,7 @@ func (x *CompleteUploadRequest) String() string {
 func (*CompleteUploadRequest) ProtoMessage() {}
 
 func (x *CompleteUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[4]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +448,7 @@ func (x *CompleteUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteUploadRequest.ProtoReflect.Descriptor instead.
 func (*CompleteUploadRequest) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{4}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CompleteUploadRequest) GetUserId() int64 {
@@ -374,7 +478,7 @@ type CompleteUploadResponse struct {
 
 func (x *CompleteUploadResponse) Reset() {
 	*x = CompleteUploadResponse{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[5]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -386,7 +490,7 @@ func (x *CompleteUploadResponse) String() string {
 func (*CompleteUploadResponse) ProtoMessage() {}
 
 func (x *CompleteUploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[5]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -399,7 +503,7 @@ func (x *CompleteUploadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteUploadResponse.ProtoReflect.Descriptor instead.
 func (*CompleteUploadResponse) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{5}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CompleteUploadResponse) GetCode() int32 {
@@ -447,7 +551,7 @@ type DeleteDocumentRequest struct {
 
 func (x *DeleteDocumentRequest) Reset() {
 	*x = DeleteDocumentRequest{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -459,7 +563,7 @@ func (x *DeleteDocumentRequest) String() string {
 func (*DeleteDocumentRequest) ProtoMessage() {}
 
 func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[6]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -472,7 +576,7 @@ func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{6}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteDocumentRequest) GetUserId() int64 {
@@ -501,7 +605,7 @@ type DeleteDocumentResponse struct {
 
 func (x *DeleteDocumentResponse) Reset() {
 	*x = DeleteDocumentResponse{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -513,7 +617,7 @@ func (x *DeleteDocumentResponse) String() string {
 func (*DeleteDocumentResponse) ProtoMessage() {}
 
 func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[7]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -526,7 +630,7 @@ func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{7}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DeleteDocumentResponse) GetCode() int32 {
@@ -567,7 +671,7 @@ type GetDocumentDownloadTicketRequest struct {
 
 func (x *GetDocumentDownloadTicketRequest) Reset() {
 	*x = GetDocumentDownloadTicketRequest{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -579,7 +683,7 @@ func (x *GetDocumentDownloadTicketRequest) String() string {
 func (*GetDocumentDownloadTicketRequest) ProtoMessage() {}
 
 func (x *GetDocumentDownloadTicketRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[8]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -592,7 +696,7 @@ func (x *GetDocumentDownloadTicketRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDocumentDownloadTicketRequest.ProtoReflect.Descriptor instead.
 func (*GetDocumentDownloadTicketRequest) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{8}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetDocumentDownloadTicketRequest) GetDocumentId() int64 {
@@ -628,7 +732,7 @@ type GetDocumentDownloadTicketResponse struct {
 
 func (x *GetDocumentDownloadTicketResponse) Reset() {
 	*x = GetDocumentDownloadTicketResponse{}
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -640,7 +744,7 @@ func (x *GetDocumentDownloadTicketResponse) String() string {
 func (*GetDocumentDownloadTicketResponse) ProtoMessage() {}
 
 func (x *GetDocumentDownloadTicketResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_knowledge_v1_knowledge_proto_msgTypes[9]
+	mi := &file_knowledge_v1_knowledge_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -653,7 +757,7 @@ func (x *GetDocumentDownloadTicketResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use GetDocumentDownloadTicketResponse.ProtoReflect.Descriptor instead.
 func (*GetDocumentDownloadTicketResponse) Descriptor() ([]byte, []int) {
-	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{9}
+	return file_knowledge_v1_knowledge_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetDocumentDownloadTicketResponse) GetCode() int32 {
@@ -737,7 +841,14 @@ var File_knowledge_v1_knowledge_proto protoreflect.FileDescriptor
 
 const file_knowledge_v1_knowledge_proto_rawDesc = "" +
 	"\n" +
-	"\x1cknowledge/v1/knowledge.proto\x12\fknowledge.v1\"=\n" +
+	"\x1cknowledge/v1/knowledge.proto\x12\fknowledge.v1\"d\n" +
+	"\x1cCompleteDocumentIndexRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\x03R\n" +
+	"documentId\x12#\n" +
+	"\rindex_version\x18\x02 \x01(\x05R\findexVersion\"M\n" +
+	"\x1dCompleteDocumentIndexResponse\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"=\n" +
 	"\"EnsurePersonalKnowledgeBaseRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\x7f\n" +
 	"#EnsurePersonalKnowledgeBaseResponse\x12\x12\n" +
@@ -810,9 +921,10 @@ const file_knowledge_v1_knowledge_proto_rawDesc = "" +
 	"\x1bEnsurePersonalKnowledgeBase\x120.knowledge.v1.EnsurePersonalKnowledgeBaseRequest\x1a1.knowledge.v1.EnsurePersonalKnowledgeBaseResponse\x12g\n" +
 	"\x12CreateUploadTicket\x12'.knowledge.v1.CreateUploadTicketRequest\x1a(.knowledge.v1.CreateUploadTicketResponse\x12[\n" +
 	"\x0eCompleteUpload\x12#.knowledge.v1.CompleteUploadRequest\x1a$.knowledge.v1.CompleteUploadResponse\x12[\n" +
-	"\x0eDeleteDocument\x12#.knowledge.v1.DeleteDocumentRequest\x1a$.knowledge.v1.DeleteDocumentResponse2\x98\x01\n" +
+	"\x0eDeleteDocument\x12#.knowledge.v1.DeleteDocumentRequest\x1a$.knowledge.v1.DeleteDocumentResponse2\x8a\x02\n" +
 	"\x18KnowledgeInternalService\x12|\n" +
-	"\x19GetDocumentDownloadTicket\x12..knowledge.v1.GetDocumentDownloadTicketRequest\x1a/.knowledge.v1.GetDocumentDownloadTicketResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
+	"\x19GetDocumentDownloadTicket\x12..knowledge.v1.GetDocumentDownloadTicketRequest\x1a/.knowledge.v1.GetDocumentDownloadTicketResponse\x12p\n" +
+	"\x15CompleteDocumentIndex\x12*.knowledge.v1.CompleteDocumentIndexRequest\x1a+.knowledge.v1.CompleteDocumentIndexResponseBCZAgithub.com/lijunsheng/familyos/proto/gen/knowledge/v1;knowledgev1b\x06proto3"
 
 var (
 	file_knowledge_v1_knowledge_proto_rawDescOnce sync.Once
@@ -826,34 +938,38 @@ func file_knowledge_v1_knowledge_proto_rawDescGZIP() []byte {
 	return file_knowledge_v1_knowledge_proto_rawDescData
 }
 
-var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_knowledge_v1_knowledge_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_knowledge_v1_knowledge_proto_goTypes = []any{
-	(*EnsurePersonalKnowledgeBaseRequest)(nil),  // 0: knowledge.v1.EnsurePersonalKnowledgeBaseRequest
-	(*EnsurePersonalKnowledgeBaseResponse)(nil), // 1: knowledge.v1.EnsurePersonalKnowledgeBaseResponse
-	(*CreateUploadTicketRequest)(nil),           // 2: knowledge.v1.CreateUploadTicketRequest
-	(*CreateUploadTicketResponse)(nil),          // 3: knowledge.v1.CreateUploadTicketResponse
-	(*CompleteUploadRequest)(nil),               // 4: knowledge.v1.CompleteUploadRequest
-	(*CompleteUploadResponse)(nil),              // 5: knowledge.v1.CompleteUploadResponse
-	(*DeleteDocumentRequest)(nil),               // 6: knowledge.v1.DeleteDocumentRequest
-	(*DeleteDocumentResponse)(nil),              // 7: knowledge.v1.DeleteDocumentResponse
-	(*GetDocumentDownloadTicketRequest)(nil),    // 8: knowledge.v1.GetDocumentDownloadTicketRequest
-	(*GetDocumentDownloadTicketResponse)(nil),   // 9: knowledge.v1.GetDocumentDownloadTicketResponse
-	nil, // 10: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	(*CompleteDocumentIndexRequest)(nil),        // 0: knowledge.v1.CompleteDocumentIndexRequest
+	(*CompleteDocumentIndexResponse)(nil),       // 1: knowledge.v1.CompleteDocumentIndexResponse
+	(*EnsurePersonalKnowledgeBaseRequest)(nil),  // 2: knowledge.v1.EnsurePersonalKnowledgeBaseRequest
+	(*EnsurePersonalKnowledgeBaseResponse)(nil), // 3: knowledge.v1.EnsurePersonalKnowledgeBaseResponse
+	(*CreateUploadTicketRequest)(nil),           // 4: knowledge.v1.CreateUploadTicketRequest
+	(*CreateUploadTicketResponse)(nil),          // 5: knowledge.v1.CreateUploadTicketResponse
+	(*CompleteUploadRequest)(nil),               // 6: knowledge.v1.CompleteUploadRequest
+	(*CompleteUploadResponse)(nil),              // 7: knowledge.v1.CompleteUploadResponse
+	(*DeleteDocumentRequest)(nil),               // 8: knowledge.v1.DeleteDocumentRequest
+	(*DeleteDocumentResponse)(nil),              // 9: knowledge.v1.DeleteDocumentResponse
+	(*GetDocumentDownloadTicketRequest)(nil),    // 10: knowledge.v1.GetDocumentDownloadTicketRequest
+	(*GetDocumentDownloadTicketResponse)(nil),   // 11: knowledge.v1.GetDocumentDownloadTicketResponse
+	nil, // 12: knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
 }
 var file_knowledge_v1_knowledge_proto_depIdxs = []int32{
-	10, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
-	0,  // 1: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:input_type -> knowledge.v1.EnsurePersonalKnowledgeBaseRequest
-	2,  // 2: knowledge.v1.KnowledgeService.CreateUploadTicket:input_type -> knowledge.v1.CreateUploadTicketRequest
-	4,  // 3: knowledge.v1.KnowledgeService.CompleteUpload:input_type -> knowledge.v1.CompleteUploadRequest
-	6,  // 4: knowledge.v1.KnowledgeService.DeleteDocument:input_type -> knowledge.v1.DeleteDocumentRequest
-	8,  // 5: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:input_type -> knowledge.v1.GetDocumentDownloadTicketRequest
-	1,  // 6: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
-	3,  // 7: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
-	5,  // 8: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
-	7,  // 9: knowledge.v1.KnowledgeService.DeleteDocument:output_type -> knowledge.v1.DeleteDocumentResponse
-	9,  // 10: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:output_type -> knowledge.v1.GetDocumentDownloadTicketResponse
-	6,  // [6:11] is the sub-list for method output_type
-	1,  // [1:6] is the sub-list for method input_type
+	12, // 0: knowledge.v1.CreateUploadTicketResponse.required_headers:type_name -> knowledge.v1.CreateUploadTicketResponse.RequiredHeadersEntry
+	2,  // 1: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:input_type -> knowledge.v1.EnsurePersonalKnowledgeBaseRequest
+	4,  // 2: knowledge.v1.KnowledgeService.CreateUploadTicket:input_type -> knowledge.v1.CreateUploadTicketRequest
+	6,  // 3: knowledge.v1.KnowledgeService.CompleteUpload:input_type -> knowledge.v1.CompleteUploadRequest
+	8,  // 4: knowledge.v1.KnowledgeService.DeleteDocument:input_type -> knowledge.v1.DeleteDocumentRequest
+	10, // 5: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:input_type -> knowledge.v1.GetDocumentDownloadTicketRequest
+	0,  // 6: knowledge.v1.KnowledgeInternalService.CompleteDocumentIndex:input_type -> knowledge.v1.CompleteDocumentIndexRequest
+	3,  // 7: knowledge.v1.KnowledgeService.EnsurePersonalKnowledgeBase:output_type -> knowledge.v1.EnsurePersonalKnowledgeBaseResponse
+	5,  // 8: knowledge.v1.KnowledgeService.CreateUploadTicket:output_type -> knowledge.v1.CreateUploadTicketResponse
+	7,  // 9: knowledge.v1.KnowledgeService.CompleteUpload:output_type -> knowledge.v1.CompleteUploadResponse
+	9,  // 10: knowledge.v1.KnowledgeService.DeleteDocument:output_type -> knowledge.v1.DeleteDocumentResponse
+	11, // 11: knowledge.v1.KnowledgeInternalService.GetDocumentDownloadTicket:output_type -> knowledge.v1.GetDocumentDownloadTicketResponse
+	1,  // 12: knowledge.v1.KnowledgeInternalService.CompleteDocumentIndex:output_type -> knowledge.v1.CompleteDocumentIndexResponse
+	7,  // [7:13] is the sub-list for method output_type
+	1,  // [1:7] is the sub-list for method input_type
 	1,  // [1:1] is the sub-list for extension type_name
 	1,  // [1:1] is the sub-list for extension extendee
 	0,  // [0:1] is the sub-list for field type_name
@@ -870,7 +986,7 @@ func file_knowledge_v1_knowledge_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_knowledge_v1_knowledge_proto_rawDesc), len(file_knowledge_v1_knowledge_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

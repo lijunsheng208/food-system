@@ -49,7 +49,10 @@ export default function PersonalKnowledgeScreen() {
       const ticket = await createUploadTicket(knowledgeBaseId, { filename: name, content_type: contentType, file_size: fileSize });
       await uploadDocumentToOSS(ticket, file.uri, contentType);
       await completeDocumentUpload(ticket.document_id);
-      setUploadDocument((item) => item && item.id === localID ? { ...item, id: ticket.document_id, state: 'pending' } : item);
+      const completedDocument = { id: ticket.document_id, name, size: fileSize, state: 'pending' as const };
+      // 确认接口成功后立即更新本地列表，让上传结果无需重新进入页面即可可见。
+      setDocuments((items) => items.some((item) => item.id === completedDocument.id) ? items : [completedDocument, ...items]);
+      setUploadDocument((item) => item && item.id === localID ? completedDocument : item);
     } catch (error) {
       const message = error instanceof Error ? error.message : '上传失败';
       setUploadDocument((item) => item && item.id === localID ? { ...item, state: 'failed', error: message } : item);

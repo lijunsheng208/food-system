@@ -45,6 +45,9 @@ func (p ticketProviderStub) GetDocumentDownloadTicket(context.Context, uint64, u
 	return &DocumentDownloadTicket{DownloadURL: "https://example.invalid/signed", FileSize: 10, ExpiresAt: time.Now().Add(time.Minute)}, nil
 }
 
+// CompleteDocumentIndex 模拟 Logic 成功激活索引版本。
+func (p ticketProviderStub) CompleteDocumentIndex(context.Context, uint64, uint) error { return nil }
+
 type processorStub struct {
 	err    error
 	called bool
