@@ -7,6 +7,9 @@ service KnowledgeService {
   rpc CreateUploadTicket(CreateUploadTicketRequest) returns (CreateUploadTicketResponse);
   rpc CompleteUpload(CompleteUploadRequest) returns (CompleteUploadResponse);
   rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse);
+  rpc GetDocumentStatus(GetDocumentStatusRequest) returns (GetDocumentStatusResponse);
+  rpc ListKnowledgeDocuments(ListKnowledgeDocumentsRequest) returns (ListKnowledgeDocumentsResponse);
+  rpc GetDocumentViewTicket(GetDocumentViewTicketRequest) returns (GetDocumentViewTicketResponse);
 }
 
 service KnowledgeInternalService {
@@ -26,6 +29,13 @@ message CompleteUploadRequest { int64 user_id = 1; int64 document_id = 2; }
 message CompleteUploadResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; int32 index_version = 5; }
 message DeleteDocumentRequest { int64 user_id = 1; int64 document_id = 2; }
 message DeleteDocumentResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; }
+message GetDocumentStatusRequest { int64 user_id = 1; int64 document_id = 2; }
+message GetDocumentStatusResponse { int32 code = 1; string message = 2; int64 document_id = 3; int32 status = 4; int32 index_version = 5; }
+message ListKnowledgeDocumentsRequest { int64 user_id = 1; int64 knowledge_base_id = 2; }
+message KnowledgeDocumentItem { int64 document_id = 1; string filename = 2; int64 file_size = 3; int32 status = 4; int32 index_version = 5; string created_at = 6; }
+message ListKnowledgeDocumentsResponse { int32 code = 1; string message = 2; repeated KnowledgeDocumentItem documents = 3; }
+message GetDocumentViewTicketRequest { int64 user_id = 1; int64 document_id = 2; }
+message GetDocumentViewTicketResponse { int32 code = 1; string message = 2; int64 document_id = 3; string view_url = 4; string filename = 5; string content_type = 6; string expires_at = 7; }
 
 message GetDocumentDownloadTicketRequest { int64 document_id = 1; int32 index_version = 2; }
 message GetDocumentDownloadTicketResponse {

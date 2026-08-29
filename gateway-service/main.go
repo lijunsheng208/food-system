@@ -108,9 +108,12 @@ func main() {
 		}
 		knowledge := protected.Group("")
 		knowledge.GET("/knowledge-bases/personal", knowledgeHandler.EnsurePersonalKnowledgeBase)
+		knowledge.GET("/knowledge-bases/:id/documents", knowledgeHandler.ListKnowledgeDocuments)
 		knowledge.POST("/knowledge-bases/:id/documents/upload-ticket", knowledgeHandler.CreateUploadTicket)
 		knowledge.POST("/knowledge-documents/:id/complete-upload", knowledgeHandler.CompleteUpload)
 		knowledge.DELETE("/knowledge-documents/:id", knowledgeHandler.DeleteDocument)
+		knowledge.GET("/knowledge-documents/:id/events", knowledgeHandler.DocumentStatusEvents)
+		knowledge.GET("/knowledge-documents/:id/view-ticket", knowledgeHandler.GetDocumentViewTicket)
 
 		family := protected.Group("/family")
 		{

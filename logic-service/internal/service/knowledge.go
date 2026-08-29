@@ -37,6 +37,15 @@ type DocumentDownloadTicket struct {
 	ExpiresAt        time.Time
 }
 
+// DocumentViewTicket 包含用户查看已完成文档所需的短期 OSS 授权。
+type DocumentViewTicket struct {
+	DocumentID  uint64
+	ViewURL     string
+	Filename    string
+	ContentType string
+	ExpiresAt   time.Time
+}
+
 // KnowledgeService 负责知识库文档上传票据和确认流程。
 type KnowledgeService struct {
 	repo       *repository.KnowledgeRepo
@@ -100,6 +109,89 @@ func (s *KnowledgeService) EnsurePersonalKnowledgeBase(ctx context.Context, user
 		return nil, ErrKnowledgePermission
 	}
 	return s.repo.GetOrCreatePersonalBase(ctx, userID)
+}
+
+// GetDocumentStatus 查询用户拥有文档的当前处理状态，供 Gateway SSE 长连接轮询。
+func (s *KnowledgeService) GetDocumentStatus(ctx context.Context, userID, documentID uint64) (*model.KnowledgeDocument, error) {
+	if userID == 0 || documentID == 0 {
+		return nil, ErrKnowledgeInvalid
+	}
+	doc, err := s.repo.GetDocument(ctx, documentID)
+	if err != nil {
+		return nil, fmt.Errorf("查询文档状态失败: %w", err)
+	}
+	if doc == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	base, err := s.repo.GetBase(ctx, doc.KnowledgeBaseID)
+	if err != nil || base == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	if base.ScopeType == model.KnowledgeScopePersonal && (base.OwnerUserID == nil || *base.OwnerUserID != userID) {
+		return nil, ErrKnowledgePermission
+	}
+	return doc, nil
+}
+
+// ListKnowledgeDocuments 查询当前用户个人知识库中的全部可见文档。
+func (s *KnowledgeService) ListKnowledgeDocuments(ctx context.Context, userID, knowledgeBaseID uint64) ([]model.KnowledgeDocument, error) {
+	if userID == 0 || knowledgeBaseID == 0 {
+		return nil, ErrKnowledgeInvalid
+	}
+	base, err := s.repo.GetBase(ctx, knowledgeBaseID)
+	if err != nil {
+		return nil, fmt.Errorf("查询知识库失败: %w", err)
+	}
+	if base == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	if base.ScopeType != model.KnowledgeScopePersonal || base.OwnerUserID == nil || *base.OwnerUserID != userID {
+		return nil, ErrKnowledgePermission
+	}
+	documents, err := s.repo.ListDocuments(ctx, knowledgeBaseID)
+	if err != nil {
+		return nil, fmt.Errorf("查询知识库文档失败: %w", err)
+	}
+	return documents, nil
+}
+
+// GetDocumentViewTicket 校验文档归属和完成状态后签发短期查看地址。
+func (s *KnowledgeService) GetDocumentViewTicket(ctx context.Context, userID, documentID uint64) (*DocumentViewTicket, error) {
+	if userID == 0 || documentID == 0 {
+		return nil, ErrKnowledgeInvalid
+	}
+	doc, err := s.repo.GetDocument(ctx, documentID)
+	if err != nil {
+		return nil, fmt.Errorf("查询待查看文档失败: %w", err)
+	}
+	if doc == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	base, err := s.repo.GetBase(ctx, doc.KnowledgeBaseID)
+	if err != nil || base == nil {
+		return nil, ErrKnowledgeNotFound
+	}
+	if base.ScopeType == model.KnowledgeScopePersonal {
+		if base.OwnerUserID == nil || *base.OwnerUserID != userID {
+			return nil, ErrKnowledgePermission
+		}
+	} else {
+		if s.familyRepo == nil || base.FamilyID == nil {
+			return nil, ErrKnowledgePermission
+		}
+		member, memberErr := s.familyRepo.GetMember(ctx, *base.FamilyID, userID)
+		if memberErr != nil || member == nil {
+			return nil, ErrKnowledgePermission
+		}
+	}
+	if doc.Status != model.DocumentCompleted || doc.ActiveIndexVersion == 0 {
+		return nil, ErrKnowledgeNotReady
+	}
+	url, err := s.storage.PresignGet(ctx, doc.OSSObjectKey, s.ttl)
+	if err != nil {
+		return nil, fmt.Errorf("签发文档查看地址失败: %w", err)
+	}
+	return &DocumentViewTicket{DocumentID: doc.ID, ViewURL: url, Filename: doc.OriginalFilename, ContentType: doc.MimeType, ExpiresAt: time.Now().Add(s.ttl)}, nil
 }
 
 // NewKnowledgeService 创建知识库服务。

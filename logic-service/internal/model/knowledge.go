@@ -54,6 +54,7 @@ type KnowledgeDocument struct {
 	ActiveIndexVersion uint       `gorm:"column:active_index_version"`
 	UploadExpiresAt    *time.Time `gorm:"column:upload_expires_at"`
 	UploadedAt         *time.Time `gorm:"column:uploaded_at"`
+	CreatedAt          time.Time  `gorm:"column:created_at"`
 }
 
 // TableName 返回文档表名。

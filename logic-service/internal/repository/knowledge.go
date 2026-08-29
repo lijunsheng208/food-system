@@ -87,6 +87,13 @@ func (r *KnowledgeRepo) GetDocument(ctx context.Context, id uint64) (*model.Know
 	return &value, nil
 }
 
+// ListDocuments 查询知识库中已完成索引的文档，并按最新上传顺序返回。
+func (r *KnowledgeRepo) ListDocuments(ctx context.Context, knowledgeBaseID uint64) ([]model.KnowledgeDocument, error) {
+	var documents []model.KnowledgeDocument
+	err := r.db.WithContext(ctx).Where("knowledge_base_id = ? AND status = ?", knowledgeBaseID, model.DocumentCompleted).Order("created_at DESC").Find(&documents).Error
+	return documents, err
+}
+
 // CompleteDocumentIndex 仅在版本仍匹配时激活 Agent 已完整写入的索引版本。
 func (r *KnowledgeRepo) CompleteDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {

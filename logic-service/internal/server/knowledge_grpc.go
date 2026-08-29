@@ -6,6 +6,7 @@ import (
 	"github.com/lijunsheng/familyos/logic-service/internal/model"
 	"github.com/lijunsheng/familyos/logic-service/internal/service"
 	knowledgev1 "github.com/lijunsheng/familyos/proto/gen/knowledge/v1"
+	"time"
 )
 
 // KnowledgeServer 提供知识库文档上传接口。
@@ -70,4 +71,52 @@ func (s *KnowledgeServer) DeleteDocument(ctx context.Context, req *knowledgev1.D
 		return &knowledgev1.DeleteDocumentResponse{Code: code, Message: err.Error()}, nil
 	}
 	return &knowledgev1.DeleteDocumentResponse{Code: CodeSuccess, Message: "文档删除已提交", DocumentId: int64(doc.ID), Status: int32(model.DocumentDeleting)}, nil
+}
+
+// GetDocumentStatus 返回当前用户文档的处理状态。
+func (s *KnowledgeServer) GetDocumentStatus(ctx context.Context, req *knowledgev1.GetDocumentStatusRequest) (*knowledgev1.GetDocumentStatusResponse, error) {
+	doc, err := s.svc.GetDocumentStatus(ctx, uint64(req.GetUserId()), uint64(req.GetDocumentId()))
+	if err != nil {
+		return &knowledgev1.GetDocumentStatusResponse{Code: 4004, Message: err.Error()}, nil
+	}
+	return &knowledgev1.GetDocumentStatusResponse{Code: 0, Message: "查询成功", DocumentId: int64(doc.ID), Status: int32(doc.Status), IndexVersion: int32(doc.IndexVersion)}, nil
+}
+
+// ListKnowledgeDocuments 返回当前用户个人知识库中的文档列表。
+func (s *KnowledgeServer) ListKnowledgeDocuments(ctx context.Context, req *knowledgev1.ListKnowledgeDocumentsRequest) (*knowledgev1.ListKnowledgeDocumentsResponse, error) {
+	documents, err := s.svc.ListKnowledgeDocuments(ctx, uint64(req.GetUserId()), uint64(req.GetKnowledgeBaseId()))
+	if err != nil {
+		return &knowledgev1.ListKnowledgeDocumentsResponse{Code: 4003, Message: err.Error()}, nil
+	}
+	items := make([]*knowledgev1.KnowledgeDocumentItem, 0, len(documents))
+	for _, doc := range documents {
+		var size int64
+		if doc.FileSize != nil {
+			size = int64(*doc.FileSize)
+		}
+		items = append(items, &knowledgev1.KnowledgeDocumentItem{DocumentId: int64(doc.ID), Filename: doc.OriginalFilename, FileSize: size, Status: int32(doc.Status), IndexVersion: int32(doc.IndexVersion), CreatedAt: doc.CreatedAt.Format(time.RFC3339)})
+	}
+	return &knowledgev1.ListKnowledgeDocumentsResponse{Code: 0, Message: "查询成功", Documents: items}, nil
+}
+
+// GetDocumentViewTicket 为有权限的用户签发已完成文档的短期查看地址。
+func (s *KnowledgeServer) GetDocumentViewTicket(ctx context.Context, req *knowledgev1.GetDocumentViewTicketRequest) (*knowledgev1.GetDocumentViewTicketResponse, error) {
+	ticket, err := s.svc.GetDocumentViewTicket(ctx, uint64(req.GetUserId()), uint64(req.GetDocumentId()))
+	if err != nil {
+		code := int32(CodeInternalError)
+		if errors.Is(err, service.ErrKnowledgeInvalid) {
+			code = 4001
+		}
+		if errors.Is(err, service.ErrKnowledgePermission) {
+			code = 4003
+		}
+		if errors.Is(err, service.ErrKnowledgeNotFound) {
+			code = 4004
+		}
+		if errors.Is(err, service.ErrKnowledgeNotReady) {
+			code = 4009
+		}
+		return &knowledgev1.GetDocumentViewTicketResponse{Code: code, Message: err.Error()}, nil
+	}
+	return &knowledgev1.GetDocumentViewTicketResponse{Code: 0, Message: "查看票据创建成功", DocumentId: int64(ticket.DocumentID), ViewUrl: ticket.ViewURL, Filename: ticket.Filename, ContentType: ticket.ContentType, ExpiresAt: ticket.ExpiresAt.Format(time.RFC3339)}, nil
 }

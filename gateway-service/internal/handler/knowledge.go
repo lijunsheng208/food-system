@@ -29,6 +29,51 @@ func (h *KnowledgeHandler) EnsurePersonalKnowledgeBase(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "knowledge_base_id": resp.GetKnowledgeBaseId()})
 }
 
+// ListKnowledgeDocuments 查询当前用户个人知识库中的文档列表。
+func (h *KnowledgeHandler) ListKnowledgeDocuments(c *gin.Context) {
+	baseID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || baseID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "知识库ID无效"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.ListKnowledgeDocuments(ctx, &knowledgev1.ListKnowledgeDocumentsRequest{UserId: int64(middleware.CurrentUserID(c)), KnowledgeBaseId: baseID})
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "知识库服务暂不可用"})
+		return
+	}
+	documents := make([]gin.H, 0, len(resp.GetDocuments()))
+	for _, doc := range resp.GetDocuments() {
+		documents = append(documents, gin.H{"document_id": doc.GetDocumentId(), "filename": doc.GetFilename(), "file_size": doc.GetFileSize(), "status": doc.GetStatus(), "index_version": doc.GetIndexVersion(), "created_at": doc.GetCreatedAt()})
+	}
+	c.JSON(http.StatusOK, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "data": gin.H{"documents": documents}})
+}
+
+// GetDocumentViewTicket 获取当前用户可访问文档的短期查看地址。
+func (h *KnowledgeHandler) GetDocumentViewTicket(c *gin.Context) {
+	documentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || documentID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "文档ID无效"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	resp, err := h.client.GetDocumentViewTicket(ctx, &knowledgev1.GetDocumentViewTicketRequest{UserId: int64(middleware.CurrentUserID(c)), DocumentId: documentID})
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "知识库服务暂不可用"})
+		return
+	}
+	status := http.StatusOK
+	if resp.GetCode() == 4003 {
+		status = http.StatusForbidden
+	}
+	if resp.GetCode() == 4004 {
+		status = http.StatusNotFound
+	}
+	c.JSON(status, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "data": gin.H{"document_id": resp.GetDocumentId(), "view_url": resp.GetViewUrl(), "filename": resp.GetFilename(), "content_type": resp.GetContentType(), "expires_at": resp.GetExpiresAt()}})
+}
+
 // NewKnowledgeHandler 创建处理器。
 func NewKnowledgeHandler(conn *grpc.ClientConn) *KnowledgeHandler {
 	return &KnowledgeHandler{client: knowledgev1.NewKnowledgeServiceClient(conn)}
@@ -95,4 +140,45 @@ func (h *KnowledgeHandler) DeleteDocument(c *gin.Context) {
 		status = http.StatusNotFound
 	}
 	c.JSON(status, gin.H{"code": resp.GetCode(), "message": resp.GetMessage(), "data": gin.H{"document_id": resp.GetDocumentId(), "status": resp.GetStatus()}})
+}
+
+// DocumentStatusEvents 通过 SSE 推送文档处理状态，状态终结后关闭连接。
+func (h *KnowledgeHandler) DocumentStatusEvents(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || id <= 0 {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	ctx := c.Request.Context()
+	var last int32 = -1
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	for {
+		callCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		resp, callErr := h.client.GetDocumentStatus(callCtx, &knowledgev1.GetDocumentStatusRequest{UserId: int64(middleware.CurrentUserID(c)), DocumentId: id})
+		cancel()
+		if callErr != nil {
+			return
+		}
+		if resp.GetCode() != 0 {
+			return
+		}
+		if resp.GetStatus() != last {
+			last = resp.GetStatus()
+			c.SSEvent("document.status", gin.H{"document_id": id, "status": resp.GetStatus(), "index_version": resp.GetIndexVersion()})
+			c.Writer.Flush()
+			if resp.GetStatus() == 3 || resp.GetStatus() == 4 || resp.GetStatus() == 6 {
+				return
+			}
+		}
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+		}
+	}
 }

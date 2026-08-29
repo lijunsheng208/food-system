@@ -23,6 +23,9 @@ const (
 	KnowledgeService_CreateUploadTicket_FullMethodName          = "/knowledge.v1.KnowledgeService/CreateUploadTicket"
 	KnowledgeService_CompleteUpload_FullMethodName              = "/knowledge.v1.KnowledgeService/CompleteUpload"
 	KnowledgeService_DeleteDocument_FullMethodName              = "/knowledge.v1.KnowledgeService/DeleteDocument"
+	KnowledgeService_GetDocumentStatus_FullMethodName           = "/knowledge.v1.KnowledgeService/GetDocumentStatus"
+	KnowledgeService_ListKnowledgeDocuments_FullMethodName      = "/knowledge.v1.KnowledgeService/ListKnowledgeDocuments"
+	KnowledgeService_GetDocumentViewTicket_FullMethodName       = "/knowledge.v1.KnowledgeService/GetDocumentViewTicket"
 )
 
 // KnowledgeServiceClient is the client API for KnowledgeService service.
@@ -33,6 +36,9 @@ type KnowledgeServiceClient interface {
 	CreateUploadTicket(ctx context.Context, in *CreateUploadTicketRequest, opts ...grpc.CallOption) (*CreateUploadTicketResponse, error)
 	CompleteUpload(ctx context.Context, in *CompleteUploadRequest, opts ...grpc.CallOption) (*CompleteUploadResponse, error)
 	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error)
+	GetDocumentStatus(ctx context.Context, in *GetDocumentStatusRequest, opts ...grpc.CallOption) (*GetDocumentStatusResponse, error)
+	ListKnowledgeDocuments(ctx context.Context, in *ListKnowledgeDocumentsRequest, opts ...grpc.CallOption) (*ListKnowledgeDocumentsResponse, error)
+	GetDocumentViewTicket(ctx context.Context, in *GetDocumentViewTicketRequest, opts ...grpc.CallOption) (*GetDocumentViewTicketResponse, error)
 }
 
 type knowledgeServiceClient struct {
@@ -83,6 +89,36 @@ func (c *knowledgeServiceClient) DeleteDocument(ctx context.Context, in *DeleteD
 	return out, nil
 }
 
+func (c *knowledgeServiceClient) GetDocumentStatus(ctx context.Context, in *GetDocumentStatusRequest, opts ...grpc.CallOption) (*GetDocumentStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDocumentStatusResponse)
+	err := c.cc.Invoke(ctx, KnowledgeService_GetDocumentStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knowledgeServiceClient) ListKnowledgeDocuments(ctx context.Context, in *ListKnowledgeDocumentsRequest, opts ...grpc.CallOption) (*ListKnowledgeDocumentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListKnowledgeDocumentsResponse)
+	err := c.cc.Invoke(ctx, KnowledgeService_ListKnowledgeDocuments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *knowledgeServiceClient) GetDocumentViewTicket(ctx context.Context, in *GetDocumentViewTicketRequest, opts ...grpc.CallOption) (*GetDocumentViewTicketResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetDocumentViewTicketResponse)
+	err := c.cc.Invoke(ctx, KnowledgeService_GetDocumentViewTicket_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KnowledgeServiceServer is the server API for KnowledgeService service.
 // All implementations must embed UnimplementedKnowledgeServiceServer
 // for forward compatibility.
@@ -91,6 +127,9 @@ type KnowledgeServiceServer interface {
 	CreateUploadTicket(context.Context, *CreateUploadTicketRequest) (*CreateUploadTicketResponse, error)
 	CompleteUpload(context.Context, *CompleteUploadRequest) (*CompleteUploadResponse, error)
 	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)
+	GetDocumentStatus(context.Context, *GetDocumentStatusRequest) (*GetDocumentStatusResponse, error)
+	ListKnowledgeDocuments(context.Context, *ListKnowledgeDocumentsRequest) (*ListKnowledgeDocumentsResponse, error)
+	GetDocumentViewTicket(context.Context, *GetDocumentViewTicketRequest) (*GetDocumentViewTicketResponse, error)
 	mustEmbedUnimplementedKnowledgeServiceServer()
 }
 
@@ -112,6 +151,15 @@ func (UnimplementedKnowledgeServiceServer) CompleteUpload(context.Context, *Comp
 }
 func (UnimplementedKnowledgeServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteDocument not implemented")
+}
+func (UnimplementedKnowledgeServiceServer) GetDocumentStatus(context.Context, *GetDocumentStatusRequest) (*GetDocumentStatusResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDocumentStatus not implemented")
+}
+func (UnimplementedKnowledgeServiceServer) ListKnowledgeDocuments(context.Context, *ListKnowledgeDocumentsRequest) (*ListKnowledgeDocumentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListKnowledgeDocuments not implemented")
+}
+func (UnimplementedKnowledgeServiceServer) GetDocumentViewTicket(context.Context, *GetDocumentViewTicketRequest) (*GetDocumentViewTicketResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetDocumentViewTicket not implemented")
 }
 func (UnimplementedKnowledgeServiceServer) mustEmbedUnimplementedKnowledgeServiceServer() {}
 func (UnimplementedKnowledgeServiceServer) testEmbeddedByValue()                          {}
@@ -206,6 +254,60 @@ func _KnowledgeService_DeleteDocument_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KnowledgeService_GetDocumentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDocumentStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeServiceServer).GetDocumentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeService_GetDocumentStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeServiceServer).GetDocumentStatus(ctx, req.(*GetDocumentStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnowledgeService_ListKnowledgeDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListKnowledgeDocumentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeServiceServer).ListKnowledgeDocuments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeService_ListKnowledgeDocuments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeServiceServer).ListKnowledgeDocuments(ctx, req.(*ListKnowledgeDocumentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KnowledgeService_GetDocumentViewTicket_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDocumentViewTicketRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KnowledgeServiceServer).GetDocumentViewTicket(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KnowledgeService_GetDocumentViewTicket_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KnowledgeServiceServer).GetDocumentViewTicket(ctx, req.(*GetDocumentViewTicketRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KnowledgeService_ServiceDesc is the grpc.ServiceDesc for KnowledgeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +330,18 @@ var KnowledgeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDocument",
 			Handler:    _KnowledgeService_DeleteDocument_Handler,
+		},
+		{
+			MethodName: "GetDocumentStatus",
+			Handler:    _KnowledgeService_GetDocumentStatus_Handler,
+		},
+		{
+			MethodName: "ListKnowledgeDocuments",
+			Handler:    _KnowledgeService_ListKnowledgeDocuments_Handler,
+		},
+		{
+			MethodName: "GetDocumentViewTicket",
+			Handler:    _KnowledgeService_GetDocumentViewTicket_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
