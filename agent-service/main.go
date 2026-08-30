@@ -118,7 +118,7 @@ func main() {
 			if modelErr != nil {
 				log.Fatalf("初始化 ReAct ChatModel 失败: %v", modelErr)
 			}
-			chatService, chatErr := agentgraph.NewChatGraph(rewriteModel, chatModel, hybrid, agentgraph.Config{MaxSteps: cfg.Agent.MaxSteps, TopK: cfg.Agent.TopK})
+			chatService, chatErr := agentgraph.NewChatGraphWithTools(rewriteModel, chatModel, hybrid, logicClient, logicClient, agentgraph.Config{MaxSteps: cfg.Agent.MaxSteps, TopK: cfg.Agent.TopK})
 			if chatErr != nil {
 				log.Fatalf("初始化 ReAct 问答服务失败: %v", chatErr)
 			}

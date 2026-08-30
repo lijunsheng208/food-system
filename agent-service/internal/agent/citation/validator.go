@@ -24,6 +24,16 @@ func (s *Store) Replace(items []Citation) {
 	s.items = append([]Citation(nil), items...)
 }
 
+// Add 追加本轮 Tool 产生的引用，保留之前已经确认的检索证据。
+func (s *Store) Add(items ...Citation) {
+	if len(items) == 0 {
+		return
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.items = append(s.items, items...)
+}
+
 // List 返回引用快照，调用方不能修改 Store 内部切片。
 func (s *Store) List() []Citation {
 	s.mu.RLock()

@@ -45,7 +45,7 @@ rag:
     candidate_k: 50
 
   rerank:
-    enabled: false
+    enabled: true
     # 兼容 Cohere/Jina 风格的 POST /rerank 接口。
     base_url: "https://llm-vswf2zh46co61bqo.cn-beijing.maas.aliyuncs.com/compatible-api/v1"
     api_key: "sk-45e14057cb184212b5b366c5fa842cea"
@@ -69,7 +69,7 @@ agent:
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
     api_key: "sk-45e14057cb184212b5b366c5fa842cea"
     model: "qwen3.6-flash"
-    timeout: "15s"
+    timeout: "60s"
     max_tokens: 256
   chat:
     base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"

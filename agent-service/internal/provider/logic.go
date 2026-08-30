@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/lijunsheng/familyos/agent-service/internal/service"
+	authv1 "github.com/lijunsheng/familyos/proto/gen/auth/v1"
+	dishv1 "github.com/lijunsheng/familyos/proto/gen/dish/v1"
 	knowledgev1 "github.com/lijunsheng/familyos/proto/gen/knowledge/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,6 +20,8 @@ const internalTokenHeader = "x-familyos-internal-token"
 type LogicClient struct {
 	conn    *grpc.ClientConn
 	client  knowledgev1.KnowledgeInternalServiceClient
+	auth    authv1.AuthServiceClient
+	dish    dishv1.DishServiceClient
 	token   string
 	timeout time.Duration
 }
@@ -31,7 +35,43 @@ func NewLogicClient(target, token string, timeout time.Duration) (*LogicClient, 
 	if err != nil {
 		return nil, fmt.Errorf("连接 Logic 内部接口失败: %w", err)
 	}
-	return &LogicClient{conn: conn, client: knowledgev1.NewKnowledgeInternalServiceClient(conn), token: token, timeout: timeout}, nil
+	return &LogicClient{conn: conn, client: knowledgev1.NewKnowledgeInternalServiceClient(conn), auth: authv1.NewAuthServiceClient(conn), dish: dishv1.NewDishServiceClient(conn), token: token, timeout: timeout}, nil
+}
+
+// ListDietaryPreferences 查询指定用户的个人饮食偏好，用户 ID 由服务端请求状态注入。
+func (c *LogicClient) ListDietaryPreferences(ctx context.Context, userID uint64) ([]*authv1.DietaryPreferenceInfo, error) {
+	if userID == 0 {
+		return nil, fmt.Errorf("查询饮食偏好用户无效")
+	}
+	requestCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	requestCtx = metadata.AppendToOutgoingContext(requestCtx, internalTokenHeader, c.token)
+	resp, err := c.auth.ListDietaryPreferences(requestCtx, &authv1.ListDietaryPreferencesRequest{UserId: int64(userID)})
+	if err != nil {
+		return nil, fmt.Errorf("请求 Logic 饮食偏好失败: %w", err)
+	}
+	if resp.GetCode() != 0 {
+		return nil, fmt.Errorf("Logic 拒绝查询饮食偏好: code=%d message=%s", resp.GetCode(), resp.GetMessage())
+	}
+	return resp.GetPreferences(), nil
+}
+
+// SearchDishes 按关键字搜索系统中已上架的菜谱。
+func (c *LogicClient) SearchDishes(ctx context.Context, keyword string) ([]*dishv1.DishInfo, error) {
+	if keyword == "" {
+		return nil, fmt.Errorf("菜谱搜索关键字不能为空")
+	}
+	requestCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	requestCtx = metadata.AppendToOutgoingContext(requestCtx, internalTokenHeader, c.token)
+	resp, err := c.dish.SearchDishes(requestCtx, &dishv1.SearchDishesRequest{Keyword: keyword})
+	if err != nil {
+		return nil, fmt.Errorf("请求 Logic 菜谱搜索失败: %w", err)
+	}
+	if resp.GetCode() != 0 {
+		return nil, fmt.Errorf("Logic 拒绝搜索菜谱: code=%d message=%s", resp.GetCode(), resp.GetMessage())
+	}
+	return resp.GetDishes(), nil
 }
 
 // GetDocumentDownloadTicket 获取与任务索引版本严格匹配的短期下载票据。

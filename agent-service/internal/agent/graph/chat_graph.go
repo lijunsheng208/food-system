@@ -28,20 +28,35 @@ type Config struct {
 type ChatGraph struct {
 	model    model.ToolCallingChatModel
 	searcher agenttools.KnowledgeSearcher
+	dietary  agenttools.DietaryPreferencesProvider
+	dishes   agenttools.DishSearcher
 	rewriter compose.Runnable[rewrite.Input, string]
 	config   Config
 }
 
-// NewChatGraph 创建并预编译 Query Rewrite 节点。
+// NewChatGraph 创建并预编译 Query Rewrite 节点，保留基础检索图的兼容入口。
 func NewChatGraph(rewriteModel model.BaseChatModel, chatModel model.ToolCallingChatModel, searcher agenttools.KnowledgeSearcher, config Config) (*ChatGraph, error) {
+	return newChatGraph(rewriteModel, chatModel, searcher, nil, nil, config)
+}
+
+// NewChatGraphWithTools 创建包含饮食偏好和菜谱搜索 Tool 的问答图。
+func NewChatGraphWithTools(rewriteModel model.BaseChatModel, chatModel model.ToolCallingChatModel, searcher agenttools.KnowledgeSearcher, dietary agenttools.DietaryPreferencesProvider, dishes agenttools.DishSearcher, config Config) (*ChatGraph, error) {
+	return newChatGraph(rewriteModel, chatModel, searcher, dietary, dishes, config)
+}
+
+// newChatGraph 统一校验依赖并构建 Query Rewrite 节点。
+func newChatGraph(rewriteModel model.BaseChatModel, chatModel model.ToolCallingChatModel, searcher agenttools.KnowledgeSearcher, dietary agenttools.DietaryPreferencesProvider, dishes agenttools.DishSearcher, config Config) (*ChatGraph, error) {
 	if rewriteModel == nil || chatModel == nil || searcher == nil || config.MaxSteps <= 0 || config.TopK <= 0 || config.TopK > 50 {
 		return nil, fmt.Errorf("Agent Chat Graph 配置无效")
+	}
+	if (dietary == nil) != (dishes == nil) {
+		return nil, fmt.Errorf("Agent 饮食和菜谱 Tool 依赖必须同时配置")
 	}
 	rewriter, err := rewrite.NewNode(rewriteModel)
 	if err != nil {
 		return nil, err
 	}
-	return &ChatGraph{model: chatModel, searcher: searcher, rewriter: rewriter, config: config}, nil
+	return &ChatGraph{model: chatModel, searcher: searcher, dietary: dietary, dishes: dishes, rewriter: rewriter, config: config}, nil
 }
 
 // Stream 运行 Query Rewrite → ReAct，并仅释放具有真实引用支撑的模型回答。
@@ -62,7 +77,19 @@ func (g *ChatGraph) Stream(ctx context.Context, state State, emit transport.Emit
 		log.Printf("Agent ReAct 创建失败: err=%v", err)
 		return err
 	}
-	agent, err := reactflow.NewAgent(ctx, g.model, []tool.BaseTool{knowledgeTool}, g.config.MaxSteps)
+	tools := []tool.BaseTool{knowledgeTool}
+	if g.dietary != nil {
+		dietaryTool, err := agenttools.NewDietaryPreferencesWithCitations(g.dietary, state.UserID, citations)
+		if err != nil {
+			return err
+		}
+		dishTool, err := agenttools.NewDishSearchWithCitations(g.dishes, citations)
+		if err != nil {
+			return err
+		}
+		tools = append(tools, dietaryTool, dishTool)
+	}
+	agent, err := reactflow.NewAgent(ctx, g.model, tools, g.config.MaxSteps)
 	if err != nil {
 		log.Printf("Agent ReAct 流启动失败: err=%v", err)
 		return err
