@@ -72,3 +72,4 @@ agent:
     max_tokens: 2048
   max_steps: 6
   top_k: 10
+  recent_messages: 6

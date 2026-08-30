@@ -4,10 +4,11 @@ import "sync"
 
 // Citation 是一次问答中由真实检索结果生成的引用。
 type Citation struct {
-	ID         string `json:"citation_id"`
-	ChunkID    string `json:"chunk_id"`
-	DocumentID uint64 `json:"document_id"`
-	Content    string `json:"content"`
+	ID           string `json:"citation_id"`
+	ChunkID      string `json:"chunk_id"`
+	DocumentID   uint64 `json:"document_id"`
+	DocumentName string `json:"document_name"`
+	Content      string `json:"content"`
 }
 
 // Store 以并发安全方式收集当前 ReAct 请求产生的真实引用。

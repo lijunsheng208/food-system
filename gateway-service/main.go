@@ -121,6 +121,7 @@ func main() {
 		knowledge.GET("/knowledge-documents/:id/events", knowledgeHandler.DocumentStatusEvents)
 		knowledge.GET("/knowledge-documents/:id/view-ticket", knowledgeHandler.GetDocumentViewTicket)
 		protected.POST("/agent/chat/stream", agentChatHandler.ChatStream)
+		protected.POST("/agent/conversations", agentChatHandler.CreateConversation)
 
 		family := protected.Group("/family")
 		{

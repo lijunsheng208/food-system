@@ -3,7 +3,17 @@ package agent.v1;
 option go_package = "github.com/lijunsheng/familyos/proto/gen/agent/v1;agentv1";
 
 service AgentChatService {
+  rpc CreateConversation(CreateConversationRequest) returns (CreateConversationResponse);
   rpc ChatStream(ChatStreamRequest) returns (stream ChatStreamEvent);
+}
+
+message CreateConversationRequest {
+  int64 user_id = 1;
+  int64 knowledge_base_id = 2;
+}
+
+message CreateConversationResponse {
+  string conversation_id = 1;
 }
 
 message ChatStreamRequest {
@@ -19,6 +29,7 @@ message ChatCitation {
   string chunk_id = 2;
   int64 document_id = 3;
   string content = 4;
+  string document_name = 5;
 }
 
 message ChatStreamEvent {

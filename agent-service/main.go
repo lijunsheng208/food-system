@@ -113,7 +113,7 @@ func main() {
 			if chatErr != nil {
 				log.Fatalf("初始化 ReAct 问答服务失败: %v", chatErr)
 			}
-			chatServer, serverErr := agentserver.NewChatServer(chatService)
+			chatServer, serverErr := agentserver.NewChatServer(chatService, repository.NewConversationRepo(db), cfg.Agent.RecentMessages)
 			if serverErr != nil {
 				log.Fatalf("初始化 Agent gRPC 服务失败: %v", serverErr)
 			}

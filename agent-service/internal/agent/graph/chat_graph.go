@@ -28,7 +28,7 @@ type Config struct {
 type ChatGraph struct {
 	model    model.ToolCallingChatModel
 	searcher agenttools.KnowledgeSearcher
-	rewriter compose.Runnable[string, string]
+	rewriter compose.Runnable[rewrite.Input, string]
 	config   Config
 }
 
@@ -49,12 +49,12 @@ func (g *ChatGraph) Stream(ctx context.Context, state State, emit transport.Emit
 	if !validateInput(state) || emit == nil {
 		return fmt.Errorf("问答请求无效")
 	}
-	rewritten, err := g.rewriter.Invoke(ctx, state.OriginalQuery)
+	rewritten, err := g.rewriter.Invoke(ctx, rewrite.Input{Query: state.OriginalQuery, History: state.History})
 	if err != nil {
 		log.Printf("Agent Query Rewrite 失败: user_id=%d knowledge_base_id=%d err=%v", state.UserID, state.KnowledgeBaseID, err)
 		return err
 	}
-	log.Printf("Agent Query Rewrite 完成: user_id=%d original_len=%d rewritten_len=%d output=%q", state.UserID, len(state.OriginalQuery), len(rewritten), rewritten)
+	log.Printf("Agent Query Rewrite 完成: user_id=%d history_messages=%d original_len=%d rewritten_len=%d output=%q", state.UserID, len(state.History), len(state.OriginalQuery), len(rewritten), rewritten)
 	state.RewrittenQuery = rewritten
 	citations := &citation.Store{}
 	knowledgeTool, err := agenttools.NewKnowledgeSearch(g.searcher, state.KnowledgeBaseID, g.config.TopK, citations)
@@ -67,7 +67,11 @@ func (g *ChatGraph) Stream(ctx context.Context, state State, emit transport.Emit
 		log.Printf("Agent ReAct 流启动失败: err=%v", err)
 		return err
 	}
-	stream, err := agent.Stream(ctx, []*schema.Message{schema.UserMessage(state.RewrittenQuery)})
+	// ReAct 同时接收最近对话与当前问题；改写结果只作为检索提示，回答仍需忠实于用户原始意图。
+	messages := make([]*schema.Message, 0, len(state.History)+1)
+	messages = append(messages, state.History...)
+	messages = append(messages, schema.UserMessage(fmt.Sprintf("当前用户问题：%s\n用于知识库检索的独立查询：%s", state.OriginalQuery, state.RewrittenQuery)))
+	stream, err := agent.Stream(ctx, messages)
 	if err != nil {
 		return fmt.Errorf("启动 ReAct 流失败: %w", err)
 	}

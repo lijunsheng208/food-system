@@ -20,12 +20,13 @@ type Config struct {
 
 // AgentConfig 描述 Eino ReAct 问答服务和 ChatModel 配置。
 type AgentConfig struct {
-	Enabled  bool             `mapstructure:"enabled"`
-	GRPCPort int              `mapstructure:"grpc_port"`
-	Rewrite  AgentModelConfig `mapstructure:"rewrite"`
-	Chat     AgentModelConfig `mapstructure:"chat"`
-	MaxSteps int              `mapstructure:"max_steps"`
-	TopK     int              `mapstructure:"top_k"`
+	Enabled        bool             `mapstructure:"enabled"`
+	GRPCPort       int              `mapstructure:"grpc_port"`
+	Rewrite        AgentModelConfig `mapstructure:"rewrite"`
+	Chat           AgentModelConfig `mapstructure:"chat"`
+	MaxSteps       int              `mapstructure:"max_steps"`
+	TopK           int              `mapstructure:"top_k"`
+	RecentMessages int              `mapstructure:"recent_messages"`
 }
 
 // AgentModelConfig 描述单个 Agent 模型的 OpenAI-compatible 参数。
@@ -162,6 +163,7 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("agent.chat.max_tokens", 2048)
 	v.SetDefault("agent.max_steps", 6)
 	v.SetDefault("agent.top_k", 10)
+	v.SetDefault("agent.recent_messages", 6)
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -198,7 +200,7 @@ func Load(configPath string) (*Config, error) {
 			return nil, fmt.Errorf("启用 OpenSearch 时连接和索引配置必须完整")
 		}
 	}
-	if cfg.Agent.Enabled && (!cfg.RAG.Enabled || !cfg.RAG.OpenSearch.Enabled || cfg.Agent.GRPCPort <= 0 || !validAgentModel(cfg.Agent.Rewrite) || !validAgentModel(cfg.Agent.Chat) || cfg.Agent.MaxSteps <= 0 || cfg.Agent.TopK <= 0 || cfg.Agent.TopK > 50) {
+	if cfg.Agent.Enabled && (!cfg.RAG.Enabled || !cfg.RAG.OpenSearch.Enabled || cfg.Agent.GRPCPort <= 0 || !validAgentModel(cfg.Agent.Rewrite) || !validAgentModel(cfg.Agent.Chat) || cfg.Agent.MaxSteps <= 0 || cfg.Agent.TopK <= 0 || cfg.Agent.TopK > 50 || cfg.Agent.RecentMessages <= 0 || cfg.Agent.RecentMessages > 20) {
 		return nil, fmt.Errorf("启用 Agent 问答时 ChatModel、混合检索和 gRPC 配置必须完整")
 	}
 	return &cfg, nil

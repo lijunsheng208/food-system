@@ -35,7 +35,11 @@ func NewKnowledgeSearch(searcher KnowledgeSearcher, knowledgeBaseID uint64, topK
 		}
 		output := knowledgeSearchOutput{Results: make([]citation.Citation, len(results))}
 		for index, result := range results {
-			output.Results[index] = citation.Citation{ID: fmt.Sprintf("C%d", index+1), ChunkID: result.ID, DocumentID: result.DocumentID, Content: result.Content}
+			filename, _ := result.Metadata["filename"].(string)
+			if filename == "" {
+				filename = fmt.Sprintf("文档 #%d", result.DocumentID)
+			}
+			output.Results[index] = citation.Citation{ID: fmt.Sprintf("C%d", index+1), ChunkID: result.ID, DocumentID: result.DocumentID, DocumentName: filename, Content: result.Content}
 		}
 		citations.Replace(output.Results)
 		return output, nil

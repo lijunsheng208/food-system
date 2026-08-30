@@ -1,10 +1,12 @@
 import { API_BASE_URL } from '../config';
 import { getAccessToken } from './api';
+import api from './api';
 
 export interface AgentCitation {
   citation_id: string;
   chunk_id: string;
   document_id: number;
+  document_name: string;
   content: string;
 }
 
@@ -16,6 +18,13 @@ export type AgentChatEvent =
   | { type: 'error'; request_id?: string; message: string };
 
 export interface AgentChatSubscription { close: () => void }
+
+// createAgentConversation 创建绑定当前个人知识库的多轮会话。
+export async function createAgentConversation(knowledgeBaseId: number): Promise<string> {
+  const { data } = await api.post<{ code: number; message: string; conversation_id: string }>('/agent/conversations', { knowledge_base_id: knowledgeBaseId });
+  if (data.code !== 0 || !data.conversation_id) throw new Error(data.message || '创建会话失败');
+  return data.conversation_id;
+}
 
 // streamAgentChat 建立带认证的 POST SSE 请求，并按网络分片增量解析 Agent 回答事件。
 export function streamAgentChat(

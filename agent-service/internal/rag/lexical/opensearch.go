@@ -47,6 +47,7 @@ type sourceChunk struct {
 	IndexVersion    uint   `json:"index_version"`
 	Content         string `json:"content"`
 	ContentSHA256   string `json:"content_sha256"`
+	Filename        string `json:"filename"`
 }
 
 // NewOpenSearch 创建客户端并确保目标索引存在。
@@ -67,7 +68,7 @@ func NewOpenSearch(config Config) (*OpenSearch, error) {
 
 // ensureIndex 创建 IK 分词和 BM25 索引，已存在时保持幂等。
 func (s *OpenSearch) ensureIndex(ctx context.Context) error {
-	body := `{"settings":{"index":{"similarity":{"default":{"type":"BM25","k1":1.2,"b":0.75}},"analysis":{"analyzer":{"familyos_index":{"type":"custom","tokenizer":"ik_max_word","filter":["lowercase"]},"familyos_search":{"type":"custom","tokenizer":"ik_smart","filter":["lowercase"]}}}},"mappings":{"properties":{"chunk_id":{"type":"keyword"},"document_id":{"type":"long"},"knowledge_base_id":{"type":"long"},"user_id":{"type":"long"},"index_version":{"type":"integer"},"active":{"type":"boolean"},"content":{"type":"text","analyzer":"familyos_index","search_analyzer":"familyos_search"},"content_sha256":{"type":"keyword"}}}}`
+	body := `{"settings":{"index":{"similarity":{"default":{"type":"BM25","k1":1.2,"b":0.75}},"analysis":{"analyzer":{"familyos_index":{"type":"custom","tokenizer":"ik_max_word","filter":["lowercase"]},"familyos_search":{"type":"custom","tokenizer":"ik_smart","filter":["lowercase"]}}}},"mappings":{"properties":{"chunk_id":{"type":"keyword"},"document_id":{"type":"long"},"knowledge_base_id":{"type":"long"},"user_id":{"type":"long"},"index_version":{"type":"integer"},"active":{"type":"boolean"},"filename":{"type":"keyword"},"content":{"type":"text","analyzer":"familyos_index","search_analyzer":"familyos_search"},"content_sha256":{"type":"keyword"}}}}`
 	request, err := http.NewRequestWithContext(ctx, http.MethodPut, s.endpoint+"/"+s.index, bytes.NewBufferString(body))
 	if err != nil {
 		return fmt.Errorf("创建 OpenSearch 索引请求失败: %w", err)
@@ -96,7 +97,8 @@ func (s *OpenSearch) IndexVersion(ctx context.Context, documentID uint64, versio
 			return fmt.Errorf("OpenSearch Chunk 数据无效")
 		}
 		meta, _ := json.Marshal(map[string]any{"index": map[string]any{"_id": chunk.ID}})
-		doc, _ := json.Marshal(map[string]any{"chunk_id": chunk.ID, "document_id": chunk.DocumentID, "knowledge_base_id": chunk.KnowledgeBaseID, "user_id": chunk.UserID, "index_version": chunk.IndexVersion, "active": true, "content": chunk.Content, "content_sha256": chunk.ContentSHA256})
+		filename, _ := chunk.Metadata["filename"].(string)
+		doc, _ := json.Marshal(map[string]any{"chunk_id": chunk.ID, "document_id": chunk.DocumentID, "knowledge_base_id": chunk.KnowledgeBaseID, "user_id": chunk.UserID, "index_version": chunk.IndexVersion, "active": true, "filename": filename, "content": chunk.Content, "content_sha256": chunk.ContentSHA256})
 		body.Write(meta)
 		body.WriteByte('\n')
 		body.Write(doc)
@@ -184,7 +186,11 @@ func (s *OpenSearch) Search(ctx context.Context, query string, filter document.S
 	}
 	results := make([]document.SearchResult, len(decoded.Hits.Hits))
 	for i, hit := range decoded.Hits.Hits {
-		results[i] = document.SearchResult{Chunk: document.Chunk{ID: hit.Source.ID, DocumentID: hit.Source.DocumentID, KnowledgeBaseID: hit.Source.KnowledgeBaseID, UserID: hit.Source.UserID, IndexVersion: hit.Source.IndexVersion, Content: hit.Source.Content, ContentSHA256: hit.Source.ContentSHA256}, Score: hit.Score}
+		metadata := map[string]any{}
+		if hit.Source.Filename != "" {
+			metadata["filename"] = hit.Source.Filename
+		}
+		results[i] = document.SearchResult{Chunk: document.Chunk{ID: hit.Source.ID, DocumentID: hit.Source.DocumentID, KnowledgeBaseID: hit.Source.KnowledgeBaseID, UserID: hit.Source.UserID, IndexVersion: hit.Source.IndexVersion, Content: hit.Source.Content, ContentSHA256: hit.Source.ContentSHA256, Metadata: metadata}, Score: hit.Score}
 	}
 	return results, nil
 }

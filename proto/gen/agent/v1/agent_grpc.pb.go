@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AgentChatService_ChatStream_FullMethodName = "/agent.v1.AgentChatService/ChatStream"
+	AgentChatService_CreateConversation_FullMethodName = "/agent.v1.AgentChatService/CreateConversation"
+	AgentChatService_ChatStream_FullMethodName         = "/agent.v1.AgentChatService/ChatStream"
 )
 
 // AgentChatServiceClient is the client API for AgentChatService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AgentChatServiceClient interface {
+	CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error)
 	ChatStream(ctx context.Context, in *ChatStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatStreamEvent], error)
 }
 
@@ -35,6 +37,16 @@ type agentChatServiceClient struct {
 
 func NewAgentChatServiceClient(cc grpc.ClientConnInterface) AgentChatServiceClient {
 	return &agentChatServiceClient{cc}
+}
+
+func (c *agentChatServiceClient) CreateConversation(ctx context.Context, in *CreateConversationRequest, opts ...grpc.CallOption) (*CreateConversationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateConversationResponse)
+	err := c.cc.Invoke(ctx, AgentChatService_CreateConversation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *agentChatServiceClient) ChatStream(ctx context.Context, in *ChatStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatStreamEvent], error) {
@@ -60,6 +72,7 @@ type AgentChatService_ChatStreamClient = grpc.ServerStreamingClient[ChatStreamEv
 // All implementations must embed UnimplementedAgentChatServiceServer
 // for forward compatibility.
 type AgentChatServiceServer interface {
+	CreateConversation(context.Context, *CreateConversationRequest) (*CreateConversationResponse, error)
 	ChatStream(*ChatStreamRequest, grpc.ServerStreamingServer[ChatStreamEvent]) error
 	mustEmbedUnimplementedAgentChatServiceServer()
 }
@@ -71,6 +84,9 @@ type AgentChatServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAgentChatServiceServer struct{}
 
+func (UnimplementedAgentChatServiceServer) CreateConversation(context.Context, *CreateConversationRequest) (*CreateConversationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateConversation not implemented")
+}
 func (UnimplementedAgentChatServiceServer) ChatStream(*ChatStreamRequest, grpc.ServerStreamingServer[ChatStreamEvent]) error {
 	return status.Error(codes.Unimplemented, "method ChatStream not implemented")
 }
@@ -95,6 +111,24 @@ func RegisterAgentChatServiceServer(s grpc.ServiceRegistrar, srv AgentChatServic
 	s.RegisterService(&AgentChatService_ServiceDesc, srv)
 }
 
+func _AgentChatService_CreateConversation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateConversationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AgentChatServiceServer).CreateConversation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AgentChatService_CreateConversation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AgentChatServiceServer).CreateConversation(ctx, req.(*CreateConversationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AgentChatService_ChatStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ChatStreamRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -112,7 +146,12 @@ type AgentChatService_ChatStreamServer = grpc.ServerStreamingServer[ChatStreamEv
 var AgentChatService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "agent.v1.AgentChatService",
 	HandlerType: (*AgentChatServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateConversation",
+			Handler:    _AgentChatService_CreateConversation_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "ChatStream",

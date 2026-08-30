@@ -26,6 +26,36 @@ func NewAgentChatHandler(agentConn, logicConn *grpc.ClientConn) *AgentChatHandle
 	return &AgentChatHandler{agent: agentv1.NewAgentChatServiceClient(agentConn), knowledge: knowledgev1.NewKnowledgeServiceClient(logicConn)}
 }
 
+// CreateConversation 校验个人知识库归属后创建 Agent 多轮会话。
+func (h *AgentChatHandler) CreateConversation(c *gin.Context) {
+	var body struct {
+		KnowledgeBaseID int64 `json:"knowledge_base_id" binding:"required"`
+	}
+	if c.ShouldBindJSON(&body) != nil || body.KnowledgeBaseID <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "创建会话请求无效"})
+		return
+	}
+	userID := int64(middleware.CurrentUserID(c))
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+	verification, err := h.knowledge.EnsurePersonalKnowledgeBase(ctx, &knowledgev1.EnsurePersonalKnowledgeBaseRequest{UserId: userID})
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "知识库服务暂不可用"})
+		return
+	}
+	if verification.GetCode() != 0 || verification.GetKnowledgeBaseId() != body.KnowledgeBaseID {
+		c.JSON(http.StatusForbidden, gin.H{"code": 4003, "message": "无权访问该知识库"})
+		return
+	}
+	response, err := h.agent.CreateConversation(ctx, &agentv1.CreateConversationRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID})
+	if err != nil {
+		log.Printf("创建Agent会话失败: user_id=%d err=%v", userID, err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "Agent服务暂不可用"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "conversation_id": response.GetConversationId()})
+}
+
 // ChatStream 处理单轮问答并在客户端断开时取消下游模型和检索请求。
 func (h *AgentChatHandler) ChatStream(c *gin.Context) {
 	var body struct {
@@ -33,7 +63,7 @@ func (h *AgentChatHandler) ChatStream(c *gin.Context) {
 		ConversationID  string `json:"conversation_id"`
 		Message         string `json:"message" binding:"required"`
 	}
-	if c.ShouldBindJSON(&body) != nil || body.KnowledgeBaseID <= 0 || body.Message == "" {
+	if c.ShouldBindJSON(&body) != nil || body.KnowledgeBaseID <= 0 || body.ConversationID == "" || body.Message == "" {
 		log.Printf("Agent SSE 请求参数无效: path=%s", c.Request.URL.Path)
 		c.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "问答请求无效"})
 		return
@@ -80,7 +110,7 @@ func (h *AgentChatHandler) ChatStream(c *gin.Context) {
 		}
 		payload := gin.H{"request_id": event.GetRequestId(), "content": event.GetContent()}
 		if citation := event.GetCitation(); citation != nil {
-			payload["citation"] = gin.H{"citation_id": citation.GetCitationId(), "chunk_id": citation.GetChunkId(), "document_id": citation.GetDocumentId(), "content": citation.GetContent()}
+			payload["citation"] = gin.H{"citation_id": citation.GetCitationId(), "chunk_id": citation.GetChunkId(), "document_id": citation.GetDocumentId(), "document_name": citation.GetDocumentName(), "content": citation.GetContent()}
 		}
 		c.SSEvent(event.GetType(), payload)
 		c.Writer.Flush()
