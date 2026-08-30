@@ -44,6 +44,14 @@ rag:
     rrf_constant: 30
     candidate_k: 50
 
+  rerank:
+    enabled: false
+    # 兼容 Cohere/Jina 风格的 POST /rerank 接口。
+    base_url: "https://llm-vswf2zh46co61bqo.cn-beijing.maas.aliyuncs.com/compatible-api/v1"
+    api_key: "sk-45e14057cb184212b5b366c5fa842cea"
+    model: "BAAI/bge-reranker-v2-m3"
+    timeout: "30s"
+
   pgvector:
     dsn: "host=127.0.0.1 user=familyos password=familyos_dev dbname=familyos_agent_vector port=5432 sslmode=disable"
 
@@ -71,3 +79,4 @@ agent:
     max_tokens: 2048
   max_steps: 6
   top_k: 5
+  recent_messages: 6

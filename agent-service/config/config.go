@@ -48,6 +48,16 @@ type RAGConfig struct {
 	Embedding       EmbeddingConfig  `mapstructure:"embedding"`
 	PGVector        PGVectorConfig   `mapstructure:"pgvector"`
 	OpenSearch      OpenSearchConfig `mapstructure:"opensearch"`
+	Rerank          RerankConfig     `mapstructure:"rerank"`
+}
+
+// RerankConfig 描述第二阶段 Cross-Encoder 重排服务配置。
+type RerankConfig struct {
+	Enabled bool          `mapstructure:"enabled"`
+	BaseURL string        `mapstructure:"base_url"`
+	APIKey  string        `mapstructure:"api_key"`
+	Model   string        `mapstructure:"model"`
+	Timeout time.Duration `mapstructure:"timeout"`
 }
 
 // OpenSearchConfig 描述 IK Analyzer 和 BM25 倒排索引服务配置。
@@ -155,6 +165,11 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("rag.opensearch.lexical_weight", 0.3)
 	v.SetDefault("rag.opensearch.rrf_constant", 30)
 	v.SetDefault("rag.opensearch.candidate_k", 50)
+	v.SetDefault("rag.rerank.enabled", false)
+	v.SetDefault("rag.rerank.base_url", "")
+	v.SetDefault("rag.rerank.api_key", "")
+	v.SetDefault("rag.rerank.model", "")
+	v.SetDefault("rag.rerank.timeout", "30s")
 	v.SetDefault("agent.enabled", false)
 	v.SetDefault("agent.grpc_port", 50052)
 	v.SetDefault("agent.rewrite.timeout", "15s")
@@ -198,6 +213,9 @@ func Load(configPath string) (*Config, error) {
 		}
 		if cfg.RAG.OpenSearch.Enabled && (cfg.RAG.OpenSearch.Endpoint == "" || cfg.RAG.OpenSearch.Index == "" || cfg.RAG.OpenSearch.RequestTimeout <= 0 || cfg.RAG.OpenSearch.DenseWeight <= 0 || cfg.RAG.OpenSearch.LexicalWeight <= 0 || cfg.RAG.OpenSearch.RRFConstant <= 0 || cfg.RAG.OpenSearch.CandidateK <= 0 || cfg.RAG.OpenSearch.CandidateK > 100) {
 			return nil, fmt.Errorf("启用 OpenSearch 时连接和索引配置必须完整")
+		}
+		if cfg.RAG.Rerank.Enabled && (cfg.RAG.Rerank.BaseURL == "" || cfg.RAG.Rerank.APIKey == "" || cfg.RAG.Rerank.Model == "" || cfg.RAG.Rerank.Timeout <= 0) {
+			return nil, fmt.Errorf("启用 Rerank 时服务配置必须完整")
 		}
 	}
 	if cfg.Agent.Enabled && (!cfg.RAG.Enabled || !cfg.RAG.OpenSearch.Enabled || cfg.Agent.GRPCPort <= 0 || !validAgentModel(cfg.Agent.Rewrite) || !validAgentModel(cfg.Agent.Chat) || cfg.Agent.MaxSteps <= 0 || cfg.Agent.TopK <= 0 || cfg.Agent.TopK > 50 || cfg.Agent.RecentMessages <= 0 || cfg.Agent.RecentMessages > 20) {

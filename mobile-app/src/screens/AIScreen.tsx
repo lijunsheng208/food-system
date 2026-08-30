@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, KeyboardAvoidingView, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Markdown from 'react-native-markdown-display';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ensurePersonalKnowledgeBase } from '../services/knowledge';
 import { createAgentConversation, streamAgentChat, type AgentChatEvent, type AgentChatSubscription, type AgentCitation } from '../services/agentChat';
@@ -11,6 +12,12 @@ type Message = { id: string; role: 'user' | 'assistant'; content: string; citati
 // visibleAnswer 清理模型可能残留的内部证据编号，引用由消息底部单独展示。
 function visibleAnswer(content: string): string {
   return content.replace(/\s*(?:\[C\d+\]|（?参见\s*C\d+）?)/gi, '').trim();
+}
+
+// openMarkdownLink 使用系统浏览器打开回答中的链接，并阻止 Markdown 默认导航行为。
+function openMarkdownLink(url: string): boolean {
+  void Linking.openURL(url);
+  return false;
 }
 
 // AIScreen 提供基于个人知识库的流式 AI 对话界面。
@@ -54,7 +61,7 @@ export default function AIScreen() {
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}><View style={styles.brandIcon}><Ionicons name="sparkles" size={18} color={colors.textOnPrimary} /></View><View><Text style={styles.title}>助手Bot</Text><Text style={styles.subtitle}>基于你的家庭知识库</Text></View><View style={styles.online}><View style={styles.onlineDot} /><Text style={styles.onlineText}>在线</Text></View></View>
       <FlatList data={messages} keyExtractor={(item) => item.id} contentContainerStyle={[styles.list, messages.length === 0 && styles.emptyList]} keyboardShouldPersistTaps="handled" renderItem={({ item }) => (
-        <View style={[styles.messageRow, item.role === 'user' && styles.userRow]}><View style={[styles.avatar, item.role === 'user' ? styles.userAvatar : styles.botAvatar]}><Ionicons name={item.role === 'user' ? 'person' : 'sparkles'} size={14} color={item.role === 'user' ? colors.primary : colors.textOnPrimary} /></View><View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.assistantBubble]}><Text style={[styles.role, item.role === 'user' && styles.userRole]}>{item.role === 'user' ? '你' : '助手Bot'}</Text><Text style={[styles.message, item.role === 'user' && styles.userMessage]}>{item.role === 'assistant' ? visibleAnswer(item.content) || (loading ? '正在思考...' : '') : item.content}</Text>{!!item.citations?.length && <View style={styles.citationBox}><View style={styles.citationTitle}><Ionicons name="book-outline" size={13} color={colors.primary} /><Text style={styles.citationHeading}>参考来源</Text></View>{item.citations.map((citation) => <View key={citation.document_id} style={styles.sourceRow}><Ionicons name="document-text-outline" size={14} color={colors.textSecondary} /><Text style={styles.sourceName} numberOfLines={1}>{citation.document_name || `文档 #${citation.document_id}`}</Text></View>)}</View>}</View></View>
+        <View style={[styles.messageRow, item.role === 'user' && styles.userRow]}><View style={[styles.avatar, item.role === 'user' ? styles.userAvatar : styles.botAvatar]}><Ionicons name={item.role === 'user' ? 'person' : 'sparkles'} size={14} color={item.role === 'user' ? colors.primary : colors.textOnPrimary} /></View><View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.assistantBubble]}><Text style={[styles.role, item.role === 'user' && styles.userRole]}>{item.role === 'user' ? '你' : '助手Bot'}</Text>{item.role === 'assistant' ? <Markdown style={markdownStyles} onLinkPress={openMarkdownLink}>{visibleAnswer(item.content) || (loading ? '正在思考...' : '')}</Markdown> : <Text style={[styles.message, styles.userMessage]}>{item.content}</Text>}{!!item.citations?.length && <View style={styles.citationBox}><View style={styles.citationTitle}><Ionicons name="book-outline" size={13} color={colors.primary} /><Text style={styles.citationHeading}>参考来源</Text></View>{item.citations.map((citation) => <View key={citation.document_id} style={styles.sourceRow}><Ionicons name="document-text-outline" size={14} color={colors.textSecondary} /><Text style={styles.sourceName} numberOfLines={1}>{citation.document_name || `文档 #${citation.document_id}`}</Text></View>)}</View>}</View></View>
       )} ListEmptyComponent={<View style={styles.emptyState}><View style={styles.emptyIcon}><Ionicons name="chatbubble-ellipses-outline" size={28} color={colors.primary} /></View><Text style={styles.emptyTitle}>开始和助手Bot聊聊</Text><Text style={styles.empty}>可以问家庭饮食、忌口和菜谱安排</Text></View>} />
       {error && <Text style={styles.error}>{error}</Text>}
       <View style={styles.composer}><TextInput style={styles.input} value={input} onChangeText={setInput} placeholder="问问家庭饮食、菜谱或忌口..." placeholderTextColor={colors.textSecondary} multiline editable={!loading} /><TouchableOpacity style={[styles.action, loading && styles.stopAction]} onPress={loading ? stopMessage : sendMessage} accessibilityLabel={loading ? '停止生成' : '发送'}><Ionicons name={loading ? 'stop' : 'arrow-up'} size={20} color={colors.textOnPrimary} /></TouchableOpacity></View>
@@ -101,4 +108,23 @@ const styles = StyleSheet.create({
   action: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary },
   stopAction: { backgroundColor: colors.error },
   loader: { position: 'absolute', top: 60, right: 20 },
+});
+
+const markdownStyles = StyleSheet.create({
+  body: { color: colors.textPrimary, fontSize: 14, lineHeight: 21 },
+  paragraph: { marginTop: 0, marginBottom: spacing.sm },
+  heading1: { color: colors.textPrimary, fontSize: 18, lineHeight: 25, fontWeight: '700', marginTop: spacing.sm, marginBottom: spacing.sm },
+  heading2: { color: colors.textPrimary, fontSize: 16, lineHeight: 23, fontWeight: '700', marginTop: spacing.sm, marginBottom: spacing.xs },
+  heading3: { color: colors.textPrimary, fontSize: 15, lineHeight: 22, fontWeight: '600', marginTop: spacing.xs, marginBottom: spacing.xs },
+  strong: { fontWeight: '700' },
+  em: { fontStyle: 'italic' },
+  bullet_list: { marginVertical: spacing.xs },
+  ordered_list: { marginVertical: spacing.xs },
+  list_item: { marginBottom: 2 },
+  blockquote: { backgroundColor: colors.primarySubtle, borderLeftColor: colors.primary, borderLeftWidth: 3, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs, marginVertical: spacing.xs },
+  code_inline: { color: colors.primaryDark, backgroundColor: colors.primarySubtle, borderRadius: 4, paddingHorizontal: 4, paddingVertical: 1 },
+  fence: { color: colors.textPrimary, backgroundColor: '#F3F4F6', borderColor: colors.border, borderWidth: 1, borderRadius: 6, padding: spacing.sm, fontSize: 12, lineHeight: 18 },
+  code_block: { color: colors.textPrimary, backgroundColor: '#F3F4F6', borderColor: colors.border, borderWidth: 1, borderRadius: 6, padding: spacing.sm, fontSize: 12, lineHeight: 18 },
+  link: { color: colors.primary, textDecorationLine: 'underline' },
+  hr: { backgroundColor: colors.border, height: 1, marginVertical: spacing.sm },
 });

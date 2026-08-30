@@ -8,6 +8,7 @@ import (
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/document"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/embedding"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/lexical"
+	"github.com/lijunsheng/familyos/agent-service/internal/rag/rerank"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/vectorstore"
 )
 
@@ -19,6 +20,7 @@ type HybridRetriever struct {
 	lexicalWeight float64
 	constant      float64
 	candidateK    int
+	reranker      rerank.Reranker
 }
 
 // HybridConfig 描述混合检索的权重、平滑常数和候选数量。
@@ -27,6 +29,7 @@ type HybridConfig struct {
 	LexicalWeight float64
 	Constant      float64
 	CandidateK    int
+	Reranker      rerank.Reranker
 }
 
 // NewHybridRetriever 创建混合检索器，权重必须为正且候选数量受控。
@@ -38,7 +41,7 @@ func NewHybridRetriever(embedder embedding.Embedder, store vectorstore.Store, le
 	if err != nil {
 		return nil, err
 	}
-	return &HybridRetriever{dense: dense, lexical: lexicalStore, denseWeight: config.DenseWeight, lexicalWeight: config.LexicalWeight, constant: config.Constant, candidateK: config.CandidateK}, nil
+	return &HybridRetriever{dense: dense, lexical: lexicalStore, denseWeight: config.DenseWeight, lexicalWeight: config.LexicalWeight, constant: config.Constant, candidateK: config.CandidateK, reranker: config.Reranker}, nil
 }
 
 // Search 执行两路检索并按 Chunk ID 融合，返回调用方要求的 TopK。
@@ -83,13 +86,23 @@ func (r *HybridRetriever) Search(ctx context.Context, query string, filter docum
 		}
 		return items[i].score > items[j].score
 	})
-	if len(items) > filter.Limit {
-		items = items[:filter.Limit]
+	if len(items) > r.candidateK {
+		items = items[:r.candidateK]
 	}
 	results := make([]document.SearchResult, len(items))
 	for i, item := range items {
 		item.result.Score = float32(item.score)
 		results[i] = item.result
+	}
+	if r.reranker != nil {
+		ranked, err := r.reranker.Rerank(ctx, query, results)
+		if err != nil {
+			return nil, fmt.Errorf("Cross-Encoder 重排失败: %w", err)
+		}
+		results = ranked
+	}
+	if len(results) > filter.Limit {
+		results = results[:filter.Limit]
 	}
 	return results, nil
 }

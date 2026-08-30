@@ -20,6 +20,7 @@ import (
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/lexical"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/parser"
 	ragrepository "github.com/lijunsheng/familyos/agent-service/internal/rag/repository"
+	"github.com/lijunsheng/familyos/agent-service/internal/rag/rerank"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/search"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/vectorstore"
 	"github.com/lijunsheng/familyos/agent-service/internal/repository"
@@ -95,7 +96,15 @@ func main() {
 			lexicalStore = value
 		}
 		if cfg.Agent.Enabled {
-			hybrid, hybridErr := search.NewHybridRetriever(embedder, store, lexicalStore, search.HybridConfig{DenseWeight: cfg.RAG.OpenSearch.DenseWeight, LexicalWeight: cfg.RAG.OpenSearch.LexicalWeight, Constant: cfg.RAG.OpenSearch.RRFConstant, CandidateK: cfg.RAG.OpenSearch.CandidateK})
+			var rerankerClient rerank.Reranker
+			if cfg.RAG.Rerank.Enabled {
+				value, rerankErr := rerank.NewHTTP(rerank.HTTPConfig{BaseURL: cfg.RAG.Rerank.BaseURL, APIKey: cfg.RAG.Rerank.APIKey, Model: cfg.RAG.Rerank.Model, Timeout: cfg.RAG.Rerank.Timeout, TopK: cfg.Agent.TopK})
+				if rerankErr != nil {
+					log.Fatalf("初始化 Cross-Encoder 重排器失败: %v", rerankErr)
+				}
+				rerankerClient = value
+			}
+			hybrid, hybridErr := search.NewHybridRetriever(embedder, store, lexicalStore, search.HybridConfig{DenseWeight: cfg.RAG.OpenSearch.DenseWeight, LexicalWeight: cfg.RAG.OpenSearch.LexicalWeight, Constant: cfg.RAG.OpenSearch.RRFConstant, CandidateK: cfg.RAG.OpenSearch.CandidateK, Reranker: rerankerClient})
 			if hybridErr != nil {
 				log.Fatalf("初始化混合检索器失败: %v", hybridErr)
 			}
