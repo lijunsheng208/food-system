@@ -32,8 +32,8 @@ rag:
     batch_size: 16
     timeout: "30s"
 
-    opensearch:
-    enabled: false
+  opensearch:
+    enabled: true
     endpoint: "http://127.0.0.1:9200"
     username: ""
     password: ""
@@ -53,3 +53,21 @@ worker:
   retry_base: "5s"
   retry_max: "5m"
   max_attempts: 5
+
+agent:
+  enabled: true
+  grpc_port: 50052
+  rewrite:
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: "sk-45e14057cb184212b5b366c5fa842cea"
+    model: "qwen3.6-flash"
+    timeout: "15s"
+    max_tokens: 256
+  chat:
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key: "sk-45e14057cb184212b5b366c5fa842cea"
+    model: "qwen3.7-plus"
+    timeout: "60s"
+    max_tokens: 2048
+  max_steps: 6
+  top_k: 5

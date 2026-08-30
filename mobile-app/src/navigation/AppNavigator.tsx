@@ -26,6 +26,7 @@ import FamilyMemberEditScreen from '../screens/FamilyMemberEditScreen';
 import FamilyMealPlanScreen from '../screens/FamilyMealPlanScreen';
 import ShoppingListScreen from '../screens/ShoppingListScreen';
 import PersonalKnowledgeScreen from '../screens/PersonalKnowledgeScreen';
+import AIScreen from '../screens/AIScreen';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -71,6 +72,7 @@ function MainTabs() {
           ),
         }}
       />
+      <Tab.Screen name="AI" component={AIScreen} options={{ tabBarLabel: 'AI', tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} /> }} />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}

@@ -35,6 +35,11 @@ func main() {
 		log.Fatalf("连接 gRPC 服务失败: %v", err)
 	}
 	defer conn.Close()
+	agentConn, err := grpc.NewClient(cfg.Agent.Target, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("连接 Agent gRPC 服务失败: %v", err)
+	}
+	defer agentConn.Close()
 	log.Printf("已连接到 gRPC 服务: %s", cfg.GRPC.Target)
 
 	// 3. 初始化 OSS 客户端（配置为空则跳过）
@@ -70,6 +75,7 @@ func main() {
 	dishHandler := handler.NewDishHandler(conn)
 	uploadHandler := handler.NewUploadHandler(ossClient)
 	knowledgeHandler := handler.NewKnowledgeHandler(conn)
+	agentChatHandler := handler.NewAgentChatHandler(agentConn, conn)
 	familyHandler := handler.NewFamilyHandler(conn)
 
 	api := r.Group("/api/v1")
@@ -114,6 +120,7 @@ func main() {
 		knowledge.DELETE("/knowledge-documents/:id", knowledgeHandler.DeleteDocument)
 		knowledge.GET("/knowledge-documents/:id/events", knowledgeHandler.DocumentStatusEvents)
 		knowledge.GET("/knowledge-documents/:id/view-ticket", knowledgeHandler.GetDocumentViewTicket)
+		protected.POST("/agent/chat/stream", agentChatHandler.ChatStream)
 
 		family := protected.Group("/family")
 		{

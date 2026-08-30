@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Server ServerConfig `mapstructure:"server"`
 	GRPC   GRPCConfig   `mapstructure:"grpc"`
+	Agent  AgentConfig  `mapstructure:"agent"`
 	OSS    OSSConfig    `mapstructure:"oss"`
 	JWT    JWTConfig    `mapstructure:"jwt"`
 }
@@ -31,6 +32,11 @@ type OSSConfig struct {
 
 // GRPCConfig gRPC 连接配置
 type GRPCConfig struct {
+	Target string `mapstructure:"target"`
+}
+
+// AgentConfig 描述 Gateway 到 Agent 问答 gRPC 的内部连接。
+type AgentConfig struct {
 	Target string `mapstructure:"target"`
 }
 
@@ -60,6 +66,7 @@ func Load(configPath string) (*Config, error) {
 
 	v.SetDefault("server.http_port", 8080)
 	v.SetDefault("grpc.target", "localhost:50051")
+	v.SetDefault("agent.target", "localhost:50052")
 	v.SetDefault("jwt.issuer", "familyos")
 	v.SetDefault("jwt.audience", "familyos-mobile")
 
@@ -73,7 +80,7 @@ func Load(configPath string) (*Config, error) {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("解析配置失败: %w", err)
 	}
-	if cfg.JWT.Secret == "" || cfg.JWT.Issuer == "" || cfg.JWT.Audience == "" {
+	if cfg.JWT.Secret == "" || cfg.JWT.Issuer == "" || cfg.JWT.Audience == "" || cfg.GRPC.Target == "" || cfg.Agent.Target == "" {
 		return nil, fmt.Errorf("jwt secret、issuer 和 audience 必须配置")
 	}
 

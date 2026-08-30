@@ -15,6 +15,26 @@ type Config struct {
 	Logic    LogicConfig    `mapstructure:"logic"`
 	Worker   WorkerConfig   `mapstructure:"worker"`
 	RAG      RAGConfig      `mapstructure:"rag"`
+	Agent    AgentConfig    `mapstructure:"agent"`
+}
+
+// AgentConfig 描述 Eino ReAct 问答服务和 ChatModel 配置。
+type AgentConfig struct {
+	Enabled  bool             `mapstructure:"enabled"`
+	GRPCPort int              `mapstructure:"grpc_port"`
+	Rewrite  AgentModelConfig `mapstructure:"rewrite"`
+	Chat     AgentModelConfig `mapstructure:"chat"`
+	MaxSteps int              `mapstructure:"max_steps"`
+	TopK     int              `mapstructure:"top_k"`
+}
+
+// AgentModelConfig 描述单个 Agent 模型的 OpenAI-compatible 参数。
+type AgentModelConfig struct {
+	BaseURL   string        `mapstructure:"base_url"`
+	APIKey    string        `mapstructure:"api_key"`
+	Model     string        `mapstructure:"model"`
+	Timeout   time.Duration `mapstructure:"timeout"`
+	MaxTokens int           `mapstructure:"max_tokens"`
 }
 
 // RAGConfig 描述文档索引、Embedding 和 pgvector 配置。
@@ -134,6 +154,14 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("rag.opensearch.lexical_weight", 0.3)
 	v.SetDefault("rag.opensearch.rrf_constant", 30)
 	v.SetDefault("rag.opensearch.candidate_k", 50)
+	v.SetDefault("agent.enabled", false)
+	v.SetDefault("agent.grpc_port", 50052)
+	v.SetDefault("agent.rewrite.timeout", "15s")
+	v.SetDefault("agent.rewrite.max_tokens", 256)
+	v.SetDefault("agent.chat.timeout", "60s")
+	v.SetDefault("agent.chat.max_tokens", 2048)
+	v.SetDefault("agent.max_steps", 6)
+	v.SetDefault("agent.top_k", 10)
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -170,5 +198,13 @@ func Load(configPath string) (*Config, error) {
 			return nil, fmt.Errorf("启用 OpenSearch 时连接和索引配置必须完整")
 		}
 	}
+	if cfg.Agent.Enabled && (!cfg.RAG.Enabled || !cfg.RAG.OpenSearch.Enabled || cfg.Agent.GRPCPort <= 0 || !validAgentModel(cfg.Agent.Rewrite) || !validAgentModel(cfg.Agent.Chat) || cfg.Agent.MaxSteps <= 0 || cfg.Agent.TopK <= 0 || cfg.Agent.TopK > 50) {
+		return nil, fmt.Errorf("启用 Agent 问答时 ChatModel、混合检索和 gRPC 配置必须完整")
+	}
 	return &cfg, nil
+}
+
+// validAgentModel 校验模型连接参数，避免服务启动后才发现配置不完整。
+func validAgentModel(value AgentModelConfig) bool {
+	return value.BaseURL != "" && value.APIKey != "" && value.Model != "" && value.Timeout > 0 && value.MaxTokens > 0
 }

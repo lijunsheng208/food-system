@@ -7,6 +7,9 @@ server:
 grpc:
   target: "localhost:50051"
 
+agent:
+  target: "localhost:50052"
+
 jwt:
   # Must match the Logic Service JWT secret.
   secret: "replace-with-a-long-random-secret"
@@ -19,4 +22,3 @@ oss:
   access_key_secret: "replace-with-your-access-key-secret"
   bucket_name: "replace-with-your-bucket-name"
   custom_domain: ""
-

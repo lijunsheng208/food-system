@@ -52,3 +52,23 @@ rag:
     lexical_weight: 0.3
     rrf_constant: 30
     candidate_k: 50
+
+agent:
+  enabled: false
+  grpc_port: 50052
+  rewrite:
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    # 通过 FAMILYOS_AGENT_AGENT_REWRITE_API_KEY 注入。
+    api_key: ""
+    model: "qwen-turbo"
+    timeout: "15s"
+    max_tokens: 256
+  chat:
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    # 通过 FAMILYOS_AGENT_AGENT_CHAT_API_KEY 注入。
+    api_key: ""
+    model: "qwen-plus"
+    timeout: "60s"
+    max_tokens: 2048
+  max_steps: 6
+  top_k: 10

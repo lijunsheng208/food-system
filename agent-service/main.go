@@ -2,13 +2,17 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 
+	"github.com/cloudwego/eino-ext/components/model/openai"
 	"github.com/lijunsheng/familyos/agent-service/config"
+	agentgraph "github.com/lijunsheng/familyos/agent-service/internal/agent/graph"
 	"github.com/lijunsheng/familyos/agent-service/internal/provider"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/chunker"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/embedding"
@@ -16,9 +20,13 @@ import (
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/lexical"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/parser"
 	ragrepository "github.com/lijunsheng/familyos/agent-service/internal/rag/repository"
+	"github.com/lijunsheng/familyos/agent-service/internal/rag/search"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/vectorstore"
 	"github.com/lijunsheng/familyos/agent-service/internal/repository"
+	agentserver "github.com/lijunsheng/familyos/agent-service/internal/server"
 	"github.com/lijunsheng/familyos/agent-service/internal/service"
+	agentv1 "github.com/lijunsheng/familyos/proto/gen/agent/v1"
+	"google.golang.org/grpc"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -85,6 +93,46 @@ func main() {
 				log.Fatalf("初始化 OpenSearch BM25 失败: %v", lexicalErr)
 			}
 			lexicalStore = value
+		}
+		if cfg.Agent.Enabled {
+			hybrid, hybridErr := search.NewHybridRetriever(embedder, store, lexicalStore, search.HybridConfig{DenseWeight: cfg.RAG.OpenSearch.DenseWeight, LexicalWeight: cfg.RAG.OpenSearch.LexicalWeight, Constant: cfg.RAG.OpenSearch.RRFConstant, CandidateK: cfg.RAG.OpenSearch.CandidateK})
+			if hybridErr != nil {
+				log.Fatalf("初始化混合检索器失败: %v", hybridErr)
+			}
+			rewriteMaxTokens := cfg.Agent.Rewrite.MaxTokens
+			rewriteModel, modelErr := openai.NewChatModel(ctx, &openai.ChatModelConfig{BaseURL: cfg.Agent.Rewrite.BaseURL, APIKey: cfg.Agent.Rewrite.APIKey, Model: cfg.Agent.Rewrite.Model, Timeout: cfg.Agent.Rewrite.Timeout, MaxTokens: &rewriteMaxTokens})
+			if modelErr != nil {
+				log.Fatalf("初始化 Query Rewrite ChatModel 失败: %v", modelErr)
+			}
+			chatMaxTokens := cfg.Agent.Chat.MaxTokens
+			chatModel, modelErr := openai.NewChatModel(ctx, &openai.ChatModelConfig{BaseURL: cfg.Agent.Chat.BaseURL, APIKey: cfg.Agent.Chat.APIKey, Model: cfg.Agent.Chat.Model, Timeout: cfg.Agent.Chat.Timeout, MaxTokens: &chatMaxTokens})
+			if modelErr != nil {
+				log.Fatalf("初始化 ReAct ChatModel 失败: %v", modelErr)
+			}
+			chatService, chatErr := agentgraph.NewChatGraph(rewriteModel, chatModel, hybrid, agentgraph.Config{MaxSteps: cfg.Agent.MaxSteps, TopK: cfg.Agent.TopK})
+			if chatErr != nil {
+				log.Fatalf("初始化 ReAct 问答服务失败: %v", chatErr)
+			}
+			chatServer, serverErr := agentserver.NewChatServer(chatService)
+			if serverErr != nil {
+				log.Fatalf("初始化 Agent gRPC 服务失败: %v", serverErr)
+			}
+			listener, listenErr := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Agent.GRPCPort))
+			if listenErr != nil {
+				log.Fatalf("监听 Agent gRPC 端口失败: %v", listenErr)
+			}
+			grpcServer := grpc.NewServer()
+			agentv1.RegisterAgentChatServiceServer(grpcServer, chatServer)
+			go func() {
+				<-ctx.Done()
+				grpcServer.GracefulStop()
+			}()
+			go func() {
+				if serveErr := grpcServer.Serve(listener); serveErr != nil {
+					log.Printf("Agent gRPC 服务退出: %v", serveErr)
+				}
+			}()
+			log.Printf("Eino ReAct 问答 gRPC 已启动: port=%d", cfg.Agent.GRPCPort)
 		}
 		documentIndexer, indexerErr := indexer.NewDocumentIndexer(parser.NewRegistry(), documentChunker, embedder, store, ragrepository.NewChunkRepo(db), indexer.DocumentIndexerConfig{DownloadTimeout: cfg.RAG.DownloadTimeout, MaxFileSize: cfg.RAG.MaxFileSize, Lexical: lexicalStore})
 		if indexerErr != nil {

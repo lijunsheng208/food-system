@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/document"
 	"github.com/pgvector/pgvector-go"
@@ -114,8 +115,10 @@ func (s *PGVector) Search(ctx context.Context, query []float32, filter document.
 	results := make([]document.SearchResult, len(rows))
 	for index, row := range rows {
 		var metadata map[string]any
-		if err := json.Unmarshal(row.Metadata, &metadata); err != nil {
-			return nil, fmt.Errorf("解析向量元数据失败: %w", err)
+		if len(row.Metadata) == 0 || strings.TrimSpace(string(row.Metadata)) == "null" || strings.TrimSpace(string(row.Metadata)) == "" {
+			metadata = map[string]any{}
+		} else if err := json.Unmarshal(row.Metadata, &metadata); err != nil {
+			return nil, fmt.Errorf("解析向量元数据失败: document_id=%d chunk_id=%q metadata_len=%d: %w", row.DocumentID, row.ID, len(row.Metadata), err)
 		}
 		results[index] = document.SearchResult{Chunk: document.Chunk{ID: row.ID, DocumentID: row.DocumentID, KnowledgeBaseID: row.KnowledgeBaseID, UserID: row.UserID, IndexVersion: row.IndexVersion, Index: row.ChunkIndex, Content: row.Content, ContentSHA256: row.ContentSHA256, Metadata: metadata}, Score: row.Score}
 	}
