@@ -71,5 +71,20 @@ func (c *LogicClient) CompleteDocumentIndex(ctx context.Context, documentID uint
 	return nil
 }
 
+// FailDocumentIndex 通知 Logic 当前索引版本已经永久失败。
+func (c *LogicClient) FailDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint, failureCode, failureMessage string) error {
+	requestCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+	requestCtx = metadata.AppendToOutgoingContext(requestCtx, internalTokenHeader, c.token)
+	resp, err := c.client.FailDocumentIndex(requestCtx, &knowledgev1.FailDocumentIndexRequest{DocumentId: int64(documentID), IndexVersion: int32(indexVersion), FailureCode: failureCode, FailureMessage: failureMessage})
+	if err != nil {
+		return fmt.Errorf("通知 Logic 索引永久失败失败: %w", err)
+	}
+	if resp.GetCode() != 0 {
+		return fmt.Errorf("Logic 拒绝记录索引失败: code=%d message=%s", resp.GetCode(), resp.GetMessage())
+	}
+	return nil
+}
+
 // Close 关闭 Logic gRPC 连接。
 func (c *LogicClient) Close() error { return c.conn.Close() }

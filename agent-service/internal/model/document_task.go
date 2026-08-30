@@ -7,10 +7,12 @@ const (
 	DocumentIndexTaskPending int8 = 0
 	// DocumentIndexTaskProcessing 表示任务已被一个 Worker 独占领取。
 	DocumentIndexTaskProcessing int8 = 1
+	// DocumentIndexTaskRetryWait 表示本次执行失败，等待退避后重试。
+	DocumentIndexTaskRetryWait int8 = 2
 	// DocumentIndexTaskCompleted 表示当前索引版本已经处理完成。
-	DocumentIndexTaskCompleted int8 = 2
-	// DocumentIndexTaskFailed 表示本次执行失败，等待退避后重试。
-	DocumentIndexTaskFailed int8 = 3
+	DocumentIndexTaskCompleted int8 = 3
+	// DocumentIndexTaskFailedPermanent 表示任务不可重试或已达到最大尝试次数。
+	DocumentIndexTaskFailedPermanent int8 = 4
 )
 
 // DocumentIndexTask 保存已可靠接收、但尚未解析的文档索引任务。
@@ -28,6 +30,8 @@ type DocumentIndexTask struct {
 	LockedBy        *string    `gorm:"column:locked_by"`
 	LockedAt        *time.Time `gorm:"column:locked_at"`
 	LastError       *string    `gorm:"column:last_error"`
+	FailureCode     *string    `gorm:"column:failure_code"`
+	FailureMessage  *string    `gorm:"column:failure_message"`
 	StartedAt       *time.Time `gorm:"column:started_at"`
 	CompletedAt     *time.Time `gorm:"column:completed_at"`
 }

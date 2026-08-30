@@ -73,6 +73,28 @@ func (s *KnowledgeInternalServer) CompleteDocumentIndex(ctx context.Context, req
 	return &knowledgev1.CompleteDocumentIndexResponse{Code: CodeSuccess, Message: "索引版本已激活"}, nil
 }
 
+// FailDocumentIndex 接收 Agent 的永久失败结论并更新对应文档版本。
+func (s *KnowledgeInternalServer) FailDocumentIndex(ctx context.Context, req *knowledgev1.FailDocumentIndexRequest) (*knowledgev1.FailDocumentIndexResponse, error) {
+	if !s.authenticated(ctx) {
+		return nil, status.Error(codes.Unauthenticated, "内部服务身份校验失败")
+	}
+	if req == nil || req.GetDocumentId() <= 0 || req.GetIndexVersion() <= 0 {
+		return &knowledgev1.FailDocumentIndexResponse{Code: 4001, Message: service.ErrKnowledgeInvalid.Error()}, nil
+	}
+	err := s.svc.FailDocumentIndex(ctx, uint64(req.GetDocumentId()), uint(req.GetIndexVersion()), req.GetFailureCode(), req.GetFailureMessage())
+	if err != nil {
+		code := int32(CodeInternalError)
+		if errors.Is(err, service.ErrKnowledgeInvalid) {
+			code = 4001
+		}
+		if errors.Is(err, service.ErrKnowledgeVersionStale) {
+			code = 4091
+		}
+		return &knowledgev1.FailDocumentIndexResponse{Code: code, Message: err.Error()}, nil
+	}
+	return &knowledgev1.FailDocumentIndexResponse{Code: CodeSuccess, Message: "文档索引失败状态已记录"}, nil
+}
+
 // authenticated 使用常量时间比较验证 Agent 服务令牌。
 func (s *KnowledgeInternalServer) authenticated(ctx context.Context) bool {
 	values := metadata.ValueFromIncomingContext(ctx, internalTokenHeader)

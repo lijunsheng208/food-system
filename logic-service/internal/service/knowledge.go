@@ -103,6 +103,26 @@ func (s *KnowledgeService) CompleteDocumentIndex(ctx context.Context, documentID
 	return nil
 }
 
+// FailDocumentIndex 记录 Agent 确认无法恢复的索引失败，并保持版本幂等。
+func (s *KnowledgeService) FailDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint, failureCode, failureMessage string) error {
+	if documentID == 0 || indexVersion == 0 || failureCode == "" || len(failureCode) > 64 || failureMessage == "" || len(failureMessage) > 500 {
+		return ErrKnowledgeInvalid
+	}
+	for _, char := range failureCode {
+		if (char < 'A' || char > 'Z') && (char < '0' || char > '9') && char != '_' {
+			return ErrKnowledgeInvalid
+		}
+	}
+	err := s.repo.FailDocumentIndex(ctx, documentID, indexVersion, failureCode, failureMessage)
+	if errors.Is(err, repository.ErrDocumentIndexVersionChanged) {
+		return ErrKnowledgeVersionStale
+	}
+	if err != nil {
+		return fmt.Errorf("更新文档索引失败状态失败: %w", err)
+	}
+	return nil
+}
+
 // EnsurePersonalKnowledgeBase 获取或创建当前用户的默认个人知识库。
 func (s *KnowledgeService) EnsurePersonalKnowledgeBase(ctx context.Context, userID uint64) (*model.KnowledgeBase, error) {
 	if userID == 0 {

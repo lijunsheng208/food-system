@@ -22,6 +22,7 @@ worker:
   lock_timeout: "5m"
   retry_base: "5s"
   retry_max: "5m"
+  max_attempts: 5
 
 rag:
   enabled: false
@@ -40,3 +41,14 @@ rag:
   pgvector:
     # 通过 FAMILYOS_AGENT_RAG_PGVECTOR_DSN 注入。
     dsn: "host=127.0.0.1 user=postgres password=password dbname=familyos_agent_vector port=5432 sslmode=disable"
+  opensearch:
+    enabled: false
+    endpoint: "http://127.0.0.1:9200"
+    username: ""
+    password: ""
+    index: "familyos-chunks-active"
+    request_timeout: "5s"
+    dense_weight: 0.7
+    lexical_weight: 0.3
+    rrf_constant: 30
+    candidate_k: 50

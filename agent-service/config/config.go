@@ -19,13 +19,28 @@ type Config struct {
 
 // RAGConfig 描述文档索引、Embedding 和 pgvector 配置。
 type RAGConfig struct {
-	Enabled         bool            `mapstructure:"enabled"`
-	ChunkSize       int             `mapstructure:"chunk_size"`
-	ChunkOverlap    int             `mapstructure:"chunk_overlap"`
-	MaxFileSize     int64           `mapstructure:"max_file_size"`
-	DownloadTimeout time.Duration   `mapstructure:"download_timeout"`
-	Embedding       EmbeddingConfig `mapstructure:"embedding"`
-	PGVector        PGVectorConfig  `mapstructure:"pgvector"`
+	Enabled         bool             `mapstructure:"enabled"`
+	ChunkSize       int              `mapstructure:"chunk_size"`
+	ChunkOverlap    int              `mapstructure:"chunk_overlap"`
+	MaxFileSize     int64            `mapstructure:"max_file_size"`
+	DownloadTimeout time.Duration    `mapstructure:"download_timeout"`
+	Embedding       EmbeddingConfig  `mapstructure:"embedding"`
+	PGVector        PGVectorConfig   `mapstructure:"pgvector"`
+	OpenSearch      OpenSearchConfig `mapstructure:"opensearch"`
+}
+
+// OpenSearchConfig 描述 IK Analyzer 和 BM25 倒排索引服务配置。
+type OpenSearchConfig struct {
+	Enabled        bool          `mapstructure:"enabled"`
+	Endpoint       string        `mapstructure:"endpoint"`
+	Username       string        `mapstructure:"username"`
+	Password       string        `mapstructure:"password"`
+	Index          string        `mapstructure:"index"`
+	RequestTimeout time.Duration `mapstructure:"request_timeout"`
+	DenseWeight    float64       `mapstructure:"dense_weight"`
+	LexicalWeight  float64       `mapstructure:"lexical_weight"`
+	RRFConstant    float64       `mapstructure:"rrf_constant"`
+	CandidateK     int           `mapstructure:"candidate_k"`
 }
 
 // EmbeddingConfig 描述 OpenAI-compatible Embedding 服务。
@@ -56,6 +71,7 @@ type WorkerConfig struct {
 	LockTimeout  time.Duration `mapstructure:"lock_timeout"`
 	RetryBase    time.Duration `mapstructure:"retry_base"`
 	RetryMax     time.Duration `mapstructure:"retry_max"`
+	MaxAttempts  uint          `mapstructure:"max_attempts"`
 }
 
 // DatabaseConfig 描述 Agent 任务表使用的 MySQL 连接。
@@ -98,6 +114,7 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("worker.lock_timeout", "5m")
 	v.SetDefault("worker.retry_base", "5s")
 	v.SetDefault("worker.retry_max", "5m")
+	v.SetDefault("worker.max_attempts", 5)
 	v.SetDefault("rag.enabled", false)
 	v.SetDefault("rag.chunk_size", 500)
 	v.SetDefault("rag.chunk_overlap", 50)
@@ -110,6 +127,13 @@ func Load(configPath string) (*Config, error) {
 	v.SetDefault("rag.embedding.batch_size", 16)
 	v.SetDefault("rag.embedding.timeout", "30s")
 	v.SetDefault("rag.pgvector.dsn", "")
+	v.SetDefault("rag.opensearch.enabled", false)
+	v.SetDefault("rag.opensearch.index", "familyos-chunks-active")
+	v.SetDefault("rag.opensearch.request_timeout", "5s")
+	v.SetDefault("rag.opensearch.dense_weight", 0.7)
+	v.SetDefault("rag.opensearch.lexical_weight", 0.3)
+	v.SetDefault("rag.opensearch.rrf_constant", 30)
+	v.SetDefault("rag.opensearch.candidate_k", 50)
 
 	if err := v.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
@@ -132,7 +156,7 @@ func Load(configPath string) (*Config, error) {
 	if (cfg.Logic.Target == "") != (cfg.Logic.AgentToken == "") || (cfg.Logic.Target != "" && cfg.Logic.RequestTimeout <= 0) {
 		return nil, fmt.Errorf("logic.target 和 logic.agent_token 必须同时配置，且 request_timeout 必须有效")
 	}
-	if cfg.Worker.PollInterval <= 0 || cfg.Worker.LockTimeout <= 0 || cfg.Worker.RetryBase <= 0 || cfg.Worker.RetryMax < cfg.Worker.RetryBase {
+	if cfg.Worker.PollInterval <= 0 || cfg.Worker.LockTimeout <= 0 || cfg.Worker.RetryBase <= 0 || cfg.Worker.RetryMax < cfg.Worker.RetryBase || cfg.Worker.MaxAttempts == 0 {
 		return nil, fmt.Errorf("worker 任务配置无效")
 	}
 	if cfg.RAG.Enabled {
@@ -141,6 +165,9 @@ func Load(configPath string) (*Config, error) {
 		}
 		if cfg.RAG.Embedding.BaseURL == "" || cfg.RAG.Embedding.APIKey == "" || cfg.RAG.Embedding.Model == "" || cfg.RAG.Embedding.Dimensions <= 0 || cfg.RAG.Embedding.Dimensions > 2000 || cfg.RAG.Embedding.BatchSize <= 0 || cfg.RAG.Embedding.Timeout <= 0 || cfg.RAG.PGVector.DSN == "" {
 			return nil, fmt.Errorf("启用 RAG 时 embedding 和 pgvector 配置必须完整")
+		}
+		if cfg.RAG.OpenSearch.Enabled && (cfg.RAG.OpenSearch.Endpoint == "" || cfg.RAG.OpenSearch.Index == "" || cfg.RAG.OpenSearch.RequestTimeout <= 0 || cfg.RAG.OpenSearch.DenseWeight <= 0 || cfg.RAG.OpenSearch.LexicalWeight <= 0 || cfg.RAG.OpenSearch.RRFConstant <= 0 || cfg.RAG.OpenSearch.CandidateK <= 0 || cfg.RAG.OpenSearch.CandidateK > 100) {
+			return nil, fmt.Errorf("启用 OpenSearch 时连接和索引配置必须完整")
 		}
 	}
 	return &cfg, nil

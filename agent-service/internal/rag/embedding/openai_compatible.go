@@ -118,15 +118,15 @@ func (e *OpenAICompatible) embed(ctx context.Context, texts []string) ([][]float
 		return nil, fmt.Errorf("Embedding 服务返回 HTTP %d", response.StatusCode)
 	}
 	if len(decoded.Data) != len(texts) {
-		return nil, fmt.Errorf("Embedding 数量不匹配: got=%d want=%d", len(decoded.Data), len(texts))
+		return nil, fmt.Errorf("%w: 数量不匹配 got=%d want=%d", ErrInvalidEmbeddingResponse, len(decoded.Data), len(texts))
 	}
 	vectors := make([][]float32, len(texts))
 	for _, item := range decoded.Data {
 		if item.Index < 0 || item.Index >= len(texts) || vectors[item.Index] != nil {
-			return nil, fmt.Errorf("Embedding 响应索引无效")
+			return nil, fmt.Errorf("%w: 响应索引无效", ErrInvalidEmbeddingResponse)
 		}
 		if len(item.Embedding) != e.config.DimensionsValue {
-			return nil, fmt.Errorf("Embedding 维度不匹配: got=%d want=%d", len(item.Embedding), e.config.DimensionsValue)
+			return nil, fmt.Errorf("%w: 维度不匹配 got=%d want=%d", ErrInvalidEmbeddingResponse, len(item.Embedding), e.config.DimensionsValue)
 		}
 		vectors[item.Index] = item.Embedding
 	}

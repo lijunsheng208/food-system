@@ -115,6 +115,26 @@ func (r *KnowledgeRepo) CompleteDocumentIndex(ctx context.Context, documentID ui
 	})
 }
 
+// FailDocumentIndex 仅将当前尚未完成的目标版本更新为永久失败。
+func (r *KnowledgeRepo) FailDocumentIndex(ctx context.Context, documentID uint64, indexVersion uint, failureCode, failureMessage string) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var document model.KnowledgeDocument
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&document, documentID).Error; err != nil {
+			return err
+		}
+		if document.IndexVersion != indexVersion {
+			return ErrDocumentIndexVersionChanged
+		}
+		if document.Status == model.DocumentFailed {
+			return nil
+		}
+		if document.Status != model.DocumentPending && document.Status != model.DocumentProcessing {
+			return ErrDocumentIndexVersionChanged
+		}
+		return tx.Model(&model.KnowledgeDocument{}).Where("id = ?", documentID).Updates(map[string]any{"status": model.DocumentFailed, "failure_code": failureCode, "failure_message": failureMessage}).Error
+	})
+}
+
 // ErrDocumentIndexVersionChanged 表示 Agent 完成的版本已不再是 Logic 当前目标版本。
 var ErrDocumentIndexVersionChanged = errors.New("文档索引版本已经变化")
 

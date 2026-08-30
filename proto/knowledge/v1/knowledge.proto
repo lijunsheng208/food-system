@@ -15,10 +15,13 @@ service KnowledgeService {
 service KnowledgeInternalService {
   rpc GetDocumentDownloadTicket(GetDocumentDownloadTicketRequest) returns (GetDocumentDownloadTicketResponse);
   rpc CompleteDocumentIndex(CompleteDocumentIndexRequest) returns (CompleteDocumentIndexResponse);
+  rpc FailDocumentIndex(FailDocumentIndexRequest) returns (FailDocumentIndexResponse);
 }
 
 message CompleteDocumentIndexRequest { int64 document_id = 1; int32 index_version = 2; }
 message CompleteDocumentIndexResponse { int32 code = 1; string message = 2; }
+message FailDocumentIndexRequest { int64 document_id = 1; int32 index_version = 2; string failure_code = 3; string failure_message = 4; }
+message FailDocumentIndexResponse { int32 code = 1; string message = 2; }
 
 message EnsurePersonalKnowledgeBaseRequest { int64 user_id = 1; }
 message EnsurePersonalKnowledgeBaseResponse { int32 code = 1; string message = 2; int64 knowledge_base_id = 3; }

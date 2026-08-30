@@ -13,6 +13,7 @@ import (
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/chunker"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/embedding"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/indexer"
+	"github.com/lijunsheng/familyos/agent-service/internal/rag/lexical"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/parser"
 	ragrepository "github.com/lijunsheng/familyos/agent-service/internal/rag/repository"
 	"github.com/lijunsheng/familyos/agent-service/internal/rag/vectorstore"
@@ -77,7 +78,15 @@ func main() {
 		if chunkErr != nil {
 			log.Fatalf("初始化文档切片器失败: %v", chunkErr)
 		}
-		documentIndexer, indexerErr := indexer.NewDocumentIndexer(parser.NewRegistry(), documentChunker, embedder, store, ragrepository.NewChunkRepo(db), indexer.DocumentIndexerConfig{DownloadTimeout: cfg.RAG.DownloadTimeout, MaxFileSize: cfg.RAG.MaxFileSize})
+		var lexicalStore lexical.Retriever
+		if cfg.RAG.OpenSearch.Enabled {
+			value, lexicalErr := lexical.NewOpenSearch(lexical.Config{Endpoint: cfg.RAG.OpenSearch.Endpoint, Username: cfg.RAG.OpenSearch.Username, Password: cfg.RAG.OpenSearch.Password, Index: cfg.RAG.OpenSearch.Index, RequestTimeout: cfg.RAG.OpenSearch.RequestTimeout})
+			if lexicalErr != nil {
+				log.Fatalf("初始化 OpenSearch BM25 失败: %v", lexicalErr)
+			}
+			lexicalStore = value
+		}
+		documentIndexer, indexerErr := indexer.NewDocumentIndexer(parser.NewRegistry(), documentChunker, embedder, store, ragrepository.NewChunkRepo(db), indexer.DocumentIndexerConfig{DownloadTimeout: cfg.RAG.DownloadTimeout, MaxFileSize: cfg.RAG.MaxFileSize, Lexical: lexicalStore})
 		if indexerErr != nil {
 			log.Fatalf("初始化文档索引器失败: %v", indexerErr)
 		}
@@ -85,7 +94,7 @@ func main() {
 		if hostErr != nil {
 			log.Fatalf("读取 Worker 主机名失败: %v", hostErr)
 		}
-		worker, workerErr := service.NewDocumentTaskWorker(taskRepo, logicClient, documentIndexer, service.DocumentTaskWorkerConfig{WorkerID: "agent-service-" + hostname + "-" + strconv.Itoa(os.Getpid()), PollInterval: cfg.Worker.PollInterval, LockTimeout: cfg.Worker.LockTimeout, RetryBase: cfg.Worker.RetryBase, RetryMax: cfg.Worker.RetryMax})
+		worker, workerErr := service.NewDocumentTaskWorker(taskRepo, logicClient, documentIndexer, service.DocumentTaskWorkerConfig{WorkerID: "agent-service-" + hostname + "-" + strconv.Itoa(os.Getpid()), PollInterval: cfg.Worker.PollInterval, LockTimeout: cfg.Worker.LockTimeout, RetryBase: cfg.Worker.RetryBase, RetryMax: cfg.Worker.RetryMax, MaxAttempts: cfg.Worker.MaxAttempts})
 		if workerErr != nil {
 			log.Fatalf("初始化文档索引 Worker 失败: %v", workerErr)
 		}

@@ -40,7 +40,7 @@ func (r *DocumentTaskRepo) ClaimIndexTask(ctx context.Context, workerID string, 
 		now := time.Now()
 		staleAt := now.Add(-lockTimeout)
 		query := tx.Clauses(clause.Locking{Strength: "UPDATE", Options: "SKIP LOCKED"}).
-			Where("((status IN (?, ?) AND next_retry_at <= ?) OR (status = ? AND locked_at < ?))", model.DocumentIndexTaskPending, model.DocumentIndexTaskFailed, now, model.DocumentIndexTaskProcessing, staleAt).
+			Where("((status IN (?, ?) AND next_retry_at <= ?) OR (status = ? AND locked_at < ?))", model.DocumentIndexTaskPending, model.DocumentIndexTaskRetryWait, now, model.DocumentIndexTaskProcessing, staleAt).
 			Order("id ASC").Limit(1).Find(&task)
 		if query.Error != nil || query.RowsAffected == 0 {
 			return query.Error
@@ -76,13 +76,37 @@ func (r *DocumentTaskRepo) MarkIndexTaskCompleted(ctx context.Context, id uint64
 	return nil
 }
 
-// MarkIndexTaskFailed 记录失败原因并将任务安排到退避时间后重试。
-func (r *DocumentTaskRepo) MarkIndexTaskFailed(ctx context.Context, id uint64, workerID string, nextRetryAt time.Time, cause string) error {
-	if len(cause) > 500 {
-		cause = cause[:500]
-	}
+// MarkIndexTaskRetryWait 记录可重试错误并将任务安排到退避时间后重试。
+func (r *DocumentTaskRepo) MarkIndexTaskRetryWait(ctx context.Context, id uint64, workerID string, nextRetryAt time.Time, cause string) error {
 	result := r.db.WithContext(ctx).Model(&model.DocumentIndexTask{}).Where("id = ? AND status = ? AND locked_by = ?", id, model.DocumentIndexTaskProcessing, workerID).
-		Updates(map[string]any{"status": model.DocumentIndexTaskFailed, "next_retry_at": nextRetryAt, "last_error": cause, "locked_by": nil, "locked_at": nil})
+		Updates(map[string]any{"status": model.DocumentIndexTaskRetryWait, "next_retry_at": nextRetryAt, "last_error": cause, "locked_by": nil, "locked_at": nil})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("文档索引任务执行锁已丢失")
+	}
+	return nil
+}
+
+// MarkIndexTaskFailureReportPending 保存永久失败结论，并仅重试向 Logic 上报失败状态。
+func (r *DocumentTaskRepo) MarkIndexTaskFailureReportPending(ctx context.Context, id uint64, workerID, code, message, cause string, nextRetryAt time.Time) error {
+	result := r.db.WithContext(ctx).Model(&model.DocumentIndexTask{}).Where("id = ? AND status = ? AND locked_by = ?", id, model.DocumentIndexTaskProcessing, workerID).
+		Updates(map[string]any{"status": model.DocumentIndexTaskRetryWait, "next_retry_at": nextRetryAt, "last_error": cause, "failure_code": code, "failure_message": message, "locked_by": nil, "locked_at": nil})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("文档索引任务执行锁已丢失")
+	}
+	return nil
+}
+
+// MarkIndexTaskFailedPermanent 将不可恢复任务置为终态，后续 Worker 不再领取。
+func (r *DocumentTaskRepo) MarkIndexTaskFailedPermanent(ctx context.Context, id uint64, workerID, cause string) error {
+	now := time.Now()
+	result := r.db.WithContext(ctx).Model(&model.DocumentIndexTask{}).Where("id = ? AND status = ? AND locked_by = ?", id, model.DocumentIndexTaskProcessing, workerID).
+		Updates(map[string]any{"status": model.DocumentIndexTaskFailedPermanent, "completed_at": now, "last_error": cause, "locked_by": nil, "locked_at": nil})
 	if result.Error != nil {
 		return result.Error
 	}

@@ -32,5 +32,24 @@ rag:
     batch_size: 16
     timeout: "30s"
 
+    opensearch:
+    enabled: false
+    endpoint: "http://127.0.0.1:9200"
+    username: ""
+    password: ""
+    index: "familyos-chunks-active"
+    request_timeout: "5s"
+    dense_weight: 0.7
+    lexical_weight: 0.3
+    rrf_constant: 30
+    candidate_k: 50
+
   pgvector:
     dsn: "host=127.0.0.1 user=familyos password=familyos_dev dbname=familyos_agent_vector port=5432 sslmode=disable"
+
+worker:
+  poll_interval: "1s"
+  lock_timeout: "5m"
+  retry_base: "5s"
+  retry_max: "5m"
+  max_attempts: 5
