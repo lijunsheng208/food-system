@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "familyos-agent-indexer"
+version = "0.1.0"
+description = "FamilyOS Python document indexing worker"
+requires-python = ">=3.10"
+dependencies = [
+  "grpcio>=1.62,<2",
+  "httpx>=0.27,<1",
+  "langchain-text-splitters>=0.3,<1",
+  "protobuf>=7.35.1,<8",
+  "psycopg[binary]>=3.1,<4",
+  "PyMySQL>=1.1,<2",
+  "PyYAML>=6,<7",
+  "rocketmq-client-python>=2.0.0,<3",
+  "unstructured[pdf]>=0.18.3,<0.19",
+]
+
+[project.scripts]
+familyos-agent-indexer = "familyos_agent.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

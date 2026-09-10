@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: familyos-agent-indexer
+Version: 0.1.0
+Summary: FamilyOS Python document indexing worker
+Requires-Python: >=3.9
+Requires-Dist: grpcio<2,>=1.62
+Requires-Dist: httpx<1,>=0.27
+Requires-Dist: langchain-text-splitters<1,>=0.3
+Requires-Dist: protobuf<8,>=7.35.1
+Requires-Dist: psycopg[binary]<4,>=3.1
+Requires-Dist: PyMySQL<2,>=1.1
+Requires-Dist: PyYAML<7,>=6
+Requires-Dist: rocketmq-client-python<3,>=2.0.0
+Requires-Dist: unstructured[pdf]<0.19,>=0.18.3

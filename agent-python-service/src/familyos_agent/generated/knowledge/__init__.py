@@ -1,0 +1,2 @@
+"""Knowledge Proto 包。"""
+

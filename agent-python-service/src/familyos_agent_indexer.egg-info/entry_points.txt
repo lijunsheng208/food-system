@@ -1,0 +1,2 @@
+[console_scripts]
+familyos-agent-indexer = familyos_agent.main:main
