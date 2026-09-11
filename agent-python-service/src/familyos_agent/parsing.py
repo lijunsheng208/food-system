@@ -74,12 +74,14 @@ class UnstructuredParser:
             from unstructured.partition.auto import partition
         except ImportError as exc:
             raise RuntimeError("缺少 Unstructured 文档解析依赖，请重新安装 agent-python-service") from exc
+        # 文本 PDF 使用 fast 可避免每个文档都加载视觉模型；扫描件仍可在此处切换 hi_res/OCR。
+        strategy = "fast" if self._source_format == "pdf" else "auto"
         return partition(
             file=io.BytesIO(source.content),
             metadata_filename=source.filename,
             content_type=source.content_type or None,
             include_page_breaks=False,
-            strategy="auto",
+            strategy=strategy,
         )
 
     # 转换元素并沿 parent_id 链计算标题路径，保留树结构和页码信息。
