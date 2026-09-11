@@ -1,18 +1,17 @@
 database:
   dsn: "user:password@tcp(127.0.0.1:3306)/familyos_agent?charset=utf8mb4&parseTime=True&loc=Local"
 
-rocketmq:
-  endpoint: "127.0.0.1:9876"
-  access_key: ""
-  access_secret: ""
-  consumer_group: "familyos-agent-document-indexer"
-  topic: "familyos-rag-document"
-
 logic:
   target: "127.0.0.1:50051"
   # 必须通过环境变量注入，并与 Logic 的 internal.agent_token 完全一致。
   agent_token: ""
   request_timeout: "10s"
+
+ingress:
+  port: 50053
+  # 必须与 Go Adapter 使用的内部令牌一致。
+  token: ""
+  max_workers: 8
 
 worker:
   poll_interval: "1s"

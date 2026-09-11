@@ -21,6 +21,94 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AcceptDocumentIndexEventRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	EventPayload  []byte                 `protobuf:"bytes,1,opt,name=event_payload,json=eventPayload,proto3" json:"event_payload,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptDocumentIndexEventRequest) Reset() {
+	*x = AcceptDocumentIndexEventRequest{}
+	mi := &file_agent_v1_agent_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptDocumentIndexEventRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptDocumentIndexEventRequest) ProtoMessage() {}
+
+func (x *AcceptDocumentIndexEventRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_v1_agent_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptDocumentIndexEventRequest.ProtoReflect.Descriptor instead.
+func (*AcceptDocumentIndexEventRequest) Descriptor() ([]byte, []int) {
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *AcceptDocumentIndexEventRequest) GetEventPayload() []byte {
+	if x != nil {
+		return x.EventPayload
+	}
+	return nil
+}
+
+type AcceptDocumentIndexEventResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Duplicate     bool                   `protobuf:"varint,1,opt,name=duplicate,proto3" json:"duplicate,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AcceptDocumentIndexEventResponse) Reset() {
+	*x = AcceptDocumentIndexEventResponse{}
+	mi := &file_agent_v1_agent_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AcceptDocumentIndexEventResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AcceptDocumentIndexEventResponse) ProtoMessage() {}
+
+func (x *AcceptDocumentIndexEventResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_agent_v1_agent_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AcceptDocumentIndexEventResponse.ProtoReflect.Descriptor instead.
+func (*AcceptDocumentIndexEventResponse) Descriptor() ([]byte, []int) {
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *AcceptDocumentIndexEventResponse) GetDuplicate() bool {
+	if x != nil {
+		return x.Duplicate
+	}
+	return false
+}
+
 type CreateConversationRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	UserId          int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -31,7 +119,7 @@ type CreateConversationRequest struct {
 
 func (x *CreateConversationRequest) Reset() {
 	*x = CreateConversationRequest{}
-	mi := &file_agent_v1_agent_proto_msgTypes[0]
+	mi := &file_agent_v1_agent_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +131,7 @@ func (x *CreateConversationRequest) String() string {
 func (*CreateConversationRequest) ProtoMessage() {}
 
 func (x *CreateConversationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_agent_v1_agent_proto_msgTypes[0]
+	mi := &file_agent_v1_agent_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +144,7 @@ func (x *CreateConversationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateConversationRequest.ProtoReflect.Descriptor instead.
 func (*CreateConversationRequest) Descriptor() ([]byte, []int) {
-	return file_agent_v1_agent_proto_rawDescGZIP(), []int{0}
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateConversationRequest) GetUserId() int64 {
@@ -82,7 +170,7 @@ type CreateConversationResponse struct {
 
 func (x *CreateConversationResponse) Reset() {
 	*x = CreateConversationResponse{}
-	mi := &file_agent_v1_agent_proto_msgTypes[1]
+	mi := &file_agent_v1_agent_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -94,7 +182,7 @@ func (x *CreateConversationResponse) String() string {
 func (*CreateConversationResponse) ProtoMessage() {}
 
 func (x *CreateConversationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_agent_v1_agent_proto_msgTypes[1]
+	mi := &file_agent_v1_agent_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,7 +195,7 @@ func (x *CreateConversationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateConversationResponse.ProtoReflect.Descriptor instead.
 func (*CreateConversationResponse) Descriptor() ([]byte, []int) {
-	return file_agent_v1_agent_proto_rawDescGZIP(), []int{1}
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateConversationResponse) GetConversationId() string {
@@ -130,7 +218,7 @@ type ChatStreamRequest struct {
 
 func (x *ChatStreamRequest) Reset() {
 	*x = ChatStreamRequest{}
-	mi := &file_agent_v1_agent_proto_msgTypes[2]
+	mi := &file_agent_v1_agent_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -142,7 +230,7 @@ func (x *ChatStreamRequest) String() string {
 func (*ChatStreamRequest) ProtoMessage() {}
 
 func (x *ChatStreamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_agent_v1_agent_proto_msgTypes[2]
+	mi := &file_agent_v1_agent_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -155,7 +243,7 @@ func (x *ChatStreamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatStreamRequest.ProtoReflect.Descriptor instead.
 func (*ChatStreamRequest) Descriptor() ([]byte, []int) {
-	return file_agent_v1_agent_proto_rawDescGZIP(), []int{2}
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ChatStreamRequest) GetUserId() int64 {
@@ -206,7 +294,7 @@ type ChatCitation struct {
 
 func (x *ChatCitation) Reset() {
 	*x = ChatCitation{}
-	mi := &file_agent_v1_agent_proto_msgTypes[3]
+	mi := &file_agent_v1_agent_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -218,7 +306,7 @@ func (x *ChatCitation) String() string {
 func (*ChatCitation) ProtoMessage() {}
 
 func (x *ChatCitation) ProtoReflect() protoreflect.Message {
-	mi := &file_agent_v1_agent_proto_msgTypes[3]
+	mi := &file_agent_v1_agent_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -231,7 +319,7 @@ func (x *ChatCitation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatCitation.ProtoReflect.Descriptor instead.
 func (*ChatCitation) Descriptor() ([]byte, []int) {
-	return file_agent_v1_agent_proto_rawDescGZIP(), []int{3}
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ChatCitation) GetCitationId() string {
@@ -283,7 +371,7 @@ type ChatStreamEvent struct {
 
 func (x *ChatStreamEvent) Reset() {
 	*x = ChatStreamEvent{}
-	mi := &file_agent_v1_agent_proto_msgTypes[4]
+	mi := &file_agent_v1_agent_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -295,7 +383,7 @@ func (x *ChatStreamEvent) String() string {
 func (*ChatStreamEvent) ProtoMessage() {}
 
 func (x *ChatStreamEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_agent_v1_agent_proto_msgTypes[4]
+	mi := &file_agent_v1_agent_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -308,7 +396,7 @@ func (x *ChatStreamEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatStreamEvent.ProtoReflect.Descriptor instead.
 func (*ChatStreamEvent) Descriptor() ([]byte, []int) {
-	return file_agent_v1_agent_proto_rawDescGZIP(), []int{4}
+	return file_agent_v1_agent_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ChatStreamEvent) GetType() string {
@@ -357,7 +445,11 @@ var File_agent_v1_agent_proto protoreflect.FileDescriptor
 
 const file_agent_v1_agent_proto_rawDesc = "" +
 	"\n" +
-	"\x14agent/v1/agent.proto\x12\bagent.v1\"`\n" +
+	"\x14agent/v1/agent.proto\x12\bagent.v1\"F\n" +
+	"\x1fAcceptDocumentIndexEventRequest\x12#\n" +
+	"\revent_payload\x18\x01 \x01(\fR\feventPayload\"@\n" +
+	" AcceptDocumentIndexEventResponse\x12\x1c\n" +
+	"\tduplicate\x18\x01 \x01(\bR\tduplicate\"`\n" +
 	"\x19CreateConversationRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12*\n" +
 	"\x11knowledge_base_id\x18\x02 \x01(\x03R\x0fknowledgeBaseId\"E\n" +
@@ -390,7 +482,9 @@ const file_agent_v1_agent_proto_rawDesc = "" +
 	"\x10AgentChatService\x12_\n" +
 	"\x12CreateConversation\x12#.agent.v1.CreateConversationRequest\x1a$.agent.v1.CreateConversationResponse\x12F\n" +
 	"\n" +
-	"ChatStream\x12\x1b.agent.v1.ChatStreamRequest\x1a\x19.agent.v1.ChatStreamEvent0\x01B;Z9github.com/lijunsheng/familyos/proto/gen/agent/v1;agentv1b\x06proto3"
+	"ChatStream\x12\x1b.agent.v1.ChatStreamRequest\x1a\x19.agent.v1.ChatStreamEvent0\x012\x90\x01\n" +
+	"\x1bDocumentIndexIngressService\x12q\n" +
+	"\x18AcceptDocumentIndexEvent\x12).agent.v1.AcceptDocumentIndexEventRequest\x1a*.agent.v1.AcceptDocumentIndexEventResponseB;Z9github.com/lijunsheng/familyos/proto/gen/agent/v1;agentv1b\x06proto3"
 
 var (
 	file_agent_v1_agent_proto_rawDescOnce sync.Once
@@ -404,22 +498,26 @@ func file_agent_v1_agent_proto_rawDescGZIP() []byte {
 	return file_agent_v1_agent_proto_rawDescData
 }
 
-var file_agent_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_agent_v1_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_agent_v1_agent_proto_goTypes = []any{
-	(*CreateConversationRequest)(nil),  // 0: agent.v1.CreateConversationRequest
-	(*CreateConversationResponse)(nil), // 1: agent.v1.CreateConversationResponse
-	(*ChatStreamRequest)(nil),          // 2: agent.v1.ChatStreamRequest
-	(*ChatCitation)(nil),               // 3: agent.v1.ChatCitation
-	(*ChatStreamEvent)(nil),            // 4: agent.v1.ChatStreamEvent
+	(*AcceptDocumentIndexEventRequest)(nil),  // 0: agent.v1.AcceptDocumentIndexEventRequest
+	(*AcceptDocumentIndexEventResponse)(nil), // 1: agent.v1.AcceptDocumentIndexEventResponse
+	(*CreateConversationRequest)(nil),        // 2: agent.v1.CreateConversationRequest
+	(*CreateConversationResponse)(nil),       // 3: agent.v1.CreateConversationResponse
+	(*ChatStreamRequest)(nil),                // 4: agent.v1.ChatStreamRequest
+	(*ChatCitation)(nil),                     // 5: agent.v1.ChatCitation
+	(*ChatStreamEvent)(nil),                  // 6: agent.v1.ChatStreamEvent
 }
 var file_agent_v1_agent_proto_depIdxs = []int32{
-	3, // 0: agent.v1.ChatStreamEvent.citation:type_name -> agent.v1.ChatCitation
-	0, // 1: agent.v1.AgentChatService.CreateConversation:input_type -> agent.v1.CreateConversationRequest
-	2, // 2: agent.v1.AgentChatService.ChatStream:input_type -> agent.v1.ChatStreamRequest
-	1, // 3: agent.v1.AgentChatService.CreateConversation:output_type -> agent.v1.CreateConversationResponse
-	4, // 4: agent.v1.AgentChatService.ChatStream:output_type -> agent.v1.ChatStreamEvent
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
+	5, // 0: agent.v1.ChatStreamEvent.citation:type_name -> agent.v1.ChatCitation
+	2, // 1: agent.v1.AgentChatService.CreateConversation:input_type -> agent.v1.CreateConversationRequest
+	4, // 2: agent.v1.AgentChatService.ChatStream:input_type -> agent.v1.ChatStreamRequest
+	0, // 3: agent.v1.DocumentIndexIngressService.AcceptDocumentIndexEvent:input_type -> agent.v1.AcceptDocumentIndexEventRequest
+	3, // 4: agent.v1.AgentChatService.CreateConversation:output_type -> agent.v1.CreateConversationResponse
+	6, // 5: agent.v1.AgentChatService.ChatStream:output_type -> agent.v1.ChatStreamEvent
+	1, // 6: agent.v1.DocumentIndexIngressService.AcceptDocumentIndexEvent:output_type -> agent.v1.AcceptDocumentIndexEventResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -436,9 +534,9 @@ func file_agent_v1_agent_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_agent_v1_agent_proto_rawDesc), len(file_agent_v1_agent_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_agent_v1_agent_proto_goTypes,
 		DependencyIndexes: file_agent_v1_agent_proto_depIdxs,

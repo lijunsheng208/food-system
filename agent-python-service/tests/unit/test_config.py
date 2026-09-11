@@ -13,6 +13,7 @@ VALID_CONFIG = """
 database: {dsn: 'u:p@tcp(127.0.0.1:3306)/familyos_agent'}
 rocketmq: {endpoint: '127.0.0.1:9876'}
 logic: {target: '127.0.0.1:50051', agent_token: 'internal-token'}
+ingress: {port: 50053, token: 'internal-token', max_workers: 2}
 rag:
   embedding: {api_key: 'embedding-key', model: 'embedding-model', dimensions: 4}
   milvus: {uri: 'http://127.0.0.1:19530', database: 'default', collection: 'familyos_document_chunks_v1'}

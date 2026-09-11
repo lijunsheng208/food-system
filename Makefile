@@ -1,4 +1,4 @@
-.PHONY: proto-gen proto-clean install-deps run-logic build-logic run-gateway build-gateway
+.PHONY: proto-gen proto-clean install-deps run-logic build-logic run-gateway build-gateway run-index-event-adapter
 
 # ===== Proto =====
 
@@ -37,6 +37,11 @@ run-gateway:
 
 build-gateway:
 	@cd gateway-service && go build -o ../deploy/gateway-service .
+
+# ===== Python Agent RocketMQ Adapter =====
+
+run-index-event-adapter:
+	@go run ./agent-index-event-adapter
 
 # ===== Deps =====
 

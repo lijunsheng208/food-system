@@ -17,17 +17,6 @@ class DatabaseConfig:
 
 
 @dataclass(frozen=True)
-class RocketMQConfig:
-    """描述与 Go Agent 兼容的 RocketMQ 消费参数。"""
-
-    endpoint: str
-    access_key: str
-    access_secret: str
-    consumer_group: str
-    topic: str
-
-
-@dataclass(frozen=True)
 class LogicConfig:
     """描述 Logic 内部 gRPC 连接。"""
 
@@ -45,6 +34,15 @@ class WorkerConfig:
     retry_base: float
     retry_max: float
     max_attempts: int
+
+
+@dataclass(frozen=True)
+class IngressConfig:
+    """描述 Go Adapter 调用的内部 gRPC 入站配置。"""
+
+    port: int
+    token: str
+    max_workers: int
 
 
 @dataclass(frozen=True)
@@ -107,9 +105,9 @@ class AppConfig:
     """聚合 Python 索引服务全部运行配置。"""
 
     database: DatabaseConfig
-    rocketmq: RocketMQConfig
     logic: LogicConfig
     worker: WorkerConfig
+    ingress: IngressConfig
     rag: RAGConfig
 
 
@@ -147,22 +145,15 @@ def load_config(path: Optional[str] = None) -> AppConfig:
             raise ValueError("配置文件根节点必须是对象")
         data = loaded
     database = _section(data, "database")
-    rocketmq = _section(data, "rocketmq")
     logic = _section(data, "logic")
     worker = _section(data, "worker")
+    ingress = _section(data, "ingress")
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
     milvus = _section(rag, "milvus")
     opensearch = _section(rag, "opensearch")
     result = AppConfig(
         database=DatabaseConfig(str(_env("DATABASE_DSN", database.get("dsn", "")))),
-        rocketmq=RocketMQConfig(
-            str(_env("ROCKETMQ_ENDPOINT", rocketmq.get("endpoint", ""))),
-            str(_env("ROCKETMQ_ACCESS_KEY", rocketmq.get("access_key", ""))),
-            str(_env("ROCKETMQ_ACCESS_SECRET", rocketmq.get("access_secret", ""))),
-            str(_env("ROCKETMQ_CONSUMER_GROUP", rocketmq.get("consumer_group", "familyos-agent-document-indexer"))),
-            str(_env("ROCKETMQ_TOPIC", rocketmq.get("topic", "familyos-rag-document"))),
-        ),
         logic=LogicConfig(
             str(_env("LOGIC_TARGET", logic.get("target", ""))),
             str(_env("LOGIC_AGENT_TOKEN", logic.get("agent_token", ""))),
@@ -174,6 +165,11 @@ def load_config(path: Optional[str] = None) -> AppConfig:
             _duration(_env("WORKER_RETRY_BASE", worker.get("retry_base", "5s"))),
             _duration(_env("WORKER_RETRY_MAX", worker.get("retry_max", "5m"))),
             int(_env("WORKER_MAX_ATTEMPTS", worker.get("max_attempts", 5))),
+        ),
+        ingress=IngressConfig(
+            int(_env("INGRESS_PORT", ingress.get("port", 50053))),
+            str(_env("INGRESS_TOKEN", ingress.get("token", ""))),
+            int(_env("INGRESS_MAX_WORKERS", ingress.get("max_workers", 8))),
         ),
         rag=RAGConfig(
             int(_env("RAG_CHILD_SIZE", rag.get("child_size", 500))),
@@ -212,10 +208,10 @@ def load_config(path: Optional[str] = None) -> AppConfig:
             ),
         ),
     )
-    if not all((result.database.dsn, result.rocketmq.endpoint, result.rocketmq.consumer_group, result.rocketmq.topic)):
-        raise ValueError("MySQL 和 RocketMQ 配置必须完整")
-    if bool(result.rocketmq.access_key) != bool(result.rocketmq.access_secret):
-        raise ValueError("RocketMQ access_key 和 access_secret 必须同时配置")
+    if not result.database.dsn:
+        raise ValueError("MySQL 配置必须完整")
+    if result.ingress.port <= 0 or not result.ingress.token or result.ingress.max_workers <= 0:
+        raise ValueError("Ingress port、token 和 max_workers 必须有效")
     if not result.logic.target or not result.logic.agent_token:
         raise ValueError("Logic target 和 agent_token 必须完整")
     embedding_ready = result.rag.embedding.model_name if result.rag.embedding.provider == "bge-m3" else (result.rag.embedding.api_key and result.rag.embedding.model)

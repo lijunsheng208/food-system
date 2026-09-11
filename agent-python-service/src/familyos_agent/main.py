@@ -10,9 +10,9 @@ from .chunking import ParentChildChunker
 from .clients import BGEM3EmbeddingClient, DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
-from .messaging import RocketMQDocumentConsumer
 from .parsing import ParserRegistry
 from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
+from .transport.grpc.index_ingress import DocumentIndexIngressServer
 
 
 # 组装 Consumer 和索引 Worker，并在退出信号后按顺序释放连接。
@@ -36,7 +36,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
     indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker)
     worker = DocumentWorker(mysql, logic, indexer, config.worker)
-    consumer = RocketMQDocumentConsumer(config.rocketmq, mysql)
+    ingress = DocumentIndexIngressServer(config.ingress.port, config.ingress.token, mysql, config.ingress.max_workers)
     stop = threading.Event()
 
     # 信号处理器只设置停止标志，资源关闭留在主流程执行。
@@ -45,11 +45,11 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     signal.signal(signal.SIGINT, request_stop)
     signal.signal(signal.SIGTERM, request_stop)
-    consumer.start()
+    ingress.start()
     try:
         worker.run(stop)
     finally:
-        consumer.close()
+        ingress.close()
         milvus.close()
         if opensearch is not None:
             opensearch.close()

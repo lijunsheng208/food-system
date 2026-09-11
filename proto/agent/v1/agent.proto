@@ -7,6 +7,18 @@ service AgentChatService {
   rpc ChatStream(ChatStreamRequest) returns (stream ChatStreamEvent);
 }
 
+service DocumentIndexIngressService {
+  rpc AcceptDocumentIndexEvent(AcceptDocumentIndexEventRequest) returns (AcceptDocumentIndexEventResponse);
+}
+
+message AcceptDocumentIndexEventRequest {
+  bytes event_payload = 1;
+}
+
+message AcceptDocumentIndexEventResponse {
+  bool duplicate = 1;
+}
+
 message CreateConversationRequest {
   int64 user_id = 1;
   int64 knowledge_base_id = 2;
