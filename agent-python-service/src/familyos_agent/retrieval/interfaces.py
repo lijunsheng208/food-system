@@ -29,6 +29,14 @@ class RetrievedChunk:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class EmbeddedChunks:
+    """描述 BGE-M3 为同一批文本生成的 Dense 与 Sparse 向量。"""
+
+    dense: Sequence[Sequence[float]]
+    sparse: Sequence[Dict[int, float]]
+
+
 class HybridRetriever(Protocol):
     """定义 Agent 所依赖的 Dense/Sparse 融合检索能力。"""
 

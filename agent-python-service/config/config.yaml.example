@@ -28,12 +28,16 @@ rag:
   max_file_size: 20971520
   download_timeout: "30s"
   embedding:
+    provider: "bge-m3"
+    model_name: "./models/bge-m3"
+    device: "cpu"
+    use_fp16: false
     base_url: "https://api.openai.com/v1"
     # 必须通过环境变量注入真实密钥。
     api_key: ""
-    model: "text-embedding-3-small"
-    dimensions: 1536
-    batch_size: 16
+    model: "bge-m3"
+    dimensions: 1024
+    batch_size: 8
     timeout: "30s"
   milvus:
     uri: "http://127.0.0.1:19530"
@@ -43,9 +47,6 @@ rag:
     timeout: "10s"
     dense_index_type: "AUTOINDEX"
     dense_metric_type: "COSINE"
-  # 阶段 B 完成 Milvus 写入替换前继续保留现有 pgvector 配置。
-  pgvector:
-    dsn: "host=127.0.0.1 user=familyos password=familyos_dev dbname=familyos_agent_vector port=5432 sslmode=disable"
   opensearch:
     enabled: false
     endpoint: "http://127.0.0.1:9200"

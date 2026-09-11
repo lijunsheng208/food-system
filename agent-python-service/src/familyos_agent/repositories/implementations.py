@@ -1,4 +1,4 @@
-"""MySQL 父子块、任务收件箱和 pgvector 子块持久化。"""
+"""MySQL 父子块和索引任务持久化。"""
 
 import json
 import re
@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple
 
 import pymysql
-import psycopg
 
 from ..domain import ChildChunk, DocumentIndexEvent, DocumentIndexTask, ParentChunk
 
@@ -138,35 +137,3 @@ class MySQLRepository:
                 affected = cursor.execute("UPDATE agent_document_index_task SET %s WHERE id=%%s AND status=1 AND locked_by=%%s" % assignments, values + (task_id, worker_id))
                 if affected != 1:
                     raise RuntimeError("文档索引任务执行锁已丢失")
-
-
-class PGVectorRepository:
-    """只保存子块向量，父块保留在 MySQL 供生成阶段扩展。"""
-
-    # 保存 PostgreSQL DSN 和固定向量维度。
-    def __init__(self, dsn: str, dimensions: int) -> None:
-        self._dsn = dsn
-        self._dimensions = dimensions
-
-    # 原子替换当前文档版本的子块向量并停用旧版本。
-    def replace_version(self, document_id: int, index_version: int, chunks: Sequence[ChildChunk], embeddings: Sequence[Sequence[float]]) -> None:
-        if len(chunks) != len(embeddings) or not chunks:
-            raise ValueError("子块和向量数量不匹配")
-        sql = """INSERT INTO agent_document_vectors
-        (id, document_id, knowledge_base_id, user_id, index_version, chunk_index,
-         content, content_sha256, metadata, embedding, active)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s::vector,true)"""
-        with psycopg.connect(self._dsn) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM agent_document_vectors WHERE document_id=%s AND index_version=%s", (document_id, index_version))
-                for chunk, embedding in zip(chunks, embeddings):
-                    if len(embedding) != self._dimensions:
-                        raise ValueError("Embedding 返回维度与配置不匹配")
-                    vector = "[" + ",".join(str(float(value)) for value in embedding) + "]"
-                    cursor.execute(sql, (chunk.id, chunk.document_id, chunk.knowledge_base_id, chunk.user_id, chunk.index_version, chunk.index, chunk.content, chunk.content_sha256, json.dumps(chunk.metadata, ensure_ascii=False), vector))
-                cursor.execute("UPDATE agent_document_vectors SET active=false WHERE document_id=%s AND index_version<>%s AND active=true", (document_id, index_version))
-
-    # 删除未完成索引版本的子块向量。
-    def delete_version(self, document_id: int, index_version: int) -> None:
-        with psycopg.connect(self._dsn) as connection:
-            connection.execute("DELETE FROM agent_document_vectors WHERE document_id=%s AND index_version=%s", (document_id, index_version))

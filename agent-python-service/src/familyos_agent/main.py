@@ -7,12 +7,12 @@ import threading
 from typing import Optional, Sequence
 
 from .chunking import ParentChildChunker
-from .clients import DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
+from .clients import BGEM3EmbeddingClient, DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
 from .messaging import RocketMQDocumentConsumer
 from .parsing import ParserRegistry
-from .repositories import MilvusCollectionManager, MySQLRepository, PGVectorRepository
+from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
 
 
 # 组装 Consumer 和索引 Worker，并在退出信号后按顺序释放连接。
@@ -25,10 +25,13 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     mysql = MySQLRepository(config.database.dsn)
     milvus = MilvusCollectionManager(config.rag.milvus, config.rag.embedding.dimensions)
     milvus.ensure_ready()
-    vectors = PGVectorRepository(config.rag.pgvector_dsn, config.rag.embedding.dimensions)
+    vectors = MilvusVectorRepository(milvus)
     logic = LogicClient(config.logic)
     downloader = DocumentDownloader(config.rag.max_file_size, config.rag.download_timeout)
-    embeddings = EmbeddingClient(config.rag.embedding)
+    if config.rag.embedding.provider == "bge-m3":
+        embeddings = BGEM3EmbeddingClient(config.rag.embedding.model_name, config.rag.embedding.batch_size, config.rag.embedding.use_fp16, config.rag.embedding.device)
+    else:
+        raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
     opensearch = OpenSearchRepository(config.rag.opensearch) if config.rag.opensearch.enabled else None
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
     indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker)

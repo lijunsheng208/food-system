@@ -57,6 +57,10 @@ class EmbeddingConfig:
     dimensions: int
     batch_size: int
     timeout: float
+    provider: str = "openai"
+    model_name: str = ""
+    device: str = "cpu"
+    use_fp16: bool = False
 
 
 @dataclass(frozen=True)
@@ -95,7 +99,6 @@ class RAGConfig:
     download_timeout: float
     embedding: EmbeddingConfig
     milvus: MilvusConfig
-    pgvector_dsn: str
     opensearch: OpenSearchConfig
 
 
@@ -150,7 +153,6 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
     milvus = _section(rag, "milvus")
-    pgvector = _section(rag, "pgvector")
     opensearch = _section(rag, "opensearch")
     result = AppConfig(
         database=DatabaseConfig(str(_env("DATABASE_DSN", database.get("dsn", "")))),
@@ -186,6 +188,10 @@ def load_config(path: Optional[str] = None) -> AppConfig:
                 int(_env("RAG_EMBEDDING_DIMENSIONS", embedding.get("dimensions", 0))),
                 int(_env("RAG_EMBEDDING_BATCH_SIZE", embedding.get("batch_size", 16))),
                 _duration(_env("RAG_EMBEDDING_TIMEOUT", embedding.get("timeout", "30s"))),
+                str(_env("RAG_EMBEDDING_PROVIDER", embedding.get("provider", "openai"))).lower(),
+                str(_env("RAG_EMBEDDING_MODEL_NAME", embedding.get("model_name", ""))),
+                str(_env("RAG_EMBEDDING_DEVICE", embedding.get("device", "cpu"))),
+                str(_env("RAG_EMBEDDING_USE_FP16", embedding.get("use_fp16", False))).lower() in ("1", "true", "yes"),
             ),
             MilvusConfig(
                 str(_env("RAG_MILVUS_URI", milvus.get("uri", ""))),
@@ -196,7 +202,6 @@ def load_config(path: Optional[str] = None) -> AppConfig:
                 str(_env("RAG_MILVUS_DENSE_INDEX_TYPE", milvus.get("dense_index_type", "AUTOINDEX"))).upper(),
                 str(_env("RAG_MILVUS_DENSE_METRIC_TYPE", milvus.get("dense_metric_type", "COSINE"))).upper(),
             ),
-            str(_env("RAG_PGVECTOR_DSN", pgvector.get("dsn", ""))),
             OpenSearchConfig(
                 str(_env("RAG_OPENSEARCH_ENABLED", opensearch.get("enabled", False))).lower() in ("1", "true", "yes"),
                 str(_env("RAG_OPENSEARCH_ENDPOINT", opensearch.get("endpoint", ""))),
@@ -211,8 +216,11 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("MySQL 和 RocketMQ 配置必须完整")
     if bool(result.rocketmq.access_key) != bool(result.rocketmq.access_secret):
         raise ValueError("RocketMQ access_key 和 access_secret 必须同时配置")
-    if not all((result.logic.target, result.logic.agent_token, result.rag.embedding.api_key, result.rag.embedding.model, result.rag.pgvector_dsn)):
-        raise ValueError("Logic、Embedding 和 pgvector 配置必须完整")
+    if not result.logic.target or not result.logic.agent_token:
+        raise ValueError("Logic target 和 agent_token 必须完整")
+    embedding_ready = result.rag.embedding.model_name if result.rag.embedding.provider == "bge-m3" else (result.rag.embedding.api_key and result.rag.embedding.model)
+    if not embedding_ready:
+        raise ValueError("Embedding 模型配置必须完整")
     if not all((result.rag.milvus.uri, result.rag.milvus.database, result.rag.milvus.collection)):
         raise ValueError("Milvus uri、database 和 collection 配置必须完整")
     if result.rag.milvus.collection != "familyos_document_chunks_v1":
@@ -223,6 +231,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Milvus Dense 索引类型必须是 AUTOINDEX 或 HNSW")
     if result.rag.embedding.dimensions <= 0 or result.rag.embedding.dimensions > 2000:
         raise ValueError("Embedding dimensions 必须在 1 到 2000 之间")
+    if result.rag.embedding.provider == "bge-m3" and not result.rag.embedding.model_name:
+        raise ValueError("BGE-M3 provider 必须配置 model_name")
     if result.rag.child_overlap >= result.rag.child_size or result.rag.parent_size < result.rag.child_size:
         raise ValueError("父子切片配置无效")
     return result

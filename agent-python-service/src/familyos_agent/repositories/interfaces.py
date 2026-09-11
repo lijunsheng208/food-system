@@ -1,6 +1,6 @@
 """向量持久化边界，隔离索引编排与具体向量数据库。"""
 
-from typing import Protocol, Sequence
+from typing import Protocol, Sequence, Mapping, Any
 
 from ..domain import ChildChunk
 
@@ -14,7 +14,7 @@ class VectorRepository(Protocol):
         document_id: int,
         index_version: int,
         chunks: Sequence[ChildChunk],
-        embeddings: Sequence[Sequence[float]],
+        embeddings: Any,
     ) -> None:
         ...
 

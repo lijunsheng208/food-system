@@ -75,7 +75,7 @@ class DocumentIndexer:
         try:
             self._vectors.delete_version(task.document_id, task.index_version)
         except Exception as exc:
-            logger.error("清理 pgvector 失败: document_id=%d error=%s", task.document_id, sanitize_error(exc))
+            logger.error("清理 Milvus 失败: document_id=%d error=%s", task.document_id, sanitize_error(exc))
         try:
             self._mysql.delete_chunks(task.document_id, task.index_version)
         except Exception as exc:

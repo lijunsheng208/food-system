@@ -1,4 +1,71 @@
-# FamilyOS Python Agent Indexer
+# FamilyOS Python Agent Service
+
+## 目录结构
+
+服务按设计稿中的职责边界组织。当前索引 Worker 的平铺模块暂时保留，后续阶段在修改相应功能时逐步迁入目标包，避免目录调整同时改变线上行为。
+
+```text
+agent-python-service/
+├── migrations/                    # MySQL 等持久化迁移
+├── scripts/                       # 运维脚本
+├── src/familyos_agent/
+│   ├── agent/                     # LangGraph StateGraph
+│   │   ├── nodes/                 # 改写、分类、检索、生成和校验节点
+│   │   └── tools/                 # FamilyOS 业务 Tool 适配器
+│   ├── clients/                   # Logic、Embedding、模型和外部客户端
+│   ├── domain/                    # 领域模型、值对象和业务错误
+│   ├── generated/                 # Proto 自动生成代码
+│   ├── repositories/              # MySQL、Milvus 持久化接口与实现
+│   ├── retrieval/                 # Dense、Sparse、Hybrid 和 Rerank
+│   ├── services/                  # 索引、Chat 和任务状态编排
+│   ├── transport/
+│   │   ├── grpc/                  # Chat gRPC 入站协议
+│   │   └── rocketmq/              # 索引事件消费与解析
+│   ├── workers/                   # 索引任务执行、重试和补偿
+│   ├── config.py                  # 应用配置（后续可迁入 core）
+│   ├── main.py                    # 进程组装和生命周期入口
+│   └── ...                        # 迁移前的现有索引模块
+└── tests/
+    ├── unit/                      # 无外部服务的单元测试
+    ├── integration/               # MySQL、Milvus、gRPC 和 MQ 集成测试
+    └── evaluation/                # Dense/Sparse/Hybrid 离线评测
+```
+
+依赖方向保持为 `transport/workers -> services -> domain`。`repositories`、`retrieval` 和 `clients` 实现由入口注入应用服务；`agent` 通过应用接口使用检索和业务 Tool，不直接解析 gRPC 或 RocketMQ 协议。`generated` 只由 Proto 生成流程维护。
+
+现有模块的计划归属如下：
+
+| 现有模块 | 目标目录 |
+| --- | --- |
+| `messaging.py` | `transport/rocketmq/` |
+| `indexing.py` | `services/` 与 `workers/` |
+| `repositories.py` | 已迁入 `repositories/implementations.py` |
+| `clients.py` | 已迁入 `clients/implementations.py` |
+| `domain.py` | 已迁入 `domain/models.py` |
+| `parsing.py`、`chunking.py` | `services/` |
+
+`agent`、`retrieval` 和 `transport/grpc` 将分别在 LangGraph、Milvus Hybrid Retrieval 和 Chat Server 阶段补充实现。包骨架不提供空的业务类，避免尚未成立的接口被其他模块依赖。
+
+## 阶段 A 基础设施
+
+阶段 A 已加入 `VectorRepository`、`HybridRetriever` 接口和 Milvus Collection 初始化。服务启动时会先检查 Milvus 连接，然后幂等创建或校验 `familyos_document_chunks_v1`；字段缺失或 Dense 向量维度不一致时直接终止启动。
+
+本地启动基础设施：
+
+```bash
+docker compose -f docker-compose.infrastructure.yml up -d milvus-etcd milvus-minio milvus
+curl --fail http://127.0.0.1:9091/healthz
+```
+
+开发配置从示例复制后通过环境变量注入真实密钥：
+
+```bash
+cd agent-python-service
+cp config/config.yaml.example config/config.yaml
+python -m familyos_agent --config config/config.yaml
+```
+
+阶段 B 已将 Indexer 切换为本地 BGE-M3 + Milvus：BGE-M3 同时生成 1024 维 Dense 和 lexical Sparse 向量，Milvus 按文档版本删除后批量插入，重复事件不会累积 Chunk。失败补偿会删除当前版本；Hybrid Search 和活动版本过滤属于阶段 C。模型目录默认为 `models/bge-m3`，该目录已加入 `.gitignore`。
 
 该服务替换 Go `agent-service` 的文档索引 Worker，外部契约保持不变：
 
@@ -6,7 +73,7 @@
 - JSON 事件类型 `document.index.requested`，字段与 Go `DocumentIndexReceiver` 一致
 - Logic `KnowledgeInternalService` 的三个 gRPC RPC
 - Agent MySQL `agent_document_index_task`、`agent_document_chunk`
-- PostgreSQL `agent_document_vectors` 和可选 OpenSearch BM25
+- Milvus `familyos_document_chunks_v1`（Dense/Sparse）和可选 OpenSearch BM25
 
 ## 解析和索引流程
 
@@ -14,7 +81,7 @@
 下载票据 → Unstructured 解析 MD/DOC/DOCX/PDF 元素树
         → 按元素 parent_id 聚合父块
         → RecursiveCharacterTextSplitter 细分重叠子块
-        → 子块 Embedding + pgvector
+        → 子块 BGE-M3 Dense/Sparse + Milvus
         → 子块 OpenSearch BM25
 ```
 

@@ -1,8 +1,10 @@
 """Milvus 连接健康检查和文档 Chunk Collection 初始化。"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 from ..config import MilvusConfig
+from ..domain import ChildChunk
+from ..retrieval import EmbeddedChunks
 
 
 EXPECTED_FIELDS = {
@@ -106,3 +108,34 @@ class MilvusCollectionManager:
         params = dense.get("params") or dense.get("type_params") or {}
         if int(params.get("dim", 0)) != self._dimensions:
             raise ValueError("Milvus Dense 向量维度与 Embedding 配置不一致")
+
+
+class MilvusVectorRepository:
+    """将 Chunk 向量以版本为单位幂等写入 Milvus。"""
+
+    # 注入已完成健康检查的 Collection 管理器，复用其客户端。
+    def __init__(self, manager: MilvusCollectionManager) -> None:
+        self._manager = manager
+        self._client = manager._client
+        self._collection = manager._config.collection
+
+    # 批量替换版本；先删除旧版本，主键 chunk_id 保证重复消息不会重复插入。
+    def replace_version(self, document_id: int, index_version: int, chunks: Sequence[ChildChunk], embeddings: EmbeddedChunks) -> None:
+        if not chunks or len(chunks) != len(embeddings.dense) or len(chunks) != len(embeddings.sparse):
+            raise ValueError("Chunk 与 Dense/Sparse 向量数量不一致")
+        for vector, weights in zip(embeddings.dense, embeddings.sparse):
+            if len(vector) != self._manager._dimensions:
+                raise ValueError("Dense 向量维度与 Milvus Collection 不一致")
+            if not isinstance(weights, dict) or any(not isinstance(key, int) or not isinstance(value, (int, float)) for key, value in weights.items()):
+                raise ValueError("Sparse 向量必须是 token_id 到权重的字典")
+        self.delete_version(document_id, index_version)
+        rows = []
+        for chunk, dense, sparse in zip(chunks, embeddings.dense, embeddings.sparse):
+            rows.append({"chunk_id": chunk.id, "document_id": chunk.document_id, "knowledge_base_id": chunk.knowledge_base_id, "user_id": chunk.user_id, "index_version": chunk.index_version, "chunk_index": chunk.index, "parent_id": chunk.parent_id, "content_sha256": chunk.content_sha256, "content": chunk.content, "metadata": chunk.metadata, "active": True, "dense_vector": list(dense), "sparse_vector": dict(sparse)})
+        if rows:
+            self._client.insert(collection_name=self._collection, data=rows)
+        # MilvusClient 没有跨行 UPDATE 的稳定契约；旧版本在检索 filter 中排除，避免依赖非原子状态切换。
+
+    # 删除指定文档版本，供失败补偿和重复消息清理使用。
+    def delete_version(self, document_id: int, index_version: int) -> None:
+        self._client.delete(collection_name=self._collection, filter="document_id == %d and index_version == %d" % (document_id, index_version))
