@@ -12,7 +12,7 @@ from .clients import DocumentDownloader, EmbeddingClient, LogicClient, OpenSearc
 from .config import WorkerConfig
 from .domain import DocumentIndexTask, PermanentDocumentError, SourceDocument
 from .parsing import ParserRegistry
-from .repositories import MySQLRepository, PGVectorRepository
+from .repositories import MySQLRepository, VectorRepository
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class DocumentIndexer:
     def __init__(
         self,
         mysql: MySQLRepository,
-        vectors: PGVectorRepository,
+        vectors: VectorRepository,
         opensearch: Optional[OpenSearchRepository],
         logic: LogicClient,
         downloader: DocumentDownloader,
@@ -148,4 +148,3 @@ def sanitize_error(error: Exception) -> str:
     value = re.sub(r"(?i)bearer\s+[a-z0-9._~+\-/]+=*", "Bearer [REDACTED]", value)
     value = re.sub(r"https?://\S+", "[URL_REDACTED]", value)
     return value[:500]
-

@@ -1,0 +1,193 @@
+services:
+  milvus-etcd:
+    image: quay.io/coreos/etcd:v3.5.18
+    container_name: familyos-milvus-etcd
+    restart: unless-stopped
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: "1000"
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+      ETCD_SNAPSHOT_COUNT: "50000"
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls=http://0.0.0.0:2379 --data-dir /etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - familyos-milvus-etcd-data:/etcd
+
+  milvus-minio:
+    image: minio/minio:RELEASE.2024-12-18T13-15-44Z
+    container_name: familyos-milvus-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ACCESS_KEY: ${FAMILYOS_MILVUS_MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${FAMILYOS_MILVUS_MINIO_SECRET_KEY:-minioadmin}
+    command: minio server /minio_data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - familyos-milvus-minio-data:/minio_data
+
+  milvus:
+    image: milvusdb/milvus:v2.5.14
+    container_name: familyos-milvus
+    restart: unless-stopped
+    command: ["milvus", "run", "standalone"]
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      ETCD_ENDPOINTS: milvus-etcd:2379
+      MINIO_ADDRESS: milvus-minio:9000
+      MINIO_ACCESS_KEY_ID: ${FAMILYOS_MILVUS_MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_ACCESS_KEY: ${FAMILYOS_MILVUS_MINIO_SECRET_KEY:-minioadmin}
+    depends_on:
+      milvus-etcd:
+        condition: service_healthy
+      milvus-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    volumes:
+      - familyos-milvus-data:/var/lib/milvus
+
+  pgvector:
+    image: pgvector/pgvector:pg16
+    container_name: familyos-pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FAMILYOS_PGVECTOR_DATABASE:-familyos_agent_vector}
+      POSTGRES_USER: ${FAMILYOS_PGVECTOR_USER:-familyos}
+      POSTGRES_PASSWORD: ${FAMILYOS_PGVECTOR_PASSWORD:-familyos_dev}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+    volumes:
+      - familyos-pgvector-data:/var/lib/postgresql/data
+
+  opensearch:
+    build:
+      context: ./opensearch
+    image: familyos-opensearch:2.19.1-ik
+    container_name: familyos-opensearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      # 开发环境关闭安全插件；生产环境必须启用 TLS 和账号认证。
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - familyos-opensearch-data:/usr/share/opensearch/data
+
+  rocketmq-init:
+    image: apache/rocketmq:5.3.2
+    platform: linux/amd64
+    user: root
+    # 命名卷默认由 root 创建，Broker 启动前需交给镜像内的 rocketmq 用户。
+    command: >
+      sh -c "chown 3000:3000 /home/rocketmq/logs /home/rocketmq/store"
+    volumes:
+      - familyos-rocketmq-logs:/home/rocketmq/logs
+      - familyos-rocketmq-store:/home/rocketmq/store
+
+  namesrv:
+    image: apache/rocketmq:5.3.2
+    platform: linux/amd64
+    container_name: familyos-rocketmq-namesrv
+    restart: unless-stopped
+    command: sh mqnamesrv
+    networks:
+      - rocketmq
+    ports:
+      - "9876:9876"
+
+  broker:
+    image: apache/rocketmq:5.3.2
+    platform: linux/amd64
+    container_name: familyos-rocketmq-broker
+    restart: unless-stopped
+    depends_on:
+      rocketmq-init:
+        condition: service_completed_successfully
+      namesrv:
+        condition: service_started
+    environment:
+      NAMESRV_ADDR: namesrv:9876
+    command: sh mqbroker -c /home/rocketmq/broker.conf
+    networks:
+      - rocketmq
+    volumes:
+      - ./rocketmq/broker.conf:/home/rocketmq/broker.conf:ro
+      - familyos-rocketmq-logs:/home/rocketmq/logs
+      - familyos-rocketmq-store:/home/rocketmq/store
+
+  rocketmq-topic-init:
+    image: apache/rocketmq:5.3.2
+    platform: linux/amd64
+    depends_on:
+      broker:
+        condition: service_started
+    # 5.x 客户端启动时要求 Topic 已有路由，等待 Broker 注册后幂等创建业务 Topic。
+    command: >
+      sh -c 'attempt=0;
+      until sh mqadmin updateTopic -n namesrv:9876 -c DefaultCluster -t familyos-rag-document;
+      do attempt=$$((attempt + 1));
+      if [ "$$attempt" -ge 30 ]; then exit 1; fi;
+      sleep 2;
+      done'
+    networks:
+      - rocketmq
+
+  proxy:
+    image: apache/rocketmq:5.3.2
+    platform: linux/amd64
+    container_name: familyos-rocketmq-proxy
+    restart: unless-stopped
+    depends_on:
+      namesrv:
+        condition: service_started
+      rocketmq-topic-init:
+        condition: service_completed_successfully
+    command: sh mqproxy -n namesrv:9876 -pc /home/rocketmq/proxy.json
+    networks:
+      - rocketmq
+    volumes:
+      - ./rocketmq/proxy.json:/home/rocketmq/proxy.json:ro
+    ports:
+      # 8080-8082、8084 已被项目占用，客户端连接 127.0.0.1:8083。
+      - "8083:8083"
+
+networks:
+  rocketmq:
+    driver: bridge
+
+volumes:
+  familyos-milvus-etcd-data:
+  familyos-milvus-minio-data:
+  familyos-milvus-data:
+  familyos-pgvector-data:
+  familyos-opensearch-data:
+  familyos-rocketmq-logs:
+  familyos-rocketmq-store:

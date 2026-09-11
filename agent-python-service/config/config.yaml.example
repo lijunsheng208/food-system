@@ -1,0 +1,55 @@
+database:
+  dsn: "user:password@tcp(127.0.0.1:3306)/familyos_agent?charset=utf8mb4&parseTime=True&loc=Local"
+
+rocketmq:
+  endpoint: "127.0.0.1:9876"
+  access_key: ""
+  access_secret: ""
+  consumer_group: "familyos-agent-document-indexer"
+  topic: "familyos-rag-document"
+
+logic:
+  target: "127.0.0.1:50051"
+  # 必须通过环境变量注入，并与 Logic 的 internal.agent_token 完全一致。
+  agent_token: ""
+  request_timeout: "10s"
+
+worker:
+  poll_interval: "1s"
+  lock_timeout: "5m"
+  retry_base: "5s"
+  retry_max: "5m"
+  max_attempts: 5
+
+rag:
+  child_size: 500
+  child_overlap: 50
+  parent_size: 4000
+  max_file_size: 20971520
+  download_timeout: "30s"
+  embedding:
+    base_url: "https://api.openai.com/v1"
+    # 必须通过环境变量注入真实密钥。
+    api_key: ""
+    model: "text-embedding-3-small"
+    dimensions: 1536
+    batch_size: 16
+    timeout: "30s"
+  milvus:
+    uri: "http://127.0.0.1:19530"
+    token: ""
+    database: "default"
+    collection: "familyos_document_chunks_v1"
+    timeout: "10s"
+    dense_index_type: "AUTOINDEX"
+    dense_metric_type: "COSINE"
+  # 阶段 B 完成 Milvus 写入替换前继续保留现有 pgvector 配置。
+  pgvector:
+    dsn: "host=127.0.0.1 user=familyos password=familyos_dev dbname=familyos_agent_vector port=5432 sslmode=disable"
+  opensearch:
+    enabled: false
+    endpoint: "http://127.0.0.1:9200"
+    username: ""
+    password: ""
+    index: "familyos-chunks-active"
+    request_timeout: "5s"

@@ -9,7 +9,7 @@ from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple
 import pymysql
 import psycopg
 
-from .domain import ChildChunk, DocumentIndexEvent, DocumentIndexTask, ParentChunk
+from ..domain import ChildChunk, DocumentIndexEvent, DocumentIndexTask, ParentChunk
 
 
 PENDING = 0
@@ -170,4 +170,3 @@ class PGVectorRepository:
     def delete_version(self, document_id: int, index_version: int) -> None:
         with psycopg.connect(self._dsn) as connection:
             connection.execute("DELETE FROM agent_document_vectors WHERE document_id=%s AND index_version=%s", (document_id, index_version))
-

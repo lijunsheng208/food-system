@@ -3,15 +3,17 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 from .config import RocketMQConfig
 from .domain import DocumentIndexEvent
-from .repositories import MySQLRepository
+from .transport.contracts import DOCUMENT_INDEX_EVENT_TYPE, DOCUMENT_INDEX_SCHEMA_VERSION
+
+if TYPE_CHECKING:
+    from .repositories import MySQLRepository
 
 
 logger = logging.getLogger(__name__)
-EXPECTED_EVENT_TYPE = "document.index.requested"
 
 
 # 严格解析 Logic 发布的 schema_version=1 INDEX JSON 事件。
@@ -28,7 +30,7 @@ def parse_index_event(body: bytes) -> DocumentIndexEvent:
         )
     except (KeyError, TypeError, ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ValueError("文档索引消息无效") from exc
-    if event.schema_version != 1 or event.event_type != EXPECTED_EVENT_TYPE or not event.event_id or min(event.document_id, event.user_id, event.knowledge_base_id, event.index_version) <= 0:
+    if event.schema_version != DOCUMENT_INDEX_SCHEMA_VERSION or event.event_type != DOCUMENT_INDEX_EVENT_TYPE or not event.event_id or min(event.document_id, event.user_id, event.knowledge_base_id, event.index_version) <= 0:
         raise ValueError("文档索引消息必填字段或事件类型不匹配")
     return event
 
@@ -37,7 +39,7 @@ class RocketMQDocumentConsumer:
     """订阅与 Go Agent 相同 Topic 和 INDEX Tag，并在任务落库后 ACK。"""
 
     # 延迟导入原生 RocketMQ 客户端，使纯解析测试不依赖本机动态库。
-    def __init__(self, config: RocketMQConfig, repository: MySQLRepository) -> None:
+    def __init__(self, config: RocketMQConfig, repository: "MySQLRepository") -> None:
         try:
             from rocketmq.client import ConsumeStatus, PushConsumer
         except ImportError as exc:
@@ -71,4 +73,3 @@ class RocketMQDocumentConsumer:
     # 停止 Consumer 并释放原生客户端资源。
     def close(self) -> None:
         self._consumer.shutdown()
-

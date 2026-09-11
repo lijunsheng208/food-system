@@ -10,9 +10,15 @@ from urllib.parse import urlparse
 import grpc
 import httpx
 
-from .config import EmbeddingConfig, LogicConfig, OpenSearchConfig
-from .domain import ChildChunk, DownloadTicket, PermanentDocumentError
-from .generated.knowledge.v1 import knowledge_pb2
+from ..config import EmbeddingConfig, LogicConfig, OpenSearchConfig
+from ..domain import ChildChunk, DownloadTicket, PermanentDocumentError
+from ..generated.knowledge.v1 import knowledge_pb2
+from ..transport.contracts import (
+    COMPLETE_DOCUMENT_INDEX_METHOD,
+    FAIL_DOCUMENT_INDEX_METHOD,
+    GET_DOCUMENT_DOWNLOAD_TICKET_METHOD,
+    INTERNAL_TOKEN_HEADER,
+)
 
 
 class LogicClient:
@@ -24,17 +30,17 @@ class LogicClient:
         self._token = config.agent_token
         self._timeout = config.request_timeout
         self._get_ticket = self._channel.unary_unary(
-            "/knowledge.v1.KnowledgeInternalService/GetDocumentDownloadTicket",
+            GET_DOCUMENT_DOWNLOAD_TICKET_METHOD,
             request_serializer=knowledge_pb2.GetDocumentDownloadTicketRequest.SerializeToString,
             response_deserializer=knowledge_pb2.GetDocumentDownloadTicketResponse.FromString,
         )
         self._complete = self._channel.unary_unary(
-            "/knowledge.v1.KnowledgeInternalService/CompleteDocumentIndex",
+            COMPLETE_DOCUMENT_INDEX_METHOD,
             request_serializer=knowledge_pb2.CompleteDocumentIndexRequest.SerializeToString,
             response_deserializer=knowledge_pb2.CompleteDocumentIndexResponse.FromString,
         )
         self._fail = self._channel.unary_unary(
-            "/knowledge.v1.KnowledgeInternalService/FailDocumentIndex",
+            FAIL_DOCUMENT_INDEX_METHOD,
             request_serializer=knowledge_pb2.FailDocumentIndexRequest.SerializeToString,
             response_deserializer=knowledge_pb2.FailDocumentIndexResponse.FromString,
         )
@@ -44,7 +50,7 @@ class LogicClient:
         response = self._get_ticket(
             knowledge_pb2.GetDocumentDownloadTicketRequest(document_id=document_id, index_version=index_version),
             timeout=self._timeout,
-            metadata=(("x-familyos-internal-token", self._token),),
+            metadata=((INTERNAL_TOKEN_HEADER, self._token),),
         )
         if response.code != 0:
             raise RuntimeError("Logic 拒绝签发文档下载票据: code=%d message=%s" % (response.code, response.message))
@@ -58,7 +64,7 @@ class LogicClient:
         response = self._complete(
             knowledge_pb2.CompleteDocumentIndexRequest(document_id=document_id, index_version=index_version),
             timeout=self._timeout,
-            metadata=(("x-familyos-internal-token", self._token),),
+            metadata=((INTERNAL_TOKEN_HEADER, self._token),),
         )
         if response.code != 0:
             raise RuntimeError("Logic 拒绝激活索引版本: code=%d message=%s" % (response.code, response.message))
@@ -68,7 +74,7 @@ class LogicClient:
         response = self._fail(
             knowledge_pb2.FailDocumentIndexRequest(document_id=document_id, index_version=index_version, failure_code=code, failure_message=message),
             timeout=self._timeout,
-            metadata=(("x-familyos-internal-token", self._token),),
+            metadata=((INTERNAL_TOKEN_HEADER, self._token),),
         )
         if response.code != 0:
             raise RuntimeError("Logic 拒绝记录索引失败: code=%d message=%s" % (response.code, response.message))
@@ -220,4 +226,3 @@ class OpenSearchRepository:
     # 关闭 OpenSearch HTTP 连接池。
     def close(self) -> None:
         self._client.close()
-

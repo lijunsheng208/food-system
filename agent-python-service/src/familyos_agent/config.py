@@ -60,6 +60,19 @@ class EmbeddingConfig:
 
 
 @dataclass(frozen=True)
+class MilvusConfig:
+    """描述 Milvus 连接、Collection 和 Dense 索引参数。"""
+
+    uri: str
+    token: str
+    database: str
+    collection: str
+    timeout: float
+    dense_index_type: str
+    dense_metric_type: str
+
+
+@dataclass(frozen=True)
 class OpenSearchConfig:
     """描述子块 BM25 索引连接。"""
 
@@ -81,6 +94,7 @@ class RAGConfig:
     max_file_size: int
     download_timeout: float
     embedding: EmbeddingConfig
+    milvus: MilvusConfig
     pgvector_dsn: str
     opensearch: OpenSearchConfig
 
@@ -135,6 +149,7 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     worker = _section(data, "worker")
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
+    milvus = _section(rag, "milvus")
     pgvector = _section(rag, "pgvector")
     opensearch = _section(rag, "opensearch")
     result = AppConfig(
@@ -172,6 +187,15 @@ def load_config(path: Optional[str] = None) -> AppConfig:
                 int(_env("RAG_EMBEDDING_BATCH_SIZE", embedding.get("batch_size", 16))),
                 _duration(_env("RAG_EMBEDDING_TIMEOUT", embedding.get("timeout", "30s"))),
             ),
+            MilvusConfig(
+                str(_env("RAG_MILVUS_URI", milvus.get("uri", ""))),
+                str(_env("RAG_MILVUS_TOKEN", milvus.get("token", ""))),
+                str(_env("RAG_MILVUS_DATABASE", milvus.get("database", ""))),
+                str(_env("RAG_MILVUS_COLLECTION", milvus.get("collection", ""))),
+                _duration(_env("RAG_MILVUS_TIMEOUT", milvus.get("timeout", "10s"))),
+                str(_env("RAG_MILVUS_DENSE_INDEX_TYPE", milvus.get("dense_index_type", "AUTOINDEX"))).upper(),
+                str(_env("RAG_MILVUS_DENSE_METRIC_TYPE", milvus.get("dense_metric_type", "COSINE"))).upper(),
+            ),
             str(_env("RAG_PGVECTOR_DSN", pgvector.get("dsn", ""))),
             OpenSearchConfig(
                 str(_env("RAG_OPENSEARCH_ENABLED", opensearch.get("enabled", False))).lower() in ("1", "true", "yes"),
@@ -189,9 +213,16 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("RocketMQ access_key 和 access_secret 必须同时配置")
     if not all((result.logic.target, result.logic.agent_token, result.rag.embedding.api_key, result.rag.embedding.model, result.rag.pgvector_dsn)):
         raise ValueError("Logic、Embedding 和 pgvector 配置必须完整")
+    if not all((result.rag.milvus.uri, result.rag.milvus.database, result.rag.milvus.collection)):
+        raise ValueError("Milvus uri、database 和 collection 配置必须完整")
+    if result.rag.milvus.collection != "familyos_document_chunks_v1":
+        raise ValueError("阶段 A 仅允许使用 familyos_document_chunks_v1 Collection")
+    if result.rag.milvus.dense_metric_type != "COSINE":
+        raise ValueError("Milvus Dense 向量首期必须使用 COSINE")
+    if result.rag.milvus.dense_index_type not in ("AUTOINDEX", "HNSW"):
+        raise ValueError("Milvus Dense 索引类型必须是 AUTOINDEX 或 HNSW")
     if result.rag.embedding.dimensions <= 0 or result.rag.embedding.dimensions > 2000:
         raise ValueError("Embedding dimensions 必须在 1 到 2000 之间")
     if result.rag.child_overlap >= result.rag.child_size or result.rag.parent_size < result.rag.child_size:
         raise ValueError("父子切片配置无效")
     return result
-

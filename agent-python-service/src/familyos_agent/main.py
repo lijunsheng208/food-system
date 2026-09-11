@@ -12,7 +12,7 @@ from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
 from .messaging import RocketMQDocumentConsumer
 from .parsing import ParserRegistry
-from .repositories import MySQLRepository, PGVectorRepository
+from .repositories import MilvusCollectionManager, MySQLRepository, PGVectorRepository
 
 
 # 组装 Consumer 和索引 Worker，并在退出信号后按顺序释放连接。
@@ -23,6 +23,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     config = load_config(args.config)
     mysql = MySQLRepository(config.database.dsn)
+    milvus = MilvusCollectionManager(config.rag.milvus, config.rag.embedding.dimensions)
+    milvus.ensure_ready()
     vectors = PGVectorRepository(config.rag.pgvector_dsn, config.rag.embedding.dimensions)
     logic = LogicClient(config.logic)
     downloader = DocumentDownloader(config.rag.max_file_size, config.rag.download_timeout)
@@ -45,6 +47,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         worker.run(stop)
     finally:
         consumer.close()
+        milvus.close()
         if opensearch is not None:
             opensearch.close()
         embeddings.close()
@@ -54,4 +57,3 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
 if __name__ == "__main__":
     main()
-

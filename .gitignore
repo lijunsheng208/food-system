@@ -22,6 +22,36 @@ coverage.out
 *.test
 *.prof
 
+# Python 服务虚拟环境、缓存、测试产物和本地配置。
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+*.egg-info/
+build/
+agent-python-service/config/config.yaml
+agent-python-service/.nltk_data/
+agent-python-service/models/
+
+# 本地 PDF/OCR 和模型运行缓存。
+*.onnx
+*.pt
+*.pth
+*.safetensors
+*.pdf.tmp
+pdf-output/
+ocr-output/
+
+# 本机编辑器工作区和调试会话文件。
+*.code-workspace
+:memory:.ses
+
 # Node/Expo 依赖、缓存和构建产物。
 node_modules/
 .expo/
