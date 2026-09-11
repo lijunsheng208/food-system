@@ -13,6 +13,7 @@ class RetrievalQuery:
     user_id: int
     top_k: int
     document_ids: Sequence[int] = ()
+    index_version: int = 0
 
 
 @dataclass(frozen=True)
