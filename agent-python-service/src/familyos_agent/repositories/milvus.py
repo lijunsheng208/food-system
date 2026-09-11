@@ -1,5 +1,6 @@
 """Milvus 连接健康检查和文档 Chunk Collection 初始化。"""
 
+from numbers import Integral, Real
 from typing import Any, Dict, List, Optional, Sequence
 
 from ..config import MilvusConfig
@@ -126,12 +127,12 @@ class MilvusVectorRepository:
         for vector, weights in zip(embeddings.dense, embeddings.sparse):
             if len(vector) != self._manager._dimensions:
                 raise ValueError("Dense 向量维度与 Milvus Collection 不一致")
-            if not isinstance(weights, dict) or any(not isinstance(key, int) or not isinstance(value, (int, float)) for key, value in weights.items()):
+            if not isinstance(weights, dict) or any(not isinstance(key, Integral) or not isinstance(value, Real) for key, value in weights.items()):
                 raise ValueError("Sparse 向量必须是 token_id 到权重的字典")
         self.delete_version(document_id, index_version)
         rows = []
         for chunk, dense, sparse in zip(chunks, embeddings.dense, embeddings.sparse):
-            rows.append({"chunk_id": chunk.id, "document_id": chunk.document_id, "knowledge_base_id": chunk.knowledge_base_id, "user_id": chunk.user_id, "index_version": chunk.index_version, "chunk_index": chunk.index, "parent_id": chunk.parent_id, "content_sha256": chunk.content_sha256, "content": chunk.content, "metadata": chunk.metadata, "active": True, "dense_vector": list(dense), "sparse_vector": dict(sparse)})
+            rows.append({"chunk_id": chunk.id, "document_id": chunk.document_id, "knowledge_base_id": chunk.knowledge_base_id, "user_id": chunk.user_id, "index_version": chunk.index_version, "chunk_index": chunk.index, "parent_id": chunk.parent_id, "content_sha256": chunk.content_sha256, "content": chunk.content, "metadata": chunk.metadata, "active": True, "dense_vector": [float(value) for value in dense], "sparse_vector": {int(key): float(value) for key, value in sparse.items()}})
         if rows:
             self._client.insert(collection_name=self._collection, data=rows)
         # MilvusClient 没有跨行 UPDATE 的稳定契约；旧版本在检索 filter 中排除，避免依赖非原子状态切换。

@@ -157,7 +157,6 @@ messages、original_query、rewritten_query、intent、documents、tool_results�
 
 - [ ] 实现批量插入、幂等替换、版本切换和失败删除。
 - [ ] 将现有 pgvector 写入替换为 Milvus 写入。
-- [ ] 完成历史数据回填工具和回填记录表/日志。
 - [ ] 对空文档、维度不匹配、重复消息和超时增加回归测试。
 
 验收：同一索引事件重复消费不会产生重复 Chunk；成功版本可检索；失败版本不会被查询到。
@@ -235,3 +234,8 @@ Python LangGraph Chat Server
 ```
 
 首期明确不引入 OpenSearch 检索路径。内容存储采用“双层职责”：MySQL 保存权威父子 Chunk 和权限数据，Milvus 保存检索所需的 `content` 冗余副本及向量；检索阶段直接使用 Milvus 内容降低延迟，回答落地前可按 `chunk_id` 回 MySQL 做权限和版本复核。
+
+
+
+# 错误解决方法
+

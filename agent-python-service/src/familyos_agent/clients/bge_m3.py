@@ -1,6 +1,7 @@
 """BGE-M3 本地 Dense/Sparse 向量生成器。"""
 
-from typing import Sequence
+from numbers import Integral, Real
+from typing import Any, Dict, Sequence
 
 from ..retrieval import EmbeddedChunks
 
@@ -33,8 +34,25 @@ class BGEM3EmbeddingClient:
             if batch_dense is None or batch_sparse is None or len(batch_dense) != len(batch) or len(batch_sparse) != len(batch):
                 raise ValueError("BGE-M3 返回数量与文本数量不匹配")
             dense.extend(batch_dense.tolist() if hasattr(batch_dense, "tolist") else batch_dense)
-            sparse.extend(batch_sparse)
+            sparse.extend(self._normalize_sparse(item) for item in batch_sparse)
         return EmbeddedChunks(dense=dense, sparse=sparse)
+
+    # 将 FlagEmbedding 的 lexical_weights 转成 Milvus 接受的原生 token_id/权重字典。
+    @staticmethod
+    def _normalize_sparse(weights: Any) -> Dict[int, float]:
+        if not isinstance(weights, dict):
+            raise ValueError("BGE-M3 Sparse 向量必须是 token_id 到权重的字典")
+        normalized: Dict[int, float] = {}
+        for key, value in weights.items():
+            try:
+                token_id = int(key)
+                weight = float(value)
+            except (TypeError, ValueError, OverflowError) as exc:
+                raise ValueError("BGE-M3 Sparse 向量包含无效 token_id 或权重") from exc
+            if isinstance(key, bool) or isinstance(value, bool) or not isinstance(token_id, Integral) or not isinstance(weight, Real):
+                raise ValueError("BGE-M3 Sparse 向量包含无效 token_id 或权重")
+            normalized[token_id] = weight
+        return normalized
 
     # 释放模型占用的资源；FlagEmbedding 没有强制 close，因此仅清理引用。
     def close(self) -> None:
