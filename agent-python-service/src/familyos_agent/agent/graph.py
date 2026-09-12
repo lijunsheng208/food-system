@@ -2,10 +2,14 @@
 
 import asyncio
 import inspect
+import json
+import logging
 from typing import Any, Mapping, Sequence
 
 from .state import AgentState
 from .tool_registry import ToolRegistry, decode_tool_arguments
+
+logger = logging.getLogger(__name__)
 
 
 def _message_content(message: Any) -> str:
@@ -38,6 +42,9 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         raise ValueError("Agent Graph 配置无效")
     try:
         from langgraph.graph import END, START, StateGraph
+        from langgraph.prebuilt import InjectedState, ToolNode
+        from langchain_core.tools import tool
+        from typing import Annotated
     except ImportError as exc:
         raise RuntimeError("缺少 langgraph，请安装 agent-python-service 依赖") from exc
 
@@ -57,6 +64,7 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         response = await _call_model(model, messages, registry)
         calls = list(_tool_calls(response))
         content = _message_content(response)
+        logger.info("Agent 模型决策完成 step=%d tool_call_count=%d content_chars=%d", steps, len(calls), len(content))
         if not calls:
             return {"messages": messages + [{"role": "assistant", "content": content}], "answer": content, "agent_steps": steps, "terminal_status": "completed"}
         call = calls[0]
@@ -64,30 +72,43 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         name = str(function.get("name", ""))
         if not name:
             return {"agent_steps": steps, "terminal_status": "failed", "error_code": "TOOL_CALL_INVALID", "error_message": "模型 Tool 调用缺少名称"}
-        return {"messages": messages + [{"role": "assistant", "content": content, "tool_calls": [dict(call)]}], "tool_calls": [dict(call)], "agent_steps": steps, "terminal_status": "tool_pending", "pending_tool_name": name, "pending_tool_arguments": function.get("arguments", {})}
+        if name not in registry._tools:
+            return {"agent_steps": steps, "terminal_status": "failed", "error_code": "TOOL_NOT_ALLOWED", "error_message": "请求的 Tool 不在白名单中"}
+        raw_arguments = function.get("arguments", function.get("args", {}))
+        normalized_arguments = decode_tool_arguments(raw_arguments)
+        normalized_call = {"name": name, "args": normalized_arguments, "id": str(call.get("id", "call_%d" % steps)), "type": "tool_call"}
+        from langchain_core.messages import AIMessage
+        assistant_message = AIMessage(content=content, tool_calls=[normalized_call])
+        return {"messages": messages + [assistant_message], "tool_calls": [normalized_call], "agent_steps": steps, "terminal_status": "tool_pending", "pending_tool_name": name, "pending_tool_arguments": normalized_arguments}
 
-    async def execute_tool(state: AgentState) -> AgentState:
-        """异步执行模型选择的白名单 Tool，并将结果写回消息上下文。"""
-        count = int(state.get("tool_call_count", 0)) + 1
+    def make_tool(agent_tool: Any) -> Any:
+        """将内部 Tool 描述转换为官方 ToolNode 可执行工具。"""
+        async def invoke(query: str = "", state: Annotated[dict, InjectedState] = None) -> str:
+            """执行单个服务端 Tool，并注入当前用户上下文。"""
+            try:
+                decoded = {"query": query}
+                if inspect.iscoroutinefunction(agent_tool.handler):
+                    result = await asyncio.wait_for(agent_tool.handler(state, decoded), timeout=tool_timeout)
+                else:
+                    result = await asyncio.wait_for(asyncio.to_thread(agent_tool.handler, state, decoded), timeout=tool_timeout)
+                return str(result)
+            except Exception:
+                logger.exception("Agent Tool 执行失败 tool=%s", agent_tool.name)
+                raise
+        return tool(agent_tool.name, description=agent_tool.description)(invoke)
+
+    tool_node = ToolNode([make_tool(item) for item in registry._tools.values()], handle_tool_errors=True)
+
+    async def after_tools(state: AgentState) -> AgentState:
+        """统计官方 ToolNode 已执行的调用次数并继续 Agent 循环。"""
+        last = state.get("messages", [])[-1] if state.get("messages") else None
+        results = [message for message in state.get("messages", []) if getattr(message, "type", "") == "tool" or (isinstance(message, Mapping) and message.get("role") == "tool")]
+        count = len(results)
+        if results and str(getattr(results[-1], "content", results[-1].get("content", "") if isinstance(results[-1], Mapping) else "")).startswith("Error"):
+            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
         if count > max_tool_calls:
             return {"tool_call_count": count, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
-        try:
-            tool = registry.get(str(state.get("pending_tool_name", "")))
-            arguments = decode_tool_arguments(state.get("pending_tool_arguments", {}))
-            if inspect.iscoroutinefunction(tool.handler):
-                result = await asyncio.wait_for(tool.handler(state, arguments), timeout=tool_timeout)
-            else:
-                result = await asyncio.wait_for(asyncio.to_thread(tool.handler, state, arguments), timeout=tool_timeout)
-        except KeyError:
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_NOT_ALLOWED", "error_message": "请求的 Tool 不在白名单中"}
-        except ValueError:
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_ARGUMENT_INVALID", "error_message": "Tool 参数无效"}
-        except asyncio.TimeoutError:
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_TIMEOUT", "error_message": "Tool 调用超时"}
-        except Exception:
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
-        name = str(state.get("pending_tool_name", ""))
-        return {"messages": list(state.get("messages", [])) + [{"role": "tool", "name": name, "content": str(result)}], "tool_results": list(state.get("tool_results", [])) + [{"name": name, "result": result}], "tool_call_count": count, "terminal_status": "continue"}
+        return {"tool_call_count": count, "terminal_status": "continue"}
 
     def route_after_decide(state: AgentState) -> str:
         """将模型决策路由到 Tool、成功终止或失败终止。"""
@@ -108,13 +129,15 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
     graph = StateGraph(AgentState)
     graph.add_node("rewrite_query", rewrite_query)
     graph.add_node("agent_decide", agent_decide)
-    graph.add_node("execute_tool", execute_tool)
+    graph.add_node("execute_tool", tool_node)
+    graph.add_node("after_tools", after_tools)
     graph.add_node("finish", finish)
     graph.add_node("fail", fail)
     graph.add_edge(START, "rewrite_query")
     graph.add_edge("rewrite_query", "agent_decide")
     graph.add_conditional_edges("agent_decide", route_after_decide, {"execute_tool": "execute_tool", "finish": "finish", "fail": "fail"})
-    graph.add_conditional_edges("execute_tool", route_after_tool, {"agent_decide": "agent_decide", "fail": "fail"})
+    graph.add_edge("execute_tool", "after_tools")
+    graph.add_conditional_edges("after_tools", route_after_tool, {"agent_decide": "agent_decide", "fail": "fail"})
     graph.add_edge("finish", END)
     graph.add_edge("fail", END)
     return graph.compile()

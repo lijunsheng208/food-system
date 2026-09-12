@@ -2,6 +2,7 @@
 
 import asyncio
 import hmac
+import logging
 from concurrent import futures
 from typing import Any, AsyncIterator, Mapping, Optional
 
@@ -10,6 +11,8 @@ import grpc
 from ...agent.streaming import AgentEvent, stream_agent_events
 from ...generated.agent.v1 import agent_pb2
 from ...generated.agent.v1 import agent_pb2_grpc
+
+logger = logging.getLogger(__name__)
 
 
 class ChatStreamService:
@@ -83,7 +86,7 @@ class _AgentChatServicer(agent_pb2_grpc.AgentChatServiceServicer):
     # 处理 ChatStream，并在客户端取消时停止异步事件消费。
     def ChatStream(self, request: Any, context: grpc.ServicerContext):
         self._service.authenticate(context)
-        state = {"user_id": request.user_id, "knowledge_base_id": request.knowledge_base_id, "conversation_id": request.conversation_id, "request_id": request.request_id, "original_query": request.message}
+        state = {"user_id": request.user_id, "knowledge_base_id": request.knowledge_base_id, "conversation_id": request.conversation_id, "request_id": request.request_id, "message": request.message, "original_query": request.message}
         iterator = None
         try:
             loop = asyncio.new_event_loop()
@@ -104,6 +107,7 @@ class _AgentChatServicer(agent_pb2_grpc.AgentChatServiceServicer):
         except asyncio.CancelledError:
             return
         except Exception:
+            logger.exception("ChatStream 处理失败 request_id=%s", request.request_id)
             yield agent_pb2.ChatStreamEvent(type="error", request_id=request.request_id, error_code="CHAT_FAILED", error_message="问答处理失败")
 
     # 创建绑定用户和知识库的会话。
