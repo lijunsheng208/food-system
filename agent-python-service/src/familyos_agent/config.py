@@ -44,6 +44,20 @@ class IngressConfig:
     token: str
     max_workers: int
 
+@dataclass(frozen=True)
+class ChatConfig:
+    """描述 Chat gRPC 和模型运行参数。"""
+    port: int
+    token: str
+    max_workers: int
+    base_url: str
+    api_key: str
+    model: str
+    timeout: float
+    max_tokens: int
+    max_steps: int
+    max_tool_calls: int
+
 
 @dataclass(frozen=True)
 class EmbeddingConfig:
@@ -108,6 +122,7 @@ class AppConfig:
     logic: LogicConfig
     worker: WorkerConfig
     ingress: IngressConfig
+    chat: ChatConfig
     rag: RAGConfig
 
 
@@ -148,6 +163,7 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     logic = _section(data, "logic")
     worker = _section(data, "worker")
     ingress = _section(data, "ingress")
+    chat = _section(data, "chat")
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
     milvus = _section(rag, "milvus")
@@ -171,6 +187,7 @@ def load_config(path: Optional[str] = None) -> AppConfig:
             str(_env("INGRESS_TOKEN", ingress.get("token", ""))),
             int(_env("INGRESS_MAX_WORKERS", ingress.get("max_workers", 8))),
         ),
+        chat=ChatConfig(int(_env("CHAT_PORT", chat.get("port", 50054))), str(_env("CHAT_TOKEN", chat.get("token", ""))), int(_env("CHAT_MAX_WORKERS", chat.get("max_workers", 8))), str(_env("CHAT_BASE_URL", chat.get("base_url", "https://api.openai.com/v1"))), str(_env("CHAT_API_KEY", chat.get("api_key", ""))), str(_env("CHAT_MODEL", chat.get("model", ""))), _duration(_env("CHAT_TIMEOUT", chat.get("timeout", "60s"))), int(_env("CHAT_MAX_TOKENS", chat.get("max_tokens", 2048))), int(_env("CHAT_MAX_STEPS", chat.get("max_steps", 8))), int(_env("CHAT_MAX_TOOL_CALLS", chat.get("max_tool_calls", 6)))),
         rag=RAGConfig(
             int(_env("RAG_CHILD_SIZE", rag.get("child_size", 500))),
             int(_env("RAG_CHILD_OVERLAP", rag.get("child_overlap", 50))),
@@ -214,6 +231,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Ingress port、token 和 max_workers 必须有效")
     if not result.logic.target or not result.logic.agent_token:
         raise ValueError("Logic target 和 agent_token 必须完整")
+    if result.chat.port <= 0 or result.chat.max_steps <= 0 or result.chat.max_tool_calls <= 0:
+        raise ValueError("Chat 配置边界无效")
     embedding_ready = result.rag.embedding.model_name if result.rag.embedding.provider == "bge-m3" else (result.rag.embedding.api_key and result.rag.embedding.model)
     if not embedding_ready:
         raise ValueError("Embedding 模型配置必须完整")

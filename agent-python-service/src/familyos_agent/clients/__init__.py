@@ -2,5 +2,6 @@
 
 from .implementations import DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .bge_m3 import BGEM3EmbeddingClient
+from .chat_model import AsyncOpenAIChatModel
 
-__all__ = ["BGEM3EmbeddingClient", "DocumentDownloader", "EmbeddingClient", "LogicClient", "OpenSearchRepository"]
+__all__ = ["AsyncOpenAIChatModel", "BGEM3EmbeddingClient", "DocumentDownloader", "EmbeddingClient", "LogicClient", "OpenSearchRepository"]

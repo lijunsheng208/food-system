@@ -2,6 +2,7 @@
 
 import json
 import re
+import uuid
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Any, Dict, Generator, List, Optional, Sequence, Tuple
@@ -113,6 +114,37 @@ class MySQLRepository:
         with self._connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute("DELETE FROM agent_document_chunk WHERE document_id=%s AND index_version=%s", (document_id, index_version))
+
+    # 创建绑定用户和知识库的会话，供 Chat gRPC 创建会话 RPC 使用。
+    def create_conversation(self, user_id: int, knowledge_base_id: int) -> str:
+        conversation_id = str(uuid.uuid4())
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO agent_conversation (id,user_id,knowledge_base_id) VALUES (%s,%s,%s)", (conversation_id, user_id, knowledge_base_id))
+        return conversation_id
+
+    # 记录一次 Chat 用户消息和生成中的助手消息，依赖 request_id 唯一约束实现幂等。
+    def begin_chat(self, request: Any) -> None:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT user_id,knowledge_base_id FROM agent_conversation WHERE id=%s FOR UPDATE", (request.conversation_id,))
+                row = cursor.fetchone()
+                if not row or int(row["user_id"]) != request.user_id or int(row["knowledge_base_id"]) != request.knowledge_base_id:
+                    raise ValueError("会话不存在或无权访问")
+                cursor.execute("INSERT IGNORE INTO agent_conversation_message (id,conversation_id,request_id,role,status,content) VALUES (%s,%s,%s,1,2,%s)", (str(uuid.uuid4()), request.conversation_id, request.request_id, request.message))
+                cursor.execute("INSERT IGNORE INTO agent_conversation_message (id,conversation_id,request_id,role,status,content) VALUES (%s,%s,%s,2,1,'')", (str(uuid.uuid4()), request.conversation_id, request.request_id))
+
+    # 保存助手最终回答及引用快照。
+    def complete_chat(self, request_id: str, answer: str, citations: Sequence[Dict[str, Any]]) -> None:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("UPDATE agent_conversation_message SET status=2,content=%s,citations=%s,completed_at=UTC_TIMESTAMP(3) WHERE request_id=%s AND role=2 AND status=1", (answer, json.dumps(list(citations), ensure_ascii=False), request_id))
+
+    # 保存失败终态，客户端只接收稳定错误码。
+    def fail_chat(self, request_id: str, error_code: str, message: str) -> None:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("UPDATE agent_conversation_message SET status=3,error_code=%s,error_message=%s,completed_at=UTC_TIMESTAMP(3) WHERE request_id=%s AND role=2 AND status=1", (error_code, message[:500], request_id))
 
     # 将当前持锁任务标记为完成。
     def mark_completed(self, task_id: int, worker_id: str) -> None:

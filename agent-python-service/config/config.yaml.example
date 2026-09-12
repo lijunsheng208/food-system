@@ -13,6 +13,18 @@ ingress:
   token: ""
   max_workers: 8
 
+chat:
+  port: 50054
+  token: ""
+  max_workers: 8
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  api_key: ""
+  model: "qwen-plus"
+  timeout: "60s"
+  max_tokens: 2048
+  max_steps: 8
+  max_tool_calls: 6
+
 worker:
   poll_interval: "1s"
   lock_timeout: "5m"
