@@ -1,0 +1,12 @@
+collection: familyos_document_chunks_eval_v1
+user_id: 900001
+knowledge_base_id: 900001
+index_version: 1
+candidate_limit: 50
+top_k: [5, 10, 20]
+fusion:
+  rrf_k: [10, 20, 60, 100]
+  weighted:
+    - [0.3, 0.7]
+    - [0.5, 0.5]
+    - [0.7, 0.3]

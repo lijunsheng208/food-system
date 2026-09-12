@@ -67,9 +67,23 @@ python -m familyos_agent --config config/config.yaml
 
 阶段 B 已将 Indexer 切换为本地 BGE-M3 + Milvus：BGE-M3 同时生成 1024 维 Dense 和 lexical Sparse 向量，Milvus 按文档版本删除后批量插入，重复事件不会累积 Chunk。失败补偿会删除当前版本；Hybrid Search 和活动版本过滤属于阶段 C。模型目录默认为 `models/bge-m3`，该目录已加入 `.gitignore`。
 
-该服务替换 Go `agent-service` 的文档索引 Worker，外部契约保持不变：
+RocketMQ 由 Go `agent-index-event-adapter` 使用官方 RocketMQ 5 客户端消费，再通过 Python 内部 gRPC `:50053` 转发。Python 只有在任务成功写入 MySQL 后返回成功，Adapter 才 ACK；临时失败会由 RocketMQ 重投。
 
-- RocketMQ Topic `familyos-rag-document`，Tag `INDEX`
+启动顺序：先启动 Python Worker，再启动 Adapter（确保同一个 Consumer Group 下不要同时运行旧 Go `agent-service` 的文档 Consumer）。
+
+```bash
+# 终端一：Python Worker
+source .venv/bin/activate
+python -m familyos_agent --config config/config.yaml
+
+# 终端二：Go Adapter（仓库根目录）
+FAMILYOS_ADAPTER_INTERNAL_TOKEN="$FAMILYOS_INTERNAL_AGENT_TOKEN" \
+go run ./agent-index-event-adapter
+```
+
+该服务通过 Go `agent-index-event-adapter` 接收 RocketMQ 事件，外部契约保持不变：
+
+- RocketMQ Topic `familyos-rag-document`，Tag `INDEX`（由 Go Adapter 消费）
 - JSON 事件类型 `document.index.requested`，字段与 Go `DocumentIndexReceiver` 一致
 - Logic `KnowledgeInternalService` 的三个 gRPC RPC
 - Agent MySQL `agent_document_index_task`、`agent_document_chunk`
