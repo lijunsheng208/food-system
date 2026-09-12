@@ -30,6 +30,12 @@ def _map_event(event: Mapping[str, Any]) -> Optional[AgentEvent]:
     kind = str(event.get("event", ""))
     name = str(event.get("name", ""))
     data = event.get("data") or {}
+    # interrupt 可能只产生 chain stream 事件，优先把待询问内容暴露给传输层。
+    if isinstance(data, Mapping):
+        for candidate in (data.get("chunk"), data.get("output"), data.get("input")):
+            if isinstance(candidate, Mapping) and candidate.get("pending_question"):
+                question = candidate["pending_question"]
+                return AgentEvent("awaiting_input", str(question.get("question", "请补充必要信息")), name, {"question": dict(question)})
     if kind == "on_chat_model_stream":
         chunk = data.get("chunk") if isinstance(data, Mapping) else None
         content = _text(getattr(chunk, "content", chunk.get("content", "") if isinstance(chunk, Mapping) else chunk))
@@ -43,8 +49,12 @@ def _map_event(event: Mapping[str, Any]) -> Optional[AgentEvent]:
         return AgentEvent("node_start", name=name, data=data)
     if kind == "on_chain_end":
         output = data.get("output") if isinstance(data, Mapping) else None
-        if isinstance(output, Mapping) and output.get("answer"):
-            return AgentEvent("model_token", str(output["answer"]), name, data)
+        if isinstance(output, Mapping) and output.get("terminal_status") == "failed":
+            return AgentEvent("error", "Agent 执行失败", name, {"error_code": output.get("error_code", "AGENT_FAILED")})
+        if isinstance(output, Mapping) and output.get("pending_question"):
+            question = output.get("pending_question") or {}
+            return AgentEvent("awaiting_input", str(question.get("question", "请补充必要信息")), name, {"question": dict(question)})
+        # 模型 token 已经由 on_chat_model_stream 发出，chain_end 只保留节点结束事件，避免重复回答。
         if isinstance(output, Mapping) and output.get("citations"):
             return AgentEvent("citations", name=name, data={"citations": output.get("citations")})
         return AgentEvent("node_end", name=name, data=data)
@@ -63,7 +73,15 @@ async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Opti
 
     async def consume() -> AsyncIterator[AgentEvent]:
         """读取底层事件并转换为应用事件。"""
-        async for raw in graph.astream_events(dict(state), config=dict(config or {}), version="v2"):
+        graph_input: Any = dict(state)
+        resume_value = graph_input.pop("__resume__", None)
+        if resume_value is not None:
+            try:
+                from langgraph.types import Command
+                graph_input = Command(resume=resume_value)
+            except ImportError as exc:
+                raise RuntimeError("缺少 LangGraph resume 支持") from exc
+        async for raw in graph.astream_events(graph_input, config=dict(config or {}), version="v2"):
             mapped = _map_event(raw)
             if mapped is not None:
                 yield mapped

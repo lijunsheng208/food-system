@@ -134,11 +134,35 @@ class MySQLRepository:
                 cursor.execute("INSERT IGNORE INTO agent_conversation_message (id,conversation_id,request_id,role,status,content) VALUES (%s,%s,%s,1,2,%s)", (str(uuid.uuid4()), request.conversation_id, request.request_id, request.message))
                 cursor.execute("INSERT IGNORE INTO agent_conversation_message (id,conversation_id,request_id,role,status,content) VALUES (%s,%s,%s,2,1,'')", (str(uuid.uuid4()), request.conversation_id, request.request_id))
 
+    # 读取请求终态，重复 request_id 直接复用已保存结果，避免重复调用模型。
+    def get_chat_result(self, request_id: str) -> Optional[Dict[str, Any]]:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT status,content,citations,error_code,error_message FROM agent_conversation_message WHERE request_id=%s AND role=2 LIMIT 1", (request_id,))
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                return {"status": int(row["status"]), "content": row.get("content", ""), "citations": json.loads(row.get("citations") or "[]"), "error_code": row.get("error_code", ""), "error_message": row.get("error_message", "")}
+
     # 保存助手最终回答及引用快照。
     def complete_chat(self, request_id: str, answer: str, citations: Sequence[Dict[str, Any]]) -> None:
         with self._connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute("UPDATE agent_conversation_message SET status=2,content=%s,citations=%s,completed_at=UTC_TIMESTAMP(3) WHERE request_id=%s AND role=2 AND status=1", (answer, json.dumps(list(citations), ensure_ascii=False), request_id))
+
+    # 复核引用仍属于当前用户知识库的有效索引版本，避免检索副本过期或越权落库。
+    def validate_chat_citations(self, user_id: int, knowledge_base_id: int, citations: Sequence[Dict[str, Any]]) -> bool:
+        if not citations:
+            return True
+        ids = [str(item.get("chunk_id", "")) for item in citations]
+        if any(not item for item in ids):
+            return False
+        placeholders = ",".join(["%s"] * len(ids))
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) AS total FROM agent_document_chunk WHERE chunk_type=1 AND user_id=%s AND knowledge_base_id=%s AND id IN (" + placeholders + ")", (user_id, knowledge_base_id, *ids))
+                row = cursor.fetchone()
+                return bool(row and int(row["total"]) == len(set(ids)))
 
     # 保存失败终态，客户端只接收稳定错误码。
     def fail_chat(self, request_id: str, error_code: str, message: str) -> None:

@@ -1,0 +1,10 @@
+{
+  "title": "FamilyOS Agent D4",
+  "schemaVersion": 39,
+  "panels": [
+    {"type":"timeseries","title":"Runs by status","targets":[{"expr":"sum by (status) (rate(familyos_agent_runs_total[5m]))"}]},
+    {"type":"timeseries","title":"First token latency","targets":[{"expr":"histogram_quantile(0.95, sum by (le) (rate(familyos_agent_first_token_seconds_bucket[5m])))"}]},
+    {"type":"timeseries","title":"Run latency","targets":[{"expr":"histogram_quantile(0.95, sum by (le) (rate(familyos_agent_run_duration_seconds_bucket[5m])))"}]},
+    {"type":"timeseries","title":"Tool calls","targets":[{"expr":"sum by (tool,status) (rate(familyos_agent_tool_calls_total[5m]))"}]}
+  ]
+}

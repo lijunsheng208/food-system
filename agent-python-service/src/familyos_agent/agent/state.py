@@ -18,6 +18,7 @@ class AgentState(TypedDict, total=False):
     documents: List[Any]
     citations: List[Dict[str, Any]]
     answer: str
+    answer_valid: bool
     agent_steps: int
     tool_call_count: int
     pending_tool_name: str
@@ -25,3 +26,8 @@ class AgentState(TypedDict, total=False):
     terminal_status: str
     error_code: str
     error_message: str
+    user_constraints: Dict[str, Any]
+    pending_question: Dict[str, Any]
+    resume_count: int
+    retry_count: int
+    resume_id: str

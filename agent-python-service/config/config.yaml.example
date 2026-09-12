@@ -24,6 +24,11 @@ chat:
   max_tokens: 2048
   max_steps: 8
   max_tool_calls: 6
+  max_user_interrupts: 3
+  # 留空时复用 database.dsn，并写入专用 agent_graph_checkpoint 表。
+  checkpointer_dsn: ""
+  metrics_port: 9108
+  otel_endpoint: ""
 
 worker:
   poll_interval: "1s"

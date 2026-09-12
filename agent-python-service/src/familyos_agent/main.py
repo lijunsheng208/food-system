@@ -7,7 +7,7 @@ import threading
 from typing import Optional, Sequence
 
 from .chunking import ParentChildChunker
-from .agent import AgentTool, ToolRegistry, build_agent_graph
+from .agent import AgentTool, ToolRegistry, build_agent_graph, build_checkpointer, PrometheusAgentMetrics, configure_tracing
 from .clients import AsyncOpenAIChatModel, BGEM3EmbeddingClient, DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
@@ -44,8 +44,14 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         rows = await asyncio.to_thread(retriever.retrieve, RetrievalQuery(str(arguments.get("query", "")), int(state["knowledge_base_id"]), int(state["user_id"]), 5))
         return [{"chunk_id": row.chunk_id, "document_id": row.document_id, "content": row.content} for row in rows]
     registry = ToolRegistry({"search_knowledge_base": AgentTool("search_knowledge_base", "检索当前用户有权限访问的知识库", search_knowledge, {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]})})
-    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls)
-    chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql), mysql, config.chat.max_workers)
+    # 生产默认复用 Agent MySQL，但 checkpoint 使用独立表，避免仅依赖进程内存。
+    metrics = PrometheusAgentMetrics()
+    configure_tracing(config.chat.otel_endpoint)
+    from prometheus_client import start_http_server
+    start_http_server(config.chat.metrics_port)
+    checkpointer = build_checkpointer(config.chat.checkpointer_dsn or config.database.dsn)
+    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics)
+    chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql, metrics), mysql, config.chat.max_workers)
     opensearch = OpenSearchRepository(config.rag.opensearch) if config.rag.opensearch.enabled else None
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
     indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker)
