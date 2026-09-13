@@ -44,6 +44,7 @@ class LLMGraphExtractor:
             name, entity_type = str(item.get("name", "")).strip(), str(item.get("type", "")).strip()
             confidence = float(item.get("confidence", 0))
             if name and entity_type in {"Recipe", "Ingredient", "CookingStep", "Cuisine", "DietTag", "Tool"} and confidence >= self._threshold:
+                # 实体按 child chunk 保持唯一，避免 Neo4j MERGE 覆盖同一实体在不同块中的 Evidence 来源。
                 entity_id = "%s:%s:%s" % (entity_type.lower(), chunk.id, name)
                 entity_map[(name, entity_type)] = GraphEntity(entity_id, entity_type, name, chunk.user_id, chunk.knowledge_base_id, chunk.document_id, chunk.index_version, chunk.id, confidence=confidence)
         relations: list[GraphRelation] = []

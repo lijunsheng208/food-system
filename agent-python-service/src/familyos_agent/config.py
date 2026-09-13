@@ -112,7 +112,7 @@ class EmbeddingConfig:
 
 @dataclass(frozen=True)
 class MilvusConfig:
-    """描述 Milvus 连接、Collection 和 Dense 索引参数。"""
+    """描述 Milvus 连接、Collection、索引和原生 RRF 参数。"""
 
     uri: str
     token: str
@@ -121,6 +121,8 @@ class MilvusConfig:
     timeout: float
     dense_index_type: str
     dense_metric_type: str
+    rrf_k: int = 60
+    candidate_limit: int = 50
 
 
 @dataclass(frozen=True)
@@ -255,6 +257,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
                 _duration(_env("RAG_MILVUS_TIMEOUT", milvus.get("timeout", "10s"))),
                 str(_env("RAG_MILVUS_DENSE_INDEX_TYPE", milvus.get("dense_index_type", "AUTOINDEX"))).upper(),
                 str(_env("RAG_MILVUS_DENSE_METRIC_TYPE", milvus.get("dense_metric_type", "COSINE"))).upper(),
+                int(_env("RAG_MILVUS_RRF_K", milvus.get("rrf_k", 60))),
+                int(_env("RAG_MILVUS_CANDIDATE_LIMIT", milvus.get("candidate_limit", 50))),
             ),
             OpenSearchConfig(
                 str(_env("RAG_OPENSEARCH_ENABLED", opensearch.get("enabled", False))).lower() in ("1", "true", "yes"),
@@ -291,6 +295,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Milvus Dense 向量首期必须使用 COSINE")
     if result.rag.milvus.dense_index_type not in ("AUTOINDEX", "HNSW"):
         raise ValueError("Milvus Dense 索引类型必须是 AUTOINDEX 或 HNSW")
+    if result.rag.milvus.rrf_k <= 0 or result.rag.milvus.candidate_limit <= 0:
+        raise ValueError("Milvus RRF 参数必须为正整数")
     if result.rag.embedding.dimensions <= 0 or result.rag.embedding.dimensions > 2000:
         raise ValueError("Embedding dimensions 必须在 1 到 2000 之间")
     if result.rag.embedding.provider == "bge-m3" and not result.rag.embedding.model_name:

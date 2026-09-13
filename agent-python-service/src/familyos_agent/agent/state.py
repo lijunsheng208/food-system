@@ -13,6 +13,7 @@ class AgentState(TypedDict, total=False):
     original_query: str
     rewritten_query: str
     retrieval_intent: str
+    retrieval_plan: Dict[str, Any]
     messages: List[Dict[str, Any]]
     tool_calls: List[Dict[str, Any]]
     tool_results: List[Dict[str, Any]]

@@ -84,10 +84,11 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         return {"rewritten_query": query}
 
     async def controlled_retrieval(state: AgentState) -> AgentState:
-        """在 Agent 决策前执行系统控制的组合检索，不依赖模型主动调用 Tool。"""
+        """在 Agent 决策前生成 RetrievalPlan，再执行向量、图或混合检索。"""
         if controlled_retriever is None:
             return {"documents": [], "retrieval_context": ""}
-        query = str(state.get("rewritten_query", state.get("original_query", ""))).strip()
+        # 路由器必须接收原始问题，确保纯 Vector 与旧评估口径一致；Hybrid 在计划内部单独生成 vector_query。
+        query = str(state.get("original_query", "")).strip()
         try:
             result = await asyncio.wait_for(asyncio.to_thread(controlled_retriever.retrieve, query, int(state["user_id"]), int(state["knowledge_base_id"])), timeout=tool_timeout)
         except Exception:
@@ -99,7 +100,9 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
             content = getattr(item, "content", None) if not isinstance(item, Mapping) else item.get("content")
             if content:
                 context_parts.append(str(content))
-        return {"documents": documents, "retrieval_context": "\n\n".join(context_parts), "route_strategy": result.get("route_strategy", "") if isinstance(result, Mapping) else "", "retrieval_fallback_reason": result.get("fallback_reason", "") if isinstance(result, Mapping) else ""}
+        plan = result.get("retrieval_plan") if isinstance(result, Mapping) else None
+        plan_value = {"route": plan.route, "vector_query": plan.vector_query, "graph_plan": plan.graph_plan} if plan is not None else {}
+        return {"documents": documents, "retrieval_context": "\n\n".join(context_parts), "route_strategy": result.get("route_strategy", "") if isinstance(result, Mapping) else "", "retrieval_fallback_reason": result.get("fallback_reason", "") if isinstance(result, Mapping) else "", "retrieval_plan": plan_value}
 
     async def agent_decide(state: AgentState) -> AgentState:
         """异步让模型选择白名单 Tool 或直接回答，并递增 Agent 步数。"""

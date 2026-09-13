@@ -18,6 +18,8 @@ class GraphExtractorTest(unittest.TestCase):
         chunk = ParentChunk("p1", 1, 2, 3, 4, 0, "鸡肉和西兰花", "sha", {})
         entities, relations = LLMGraphExtractor(FakeModel(), 0.7).extract(chunk)
         self.assertEqual([entity.name for entity in entities], ["鸡肉"])
+        self.assertEqual(entities[0].entity_id, "ingredient:p1:鸡肉")
+        self.assertEqual(entities[0].source_chunk_id, "p1")
         self.assertEqual(relations, [])
 
 

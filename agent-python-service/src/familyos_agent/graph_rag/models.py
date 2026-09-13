@@ -93,6 +93,24 @@ class GraphQueryPlan:
 
 
 @dataclass(frozen=True)
+class RetrievalPlan:
+    """保存一次统一检索决策，明确向量查询文本和受控图查询计划。"""
+
+    route: str
+    vector_query: str
+    graph_plan: Optional[GraphQueryPlan] = None
+
+    # 校验路由与计划的组合，防止未完成的 LLM 输出进入检索层。
+    def __post_init__(self) -> None:
+        if self.route not in {"vector", "graph", "hybrid", "tool", "no_retrieval"}:
+            raise ValueError("不支持的检索路由: %s" % self.route)
+        if not self.vector_query.strip():
+            raise ValueError("向量检索文本不能为空")
+        if self.route in {"graph", "hybrid"} and self.graph_plan is None:
+            raise ValueError("图或混合路由必须包含 graph_plan")
+
+
+@dataclass(frozen=True)
 class Evidence:
     """统一描述文档、图结果或 Tool 返回的可审计回答证据。"""
 

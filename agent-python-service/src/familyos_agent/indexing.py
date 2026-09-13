@@ -10,7 +10,7 @@ from typing import Callable, Optional, Sequence, Tuple
 from .chunking import ParentChildChunker
 from .clients import DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .config import WorkerConfig
-from .domain import DocumentIndexTask, ParentChunk, PermanentDocumentError, SourceDocument
+from .domain import ChildChunk, DocumentIndexTask, ParentChunk, PermanentDocumentError, SourceDocument
 from .graph_rag.models import GraphEntity, GraphRelation
 from .parsing import ParserRegistry
 from .repositories import MySQLRepository, VectorRepository
@@ -34,7 +34,7 @@ class DocumentIndexer:
         parsers: ParserRegistry,
         chunker: ParentChildChunker,
         graph_repository: Optional[object] = None,
-        graph_extractor: Optional[Callable[[ParentChunk], Tuple[Sequence[GraphEntity], Sequence[GraphRelation]]]] = None,
+        graph_extractor: Optional[Callable[[ChildChunk], Tuple[Sequence[GraphEntity], Sequence[GraphRelation]]]] = None,
     ) -> None:
         self._mysql = mysql
         self._vectors = vectors
@@ -69,8 +69,9 @@ class DocumentIndexer:
             if self._graph_repository is not None and self._graph_extractor is not None:
                 entities: list[GraphEntity] = []
                 relations: list[GraphRelation] = []
-                for parent in parents:
-                    found_entities, found_relations = self._graph_extractor(parent)
+                # 图证据必须引用与 Milvus/MySQL 相同的 child chunk ID；父块仅用于组织上下文，不能作为检索证据主键。
+                for child in children:
+                    found_entities, found_relations = self._graph_extractor(child)
                     entities.extend(found_entities)
                     relations.extend(found_relations)
                 self._graph_repository.replace_version(task.document_id, task.index_version, entities, relations)

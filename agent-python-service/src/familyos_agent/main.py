@@ -14,7 +14,7 @@ from .indexing import DocumentIndexer, DocumentWorker
 from .parsing import ParserRegistry
 from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
 from .retrieval import MilvusHybridRetriever
-from .graph_rag import ControlledRetriever, LLMGraphExtractor
+from .graph_rag import ControlledRetriever, LLMGraphExtractor, LLMIntentClassifier
 from .graph_rag.llm_client import SyncOpenAIModel
 from .transport.grpc.chat import AgentChatGrpcServer, ChatStreamService
 from .transport.grpc.index_ingress import DocumentIndexIngressServer
@@ -37,7 +37,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         embeddings = BGEM3EmbeddingClient(config.rag.embedding.model_name, config.rag.embedding.batch_size, config.rag.embedding.use_fp16, config.rag.embedding.device)
     else:
         raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
-    retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions)
+    retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions, config.rag.milvus.rrf_k, config.rag.milvus.candidate_limit)
     # 阶段 4 先启用内部受控路由；未配置 Neo4j 时自动退化为 Milvus 检索。
     graph_driver = None
     graph_repository = None
@@ -54,7 +54,12 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 graph_driver.close()
                 graph_driver = None
     graph_retriever = GraphRetriever(graph_repository, mysql.resolve_chunks) if graph_repository is not None else None
-    controlled_retriever = ControlledRetriever(retriever, graph_retriever, timeout=config.graph_retrieval.timeout)
+    intent_classifier = None
+    if config.graph_extraction.enabled:
+        # 意图分类复用已验证的 OpenAI-compatible 配置，统一生成 RetrievalPlan。
+        intent_model = SyncOpenAIModel(config.graph_extraction.base_url, config.graph_extraction.api_key, config.graph_extraction.model, config.graph_extraction.timeout, config.graph_extraction.max_tokens)
+        intent_classifier = LLMIntentClassifier(intent_model).classify
+    controlled_retriever = ControlledRetriever(retriever, graph_retriever, timeout=config.graph_retrieval.timeout, intent_classifier=intent_classifier)
     graph_extractor = None
     if graph_repository is not None and config.graph_extraction.enabled:
         graph_extractor = LLMGraphExtractor(SyncOpenAIModel(config.graph_extraction.base_url, config.graph_extraction.api_key, config.graph_extraction.model, config.graph_extraction.timeout, config.graph_extraction.max_tokens), config.graph_extraction.confidence_threshold).extract

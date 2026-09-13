@@ -47,7 +47,7 @@ graph_extraction:
 
 graph_retrieval:
   enabled: false
-  uri: "neo4j://127.0.0.1:7687"
+  uri: "bolt://127.0.0.1:7687"
   user: "neo4j"
   password: ""
   database: "neo4j"
@@ -86,6 +86,8 @@ rag:
     timeout: "10s"
     dense_index_type: "AUTOINDEX"
     dense_metric_type: "COSINE"
+    rrf_k: 60
+    candidate_limit: 50
   opensearch:
     enabled: false
     endpoint: "http://127.0.0.1:9200"
