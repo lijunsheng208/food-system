@@ -39,7 +39,25 @@ async def _call_model(model: Any, messages: Sequence[Mapping[str, Any]], registr
     raise TypeError("D2 模型必须实现 ainvoke")
 
 
-def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, max_tool_calls: int = 6, tool_timeout: float = 10.0, enable_query_rewrite: bool = False, checkpointer: Any = None, max_user_interrupts: int = 3, metrics: Any = None) -> Any:
+async def _rewrite_query(model: Any, history: Sequence[Mapping[str, Any]], query: str) -> str:
+    """调用 Rewrite 模型澄清指代和省略，并在输出异常时由上层回退。"""
+    prompt = [{"role": "system", "content": "你是检索查询改写器。结合对话历史，把当前问题改写成一个独立、完整、适合中文向量检索的查询。只使用历史明确事实，保留否定词、数字、单位、过敏原和人数；不要回答问题，不要添加事实。只输出 JSON：{\"standalone_query\":\"...\"}"}]
+    prompt.extend(list(history)[-10:])
+    prompt.append({"role": "user", "content": query})
+    response = await model.ainvoke(prompt)
+    content = _message_content(response).strip()
+    if content.startswith("```"):
+        content = content.strip("`").removeprefix("json").strip()
+    try:
+        value = json.loads(content).get("standalone_query", "")
+    except (json.JSONDecodeError, AttributeError):
+        raise ValueError("Query Rewrite 返回格式无效")
+    if not isinstance(value, str) or not value.strip() or len(value) > 2000:
+        raise ValueError("Query Rewrite 查询无效")
+    return value.strip()
+
+
+def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, max_tool_calls: int = 6, tool_timeout: float = 10.0, enable_query_rewrite: bool = False, checkpointer: Any = None, max_user_interrupts: int = 3, metrics: Any = None, rewrite_model: Any = None) -> Any:
     """构建只支持异步运行的 Agent Graph，限制步数、Tool 次数和单 Tool 超时。"""
     if model is None or registry is None or max_steps <= 0 or max_tool_calls <= 0 or tool_timeout <= 0 or max_user_interrupts <= 0:
         raise ValueError("Agent Graph 配置无效")
@@ -53,10 +71,16 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
     metrics = metrics or AgentMetrics()
 
     async def rewrite_query(state: AgentState) -> AgentState:
-        """D1 默认异步透传原问题，后续 Query Rewrite 可在此替换。"""
+        """按开关调用查询改写模型，失败时回退原问题保障检索可用。"""
         query = str(state.get("original_query", "")).strip()
         if not query:
             raise ValueError("问题不能为空")
+        if enable_query_rewrite and rewrite_model is not None:
+            try:
+                history = [item for item in state.get("messages", []) if isinstance(item, Mapping)]
+                return {"rewritten_query": await _rewrite_query(rewrite_model, history, query)}
+            except Exception:
+                logger.exception("Query Rewrite 失败，回退原问题")
         return {"rewritten_query": query}
 
     async def agent_decide(state: AgentState) -> AgentState:
@@ -64,7 +88,9 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         steps = int(state.get("agent_steps", 0)) + 1
         if steps > max_steps:
             return {"agent_steps": steps, "terminal_status": "failed", "error_code": "AGENT_MAX_STEPS", "error_message": "Agent 超过最大步数"}
-        messages = list(state.get("messages", [])) or [{"role": "user", "content": state.get("original_query", "")}]
+        messages = list(state.get("messages", []))
+        # 每轮都追加当前问题和改写查询，避免 Checkpoint 中的旧消息遮蔽本轮意图。
+        messages.append({"role": "user", "content": "原始问题：%s\n检索查询：%s" % (state.get("original_query", ""), state.get("rewritten_query", state.get("original_query", "")))})
         response = await _call_model(model, messages, registry)
         calls = list(_tool_calls(response))
         content = _message_content(response)

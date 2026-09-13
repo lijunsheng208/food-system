@@ -61,6 +61,12 @@ class ChatConfig:
     checkpointer_dsn: str = ""
     metrics_port: int = 9108
     otel_endpoint: str = ""
+    enable_query_rewrite: bool = False
+    rewrite_base_url: str = ""
+    rewrite_api_key: str = ""
+    rewrite_model: str = ""
+    rewrite_timeout: float = 15.0
+    rewrite_max_tokens: int = 256
 
 
 @dataclass(frozen=True)
@@ -191,7 +197,7 @@ def load_config(path: Optional[str] = None) -> AppConfig:
             str(_env("INGRESS_TOKEN", ingress.get("token", ""))),
             int(_env("INGRESS_MAX_WORKERS", ingress.get("max_workers", 8))),
         ),
-        chat=ChatConfig(int(_env("CHAT_PORT", chat.get("port", 50054))), str(_env("CHAT_TOKEN", chat.get("token", ""))), int(_env("CHAT_MAX_WORKERS", chat.get("max_workers", 8))), str(_env("CHAT_BASE_URL", chat.get("base_url", "https://api.openai.com/v1"))), str(_env("CHAT_API_KEY", chat.get("api_key", ""))), str(_env("CHAT_MODEL", chat.get("model", ""))), _duration(_env("CHAT_TIMEOUT", chat.get("timeout", "60s"))), int(_env("CHAT_MAX_TOKENS", chat.get("max_tokens", 2048))), int(_env("CHAT_MAX_STEPS", chat.get("max_steps", 8))), int(_env("CHAT_MAX_TOOL_CALLS", chat.get("max_tool_calls", 6))), int(_env("CHAT_MAX_USER_INTERRUPTS", chat.get("max_user_interrupts", 3))), str(_env("CHAT_CHECKPOINTER_DSN", chat.get("checkpointer_dsn", ""))), int(_env("CHAT_METRICS_PORT", chat.get("metrics_port", 9108))), str(_env("CHAT_OTEL_ENDPOINT", chat.get("otel_endpoint", "")))),
+        chat=ChatConfig(int(_env("CHAT_PORT", chat.get("port", 50054))), str(_env("CHAT_TOKEN", chat.get("token", ""))), int(_env("CHAT_MAX_WORKERS", chat.get("max_workers", 8))), str(_env("CHAT_BASE_URL", chat.get("base_url", "https://api.openai.com/v1"))), str(_env("CHAT_API_KEY", chat.get("api_key", ""))), str(_env("CHAT_MODEL", chat.get("model", ""))), _duration(_env("CHAT_TIMEOUT", chat.get("timeout", "60s"))), int(_env("CHAT_MAX_TOKENS", chat.get("max_tokens", 2048))), int(_env("CHAT_MAX_STEPS", chat.get("max_steps", 8))), int(_env("CHAT_MAX_TOOL_CALLS", chat.get("max_tool_calls", 6))), int(_env("CHAT_MAX_USER_INTERRUPTS", chat.get("max_user_interrupts", 3))), str(_env("CHAT_CHECKPOINTER_DSN", chat.get("checkpointer_dsn", ""))), int(_env("CHAT_METRICS_PORT", chat.get("metrics_port", 9108))), str(_env("CHAT_OTEL_ENDPOINT", chat.get("otel_endpoint", ""))), str(_env("CHAT_ENABLE_QUERY_REWRITE", chat.get("enable_query_rewrite", False))).lower() in ("1", "true", "yes"), str(_env("CHAT_REWRITE_BASE_URL", chat.get("rewrite_base_url", ""))), str(_env("CHAT_REWRITE_API_KEY", chat.get("rewrite_api_key", ""))), str(_env("CHAT_REWRITE_MODEL", chat.get("rewrite_model", ""))), _duration(_env("CHAT_REWRITE_TIMEOUT", chat.get("rewrite_timeout", "15s"))), int(_env("CHAT_REWRITE_MAX_TOKENS", chat.get("rewrite_max_tokens", 256)))),
         rag=RAGConfig(
             int(_env("RAG_CHILD_SIZE", rag.get("child_size", 500))),
             int(_env("RAG_CHILD_OVERLAP", rag.get("child_overlap", 50))),
@@ -237,6 +243,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Logic target 和 agent_token 必须完整")
     if result.chat.port <= 0 or result.chat.max_steps <= 0 or result.chat.max_tool_calls <= 0 or result.chat.max_user_interrupts <= 0 or result.chat.metrics_port <= 0:
         raise ValueError("Chat 配置边界无效")
+    if result.chat.enable_query_rewrite and (not result.chat.rewrite_base_url or not result.chat.rewrite_api_key or not result.chat.rewrite_model or result.chat.rewrite_timeout <= 0 or result.chat.rewrite_max_tokens <= 0):
+        raise ValueError("启用 Query Rewrite 时 Rewrite 模型配置必须完整")
     embedding_ready = result.rag.embedding.model_name if result.rag.embedding.provider == "bge-m3" else (result.rag.embedding.api_key and result.rag.embedding.model)
     if not embedding_ready:
         raise ValueError("Embedding 模型配置必须完整")

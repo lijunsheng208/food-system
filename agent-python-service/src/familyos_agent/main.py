@@ -37,6 +37,9 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
     retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions)
     chat_model = AsyncOpenAIChatModel(config.chat)
+    rewrite_model = None
+    if config.chat.enable_query_rewrite:
+        rewrite_model = AsyncOpenAIChatModel(type("RewriteConfig", (), {"base_url": config.chat.rewrite_base_url, "api_key": config.chat.rewrite_api_key, "model": config.chat.rewrite_model, "timeout": config.chat.rewrite_timeout, "max_tokens": config.chat.rewrite_max_tokens})())
     async def search_knowledge(state, arguments):
         """使用服务端身份执行知识库 Hybrid 检索。"""
         import asyncio
@@ -50,7 +53,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     from prometheus_client import start_http_server
     start_http_server(config.chat.metrics_port)
     checkpointer = build_checkpointer(config.chat.checkpointer_dsn or config.database.dsn)
-    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics)
+    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, enable_query_rewrite=config.chat.enable_query_rewrite, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics, rewrite_model=rewrite_model)
     chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql, metrics), mysql, config.chat.max_workers)
     opensearch = OpenSearchRepository(config.rag.opensearch) if config.rag.opensearch.enabled else None
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
@@ -81,6 +84,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         # 主线程退出前关闭异步模型的 HTTP 连接池。
         import asyncio
         asyncio.run(chat_model.aclose())
+        if rewrite_model is not None:
+            asyncio.run(rewrite_model.aclose())
 
 
 if __name__ == "__main__":

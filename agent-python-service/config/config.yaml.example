@@ -29,6 +29,12 @@ chat:
   checkpointer_dsn: ""
   metrics_port: 9108
   otel_endpoint: ""
+  enable_query_rewrite: false
+  rewrite_base_url: "https://api.openai.com/v1"
+  rewrite_api_key: ""
+  rewrite_model: ""
+  rewrite_timeout: "15s"
+  rewrite_max_tokens: 256
 
 worker:
   poll_interval: "1s"

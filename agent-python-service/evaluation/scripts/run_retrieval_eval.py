@@ -268,13 +268,16 @@ def main():
     parser.add_argument("--queries", default="evaluation/datasets/labels/queries.jsonl")
     parser.add_argument("--mapping", default="evaluation/datasets/raw/chunks.jsonl")
     parser.add_argument("--output", default="evaluation/reports/retrieval_eval.json")
+    parser.add_argument("--query-field", default="query", choices=("query", "rewritten_query"))
     args = parser.parse_args()
     config = load_config(args.config)
     eval_config = yaml.safe_load(Path(args.eval_config).read_text(encoding="utf-8"))
     queries = _load_queries(Path(args.queries))
     document_contents = _load_document_contents(Path(args.mapping))
     embed = BGEM3EmbeddingClient(config.rag.embedding.model_name, config.rag.embedding.batch_size, config.rag.embedding.use_fp16, config.rag.embedding.device)
-    vectors = embed.embed_documents([query["query"] for query in queries])
+    if args.query_field == "rewritten_query" and any(not query.get("rewritten_query") for query in queries):
+        raise ValueError("评测数据缺少 rewritten_query")
+    vectors = embed.embed_documents([query[args.query_field] for query in queries])
     embed.close()
     client = MilvusClient(uri=config.rag.milvus.uri, db_name=config.rag.milvus.database, token=config.rag.milvus.token or None, timeout=120)
     collection = eval_config["collection"]
