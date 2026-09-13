@@ -42,6 +42,22 @@ class AgentD1Test(unittest.TestCase):
         self.assertEqual(result["error_code"], "TOOL_NOT_ALLOWED")
         self.assertEqual(result["terminal_status"], "failed")
 
+    def test_tool_results_are_normalized_into_state(self):
+        class ToolModel:
+            def __init__(self): self.calls = 0
+            def bind_tools(self, tools): return self
+            async def ainvoke(self, messages):
+                self.calls += 1
+                if self.calls == 1:
+                    return FakeResponse(tool_calls=[{"id": "t1", "function": {"name": "lookup", "arguments": '{"query":"菜单"}'}}])
+                return FakeResponse("基于证据的回答")
+
+        registry = ToolRegistry({"lookup": AgentTool("lookup", "查询资料", lambda state, args: '{"documents":[{"chunk_id":"c1","content":"菜单原文"}],"citations":[{"chunk_id":"c1"}]}')})
+        result = asyncio.run(build_agent_graph(ToolModel(), registry).ainvoke({"original_query": "查菜单", "messages": []}))
+        self.assertEqual(result["tool_results"][0]["tool_call_id"], "t1")
+        self.assertEqual(result["documents"][0]["chunk_id"], "c1")
+        self.assertEqual(result["citations"][0]["chunk_id"], "c1")
+
 
 if __name__ == "__main__":
     unittest.main()

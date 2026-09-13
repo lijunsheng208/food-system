@@ -101,6 +101,24 @@ services:
     volumes:
       - familyos-opensearch-data:/usr/share/opensearch/data
 
+  neo4j:
+    image: neo4j:5-community
+    container_name: familyos-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: "neo4j/${FAMILYOS_NEO4J_PASSWORD:-familyos_dev}"
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474/ >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - familyos-neo4j-data:/data
+      - familyos-neo4j-logs:/logs
+
   rocketmq-init:
     image: apache/rocketmq:5.3.2
     platform: linux/amd64
@@ -189,5 +207,7 @@ volumes:
   familyos-milvus-data:
   familyos-pgvector-data:
   familyos-opensearch-data:
+  familyos-neo4j-data:
+  familyos-neo4j-logs:
   familyos-rocketmq-logs:
   familyos-rocketmq-store:

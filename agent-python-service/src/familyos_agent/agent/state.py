@@ -12,10 +12,14 @@ class AgentState(TypedDict, total=False):
     request_id: str
     original_query: str
     rewritten_query: str
+    retrieval_intent: str
     messages: List[Dict[str, Any]]
     tool_calls: List[Dict[str, Any]]
     tool_results: List[Dict[str, Any]]
     documents: List[Any]
+    retrieval_context: str
+    route_strategy: str
+    retrieval_fallback_reason: str
     citations: List[Dict[str, Any]]
     answer: str
     answer_valid: bool

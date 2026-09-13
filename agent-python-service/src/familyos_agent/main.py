@@ -14,6 +14,8 @@ from .indexing import DocumentIndexer, DocumentWorker
 from .parsing import ParserRegistry
 from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
 from .retrieval import MilvusHybridRetriever
+from .graph_rag import ControlledRetriever, LLMGraphExtractor
+from .graph_rag.llm_client import SyncOpenAIModel
 from .transport.grpc.chat import AgentChatGrpcServer, ChatStreamService
 from .transport.grpc.index_ingress import DocumentIndexIngressServer
 
@@ -36,6 +38,26 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     else:
         raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
     retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions)
+    # 阶段 4 先启用内部受控路由；未配置 Neo4j 时自动退化为 Milvus 检索。
+    graph_driver = None
+    graph_repository = None
+    if config.graph_retrieval.enabled:
+        try:
+            from neo4j import GraphDatabase
+            graph_driver = GraphDatabase.driver(config.graph_retrieval.uri, auth=(config.graph_retrieval.user, config.graph_retrieval.password))
+            graph_driver.verify_connectivity()
+            from .graph_rag import Neo4jGraphRepository, GraphRetriever
+            graph_repository = Neo4jGraphRepository(graph_driver)
+        except Exception:
+            logging.getLogger(__name__).exception("Neo4j 初始化失败，阶段 4 回退到 Milvus")
+            if graph_driver is not None:
+                graph_driver.close()
+                graph_driver = None
+    graph_retriever = GraphRetriever(graph_repository, mysql.resolve_chunks) if graph_repository is not None else None
+    controlled_retriever = ControlledRetriever(retriever, graph_retriever, timeout=config.graph_retrieval.timeout)
+    graph_extractor = None
+    if graph_repository is not None and config.graph_extraction.enabled:
+        graph_extractor = LLMGraphExtractor(SyncOpenAIModel(config.graph_extraction.base_url, config.graph_extraction.api_key, config.graph_extraction.model, config.graph_extraction.timeout, config.graph_extraction.max_tokens), config.graph_extraction.confidence_threshold).extract
     chat_model = AsyncOpenAIChatModel(config.chat)
     rewrite_model = None
     if config.chat.enable_query_rewrite:
@@ -43,9 +65,10 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     async def search_knowledge(state, arguments):
         """使用服务端身份执行知识库 Hybrid 检索。"""
         import asyncio
+        import json
         from .retrieval import RetrievalQuery
         rows = await asyncio.to_thread(retriever.retrieve, RetrievalQuery(str(arguments.get("query", "")), int(state["knowledge_base_id"]), int(state["user_id"]), 5))
-        return [{"chunk_id": row.chunk_id, "document_id": row.document_id, "content": row.content} for row in rows]
+        return json.dumps({"documents": [{"chunk_id": row.chunk_id, "document_id": row.document_id, "content": row.content} for row in rows]}, ensure_ascii=False)
     registry = ToolRegistry({"search_knowledge_base": AgentTool("search_knowledge_base", "检索当前用户有权限访问的知识库", search_knowledge, {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]})})
     # 生产默认复用 Agent MySQL，但 checkpoint 使用独立表，避免仅依赖进程内存。
     metrics = PrometheusAgentMetrics()
@@ -53,11 +76,11 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     from prometheus_client import start_http_server
     start_http_server(config.chat.metrics_port)
     checkpointer = build_checkpointer(config.chat.checkpointer_dsn or config.database.dsn)
-    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, enable_query_rewrite=config.chat.enable_query_rewrite, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics, rewrite_model=rewrite_model)
+    chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, enable_query_rewrite=config.chat.enable_query_rewrite, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics, rewrite_model=rewrite_model, controlled_retriever=controlled_retriever)
     chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql, metrics), mysql, config.chat.max_workers)
     opensearch = OpenSearchRepository(config.rag.opensearch) if config.rag.opensearch.enabled else None
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
-    indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker)
+    indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker, graph_repository=graph_repository, graph_extractor=graph_extractor)
     worker = DocumentWorker(mysql, logic, indexer, config.worker)
     ingress = DocumentIndexIngressServer(config.ingress.port, config.ingress.token, mysql, config.ingress.max_workers)
     stop = threading.Event()
@@ -76,6 +99,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         ingress.close()
         chat_server.close()
         milvus.close()
+        if graph_driver is not None:
+            graph_driver.close()
         if opensearch is not None:
             opensearch.close()
         embeddings.close()

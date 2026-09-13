@@ -164,6 +164,28 @@ class MySQLRepository:
                 row = cursor.fetchone()
                 return bool(row and int(row["total"]) == len(set(ids)))
 
+    # 按 source_chunk_id 回查当前用户知识库中的有效原文，供 Graph RAG 生成可引用证据。
+    def resolve_chunks(self, source_chunk_ids: Sequence[str], user_id: int, knowledge_base_id: int, index_version: int = 0) -> List[Dict[str, Any]]:
+        ids = [str(value).strip() for value in source_chunk_ids if str(value).strip()]
+        if not ids or user_id <= 0 or knowledge_base_id <= 0 or index_version < 0:
+            return []
+        placeholders = ",".join(["%s"] * len(ids))
+        sql = "SELECT id AS chunk_id, document_id, index_version, content, metadata FROM agent_document_chunk WHERE chunk_type=1 AND user_id=%s AND knowledge_base_id=%s AND id IN (" + placeholders + ")"
+        params: Tuple[Any, ...] = (user_id, knowledge_base_id, *ids)
+        if index_version > 0:
+            sql += " AND index_version=%s"
+            params += (index_version,)
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                rows = cursor.fetchall() or []
+                for row in rows:
+                    try:
+                        row["metadata"] = json.loads(row.get("metadata") or "{}")
+                    except (TypeError, json.JSONDecodeError):
+                        row["metadata"] = {}
+                return list(rows)
+
     # 保存失败终态，客户端只接收稳定错误码。
     def fail_chat(self, request_id: str, error_code: str, message: str) -> None:
         with self._connection() as connection:

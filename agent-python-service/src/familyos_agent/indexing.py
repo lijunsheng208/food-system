@@ -5,12 +5,13 @@ import re
 import socket
 import threading
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Callable, Optional, Sequence, Tuple
 
 from .chunking import ParentChildChunker
 from .clients import DocumentDownloader, EmbeddingClient, LogicClient, OpenSearchRepository
 from .config import WorkerConfig
-from .domain import DocumentIndexTask, PermanentDocumentError, SourceDocument
+from .domain import DocumentIndexTask, ParentChunk, PermanentDocumentError, SourceDocument
+from .graph_rag.models import GraphEntity, GraphRelation
 from .parsing import ParserRegistry
 from .repositories import MySQLRepository, VectorRepository
 
@@ -32,6 +33,8 @@ class DocumentIndexer:
         embeddings: EmbeddingClient,
         parsers: ParserRegistry,
         chunker: ParentChildChunker,
+        graph_repository: Optional[object] = None,
+        graph_extractor: Optional[Callable[[ParentChunk], Tuple[Sequence[GraphEntity], Sequence[GraphRelation]]]] = None,
     ) -> None:
         self._mysql = mysql
         self._vectors = vectors
@@ -41,6 +44,8 @@ class DocumentIndexer:
         self._embeddings = embeddings
         self._parsers = parsers
         self._chunker = chunker
+        self._graph_repository = graph_repository
+        self._graph_extractor = graph_extractor
 
     # 处理一个文档版本；只有父子块、向量和 BM25 都成功才允许回调完成。
     def process(self, task: DocumentIndexTask) -> None:
@@ -61,6 +66,14 @@ class DocumentIndexer:
             self._vectors.replace_version(task.document_id, task.index_version, children, vectors)
             if self._opensearch is not None:
                 self._opensearch.replace_version(task.document_id, task.index_version, children)
+            if self._graph_repository is not None and self._graph_extractor is not None:
+                entities: list[GraphEntity] = []
+                relations: list[GraphRelation] = []
+                for parent in parents:
+                    found_entities, found_relations = self._graph_extractor(parent)
+                    entities.extend(found_entities)
+                    relations.extend(found_relations)
+                self._graph_repository.replace_version(task.document_id, task.index_version, entities, relations)
         except Exception:
             self._compensate(task)
             raise
@@ -80,6 +93,11 @@ class DocumentIndexer:
             self._mysql.delete_chunks(task.document_id, task.index_version)
         except Exception as exc:
             logger.error("清理 MySQL 父子块失败: document_id=%d error=%s", task.document_id, sanitize_error(exc))
+        if self._graph_repository is not None:
+            try:
+                self._graph_repository.delete_version(task.document_id, task.index_version)
+            except Exception as exc:
+                logger.error("清理 Neo4j 图版本失败: document_id=%d error=%s", task.document_id, sanitize_error(exc))
 
 
 class DocumentWorker:

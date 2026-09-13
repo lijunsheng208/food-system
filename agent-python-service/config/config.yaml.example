@@ -36,6 +36,23 @@ chat:
   rewrite_timeout: "15s"
   rewrite_max_tokens: 256
 
+graph_extraction:
+  enabled: false
+  base_url: "https://api.openai.com/v1"
+  api_key: ""
+  model: ""
+  timeout: "30s"
+  max_tokens: 1200
+  confidence_threshold: 0.7
+
+graph_retrieval:
+  enabled: false
+  uri: "neo4j://127.0.0.1:7687"
+  user: "neo4j"
+  password: ""
+  database: "neo4j"
+  timeout: "5s"
+
 worker:
   poll_interval: "1s"
   lock_timeout: "5m"

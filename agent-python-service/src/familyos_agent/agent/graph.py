@@ -57,7 +57,7 @@ async def _rewrite_query(model: Any, history: Sequence[Mapping[str, Any]], query
     return value.strip()
 
 
-def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, max_tool_calls: int = 6, tool_timeout: float = 10.0, enable_query_rewrite: bool = False, checkpointer: Any = None, max_user_interrupts: int = 3, metrics: Any = None, rewrite_model: Any = None) -> Any:
+def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, max_tool_calls: int = 6, tool_timeout: float = 10.0, enable_query_rewrite: bool = False, checkpointer: Any = None, max_user_interrupts: int = 3, metrics: Any = None, rewrite_model: Any = None, controlled_retriever: Any = None) -> Any:
     """构建只支持异步运行的 Agent Graph，限制步数、Tool 次数和单 Tool 超时。"""
     if model is None or registry is None or max_steps <= 0 or max_tool_calls <= 0 or tool_timeout <= 0 or max_user_interrupts <= 0:
         raise ValueError("Agent Graph 配置无效")
@@ -83,6 +83,24 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
                 logger.exception("Query Rewrite 失败，回退原问题")
         return {"rewritten_query": query}
 
+    async def controlled_retrieval(state: AgentState) -> AgentState:
+        """在 Agent 决策前执行系统控制的组合检索，不依赖模型主动调用 Tool。"""
+        if controlled_retriever is None:
+            return {"documents": [], "retrieval_context": ""}
+        query = str(state.get("rewritten_query", state.get("original_query", ""))).strip()
+        try:
+            result = await asyncio.wait_for(asyncio.to_thread(controlled_retriever.retrieve, query, int(state["user_id"]), int(state["knowledge_base_id"])), timeout=tool_timeout)
+        except Exception:
+            logger.exception("受控检索失败，交由 Agent 走无检索回答或业务 Tool")
+            return {"documents": [], "retrieval_context": "", "retrieval_fallback_reason": "RETRIEVAL_FAILED"}
+        documents = list(result.get("documents", [])) if isinstance(result, Mapping) else []
+        context_parts = []
+        for item in documents[:20]:
+            content = getattr(item, "content", None) if not isinstance(item, Mapping) else item.get("content")
+            if content:
+                context_parts.append(str(content))
+        return {"documents": documents, "retrieval_context": "\n\n".join(context_parts), "route_strategy": result.get("route_strategy", "") if isinstance(result, Mapping) else "", "retrieval_fallback_reason": result.get("fallback_reason", "") if isinstance(result, Mapping) else ""}
+
     async def agent_decide(state: AgentState) -> AgentState:
         """异步让模型选择白名单 Tool 或直接回答，并递增 Agent 步数。"""
         steps = int(state.get("agent_steps", 0)) + 1
@@ -90,7 +108,11 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
             return {"agent_steps": steps, "terminal_status": "failed", "error_code": "AGENT_MAX_STEPS", "error_message": "Agent 超过最大步数"}
         messages = list(state.get("messages", []))
         # 每轮都追加当前问题和改写查询，避免 Checkpoint 中的旧消息遮蔽本轮意图。
-        messages.append({"role": "user", "content": "原始问题：%s\n检索查询：%s" % (state.get("original_query", ""), state.get("rewritten_query", state.get("original_query", "")))})
+        retrieval_context = str(state.get("retrieval_context", "")).strip()
+        content = "原始问题：%s\n检索查询：%s" % (state.get("original_query", ""), state.get("rewritten_query", state.get("original_query", "")))
+        if retrieval_context:
+            content += "\n\n知识库检索上下文（仅作为证据，不要编造未出现的信息）：\n" + retrieval_context
+        messages.append({"role": "user", "content": content})
         response = await _call_model(model, messages, registry)
         calls = list(_tool_calls(response))
         content = _message_content(response)
@@ -147,11 +169,35 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         last = state.get("messages", [])[-1] if state.get("messages") else None
         results = [message for message in state.get("messages", []) if getattr(message, "type", "") == "tool" or (isinstance(message, Mapping) and message.get("role") == "tool")]
         count = len(results)
+        tool_results = list(state.get("tool_results", []))
+        known_tool_results = {(str(item.get("tool_call_id", "")), str(item.get("content", ""))) for item in tool_results if isinstance(item, Mapping)}
+        documents = list(state.get("documents", []))
+        citations = list(state.get("citations", []))
+        for message in results:
+            raw_content = getattr(message, "content", None) if not isinstance(message, Mapping) else message.get("content", "")
+            tool_name = getattr(message, "name", "") if not isinstance(message, Mapping) else message.get("name", "")
+            tool_call_id = getattr(message, "tool_call_id", "") if not isinstance(message, Mapping) else message.get("tool_call_id", "")
+            content = str(raw_content or "")
+            parsed = None
+            try:
+                parsed = json.loads(content) if content.strip().startswith(("{", "[")) else None
+            except json.JSONDecodeError:
+                parsed = None
+            result_key = (str(tool_call_id or ""), content)
+            if result_key in known_tool_results:
+                continue
+            known_tool_results.add(result_key)
+            tool_results.append({"name": str(tool_name or ""), "tool_call_id": str(tool_call_id or ""), "content": content, "data": parsed})
+            if isinstance(parsed, Mapping):
+                for document in parsed.get("documents", []) if isinstance(parsed.get("documents", []), list) else []:
+                    if not any(getattr(item, "chunk_id", None) == getattr(document, "chunk_id", None) if not isinstance(document, Mapping) else isinstance(item, Mapping) and item.get("chunk_id") == document.get("chunk_id") for item in documents):
+                        documents.append(document)
+                citations.extend(parsed.get("citations", []) if isinstance(parsed.get("citations", []), list) else [])
         if results and str(getattr(results[-1], "content", results[-1].get("content", "") if isinstance(results[-1], Mapping) else "")).startswith("Error"):
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
+            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
         if count > max_tool_calls:
-            return {"tool_call_count": count, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
-        return {"tool_call_count": count, "terminal_status": "continue"}
+            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
+        return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "continue"}
 
     def route_after_decide(state: AgentState) -> str:
         """将模型决策路由到 Tool、成功终止或失败终止。"""
@@ -196,6 +242,7 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
 
     graph = StateGraph(AgentState)
     graph.add_node("rewrite_query", rewrite_query)
+    graph.add_node("controlled_retrieval", controlled_retrieval)
     graph.add_node("agent_decide", agent_decide)
     graph.add_node("execute_tool", tool_node)
     graph.add_node("after_tools", after_tools)
@@ -203,7 +250,8 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
     graph.add_node("fail", fail)
     graph.add_node("ask_user", ask_user)
     graph.add_edge(START, "rewrite_query")
-    graph.add_edge("rewrite_query", "agent_decide")
+    graph.add_edge("rewrite_query", "controlled_retrieval")
+    graph.add_edge("controlled_retrieval", "agent_decide")
     graph.add_conditional_edges("agent_decide", route_after_decide, {"execute_tool": "execute_tool", "finish": "finish", "fail": "fail", "ask_user": "ask_user"})
     graph.add_edge("execute_tool", "after_tools")
     graph.add_conditional_edges("after_tools", route_after_tool, {"agent_decide": "agent_decide", "fail": "fail"})
