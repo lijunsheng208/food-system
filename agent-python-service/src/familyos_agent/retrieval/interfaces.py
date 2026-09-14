@@ -44,3 +44,11 @@ class HybridRetriever(Protocol):
     # retrieve 在调用方权限和活动版本约束内返回按相关性排序的文档块。
     def retrieve(self, query: RetrievalQuery) -> Sequence[RetrievedChunk]:
         ...
+
+
+class ChunkReranker(Protocol):
+    """定义 Query 与 Child 文本的 Cross-Encoder 相关性打分能力。"""
+
+    # score 按输入 Child 顺序返回相关性分数，分数越大表示越相关。
+    def score(self, query: str, chunks: Sequence[str]) -> Sequence[float]:
+        ...

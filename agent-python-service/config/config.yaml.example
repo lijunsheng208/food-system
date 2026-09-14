@@ -88,6 +88,22 @@ rag:
     dense_metric_type: "COSINE"
     rrf_k: 60
     candidate_limit: 50
+  reranker:
+    enabled: false
+    # local 使用本地 BGE；dashscope 使用专用文本重排 API。
+    provider: "local"
+    base_url: "https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank"
+    # dashscope API Key 必须通过 FAMILYOS_AGENT_RAG_RERANKER_API_KEY 注入。
+    api_key: ""
+    # 生产环境应挂载预下载模型，例如 BAAI/bge-reranker-v2-m3。
+    model_name: "./models/bge-reranker-v2-m3"
+    timeout: "30s"
+    device: "cpu"
+    use_fp16: false
+    batch_size: 16
+    max_length: 512
+    # 首轮 RRF Child 召回数量，必须在 20～50 之间。
+    recall_top_k: 50
   opensearch:
     enabled: false
     endpoint: "http://127.0.0.1:9200"

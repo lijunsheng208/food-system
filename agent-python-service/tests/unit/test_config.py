@@ -43,6 +43,24 @@ class ConfigTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Milvus"):
             self._load(VALID_CONFIG.replace("http://127.0.0.1:19530", ""))
 
+    # 启用父子重排时必须提供模型，并将首轮召回约束在 20～50。
+    def test_validates_parent_child_reranker(self) -> None:
+        enabled = VALID_CONFIG.replace("  milvus:", "  reranker: {enabled: true, model_name: 'reranker', recall_top_k: 30}\n  milvus:")
+        config = self._load(enabled)
+        self.assertTrue(config.rag.reranker.enabled)
+        self.assertEqual(config.rag.reranker.recall_top_k, 30)
+
+        invalid = enabled.replace("recall_top_k: 30", "recall_top_k: 10")
+        with self.assertRaisesRegex(ValueError, "20 到 50"):
+            self._load(invalid)
+
+    # DashScope Provider 必须配置 API 地址、密钥和模型名称。
+    def test_loads_dashscope_reranker(self) -> None:
+        content = VALID_CONFIG.replace("  milvus:", "  reranker: {enabled: true, provider: 'dashscope', base_url: 'https://example.test', api_key: 'key', model_name: 'gte-rerank-v2'}\n  milvus:")
+        config = self._load(content)
+        self.assertEqual(config.rag.reranker.provider, "dashscope")
+        self.assertEqual(config.rag.reranker.model_name, "gte-rerank-v2")
+
 
 if __name__ == "__main__":
     unittest.main()

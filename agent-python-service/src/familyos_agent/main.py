@@ -13,7 +13,7 @@ from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
 from .parsing import ParserRegistry
 from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
-from .retrieval import MilvusHybridRetriever
+from .retrieval import BGEChunkReranker, DashScopeReranker, HybridRetriever, MilvusHybridRetriever, MilvusParentChildRetriever
 from .graph_rag import ControlledRetriever, LLMGraphExtractor, LLMIntentClassifier
 from .graph_rag.llm_client import SyncOpenAIModel
 from .transport.grpc.chat import AgentChatGrpcServer, ChatStreamService
@@ -37,7 +37,15 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         embeddings = BGEM3EmbeddingClient(config.rag.embedding.model_name, config.rag.embedding.batch_size, config.rag.embedding.use_fp16, config.rag.embedding.device)
     else:
         raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
-    retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions, config.rag.milvus.rrf_k, config.rag.milvus.candidate_limit)
+    base_retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions, config.rag.milvus.rrf_k, config.rag.milvus.candidate_limit)
+    reranker = None
+    retriever: HybridRetriever = base_retriever
+    if config.rag.reranker.enabled:
+        # 父子检索只在显式启用时加载本地 Cross-Encoder，避免未准备模型的环境启动时联网。
+        reranker = (BGEChunkReranker(config.rag.reranker.model_name, config.rag.reranker.batch_size, config.rag.reranker.max_length, config.rag.reranker.use_fp16, config.rag.reranker.device)
+                    if config.rag.reranker.provider == "local" else
+                    DashScopeReranker(config.rag.reranker.base_url, config.rag.reranker.api_key, config.rag.reranker.model_name, config.rag.reranker.timeout, config.rag.reranker.batch_size))
+        retriever = MilvusParentChildRetriever(base_retriever, milvus._client, config.rag.milvus.collection, reranker, config.rag.reranker.recall_top_k)
     # 阶段 4 先启用内部受控路由；未配置 Neo4j 时自动退化为 Milvus 检索。
     graph_driver = None
     graph_repository = None
@@ -109,6 +117,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         if opensearch is not None:
             opensearch.close()
         embeddings.close()
+        if reranker is not None:
+            reranker.close()
         downloader.close()
         logic.close()
         # 主线程退出前关闭异步模型的 HTTP 连接池。

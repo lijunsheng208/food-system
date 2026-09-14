@@ -126,6 +126,23 @@ class MilvusConfig:
 
 
 @dataclass(frozen=True)
+class RerankerConfig:
+    """描述父子候选扩展和本地 Cross-Encoder 重排参数。"""
+
+    enabled: bool = False
+    provider: str = "local"
+    base_url: str = "https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank"
+    api_key: str = ""
+    model_name: str = ""
+    timeout: float = 30.0
+    device: str = "cpu"
+    use_fp16: bool = False
+    batch_size: int = 16
+    max_length: int = 512
+    recall_top_k: int = 50
+
+
+@dataclass(frozen=True)
 class OpenSearchConfig:
     """描述子块 BM25 索引连接。"""
 
@@ -148,6 +165,7 @@ class RAGConfig:
     download_timeout: float
     embedding: EmbeddingConfig
     milvus: MilvusConfig
+    reranker: RerankerConfig
     opensearch: OpenSearchConfig
 
 
@@ -208,6 +226,15 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
     milvus = _section(rag, "milvus")
+    # 兼容已部署配置中的 rag.rerank 命名，统一映射到 RerankerConfig。
+    reranker = _section(rag, "reranker")
+    if not reranker and isinstance(rag.get("rerank"), dict):
+        legacy_rerank = rag["rerank"]
+        reranker = dict(legacy_rerank)
+        reranker.setdefault("provider", "dashscope")
+        reranker.setdefault("model_name", legacy_rerank.get("model", ""))
+        reranker.setdefault("api_key", legacy_rerank.get("api_key", ""))
+        reranker.setdefault("recall_top_k", 20)
     opensearch = _section(rag, "opensearch")
     result = AppConfig(
         database=DatabaseConfig(str(_env("DATABASE_DSN", database.get("dsn", "")))),
@@ -260,6 +287,19 @@ def load_config(path: Optional[str] = None) -> AppConfig:
                 int(_env("RAG_MILVUS_RRF_K", milvus.get("rrf_k", 60))),
                 int(_env("RAG_MILVUS_CANDIDATE_LIMIT", milvus.get("candidate_limit", 50))),
             ),
+            RerankerConfig(
+                str(_env("RAG_RERANKER_ENABLED", reranker.get("enabled", False))).lower() in ("1", "true", "yes"),
+                str(_env("RAG_RERANKER_PROVIDER", reranker.get("provider", "local"))).lower(),
+                str(_env("RAG_RERANKER_BASE_URL", reranker.get("base_url", "https://dashscope.aliyuncs.com/api/v1/services/rerank/text-rerank/text-rerank"))),
+                str(_env("RAG_RERANKER_API_KEY", reranker.get("api_key", ""))),
+                str(_env("RAG_RERANKER_MODEL_NAME", reranker.get("model_name", ""))),
+                _duration(_env("RAG_RERANKER_TIMEOUT", reranker.get("timeout", "30s"))),
+                str(_env("RAG_RERANKER_DEVICE", reranker.get("device", "cpu"))),
+                str(_env("RAG_RERANKER_USE_FP16", reranker.get("use_fp16", False))).lower() in ("1", "true", "yes"),
+                int(_env("RAG_RERANKER_BATCH_SIZE", reranker.get("batch_size", 16))),
+                int(_env("RAG_RERANKER_MAX_LENGTH", reranker.get("max_length", 512))),
+                int(_env("RAG_RERANKER_RECALL_TOP_K", reranker.get("recall_top_k", 50))),
+            ),
             OpenSearchConfig(
                 str(_env("RAG_OPENSEARCH_ENABLED", opensearch.get("enabled", False))).lower() in ("1", "true", "yes"),
                 str(_env("RAG_OPENSEARCH_ENDPOINT", opensearch.get("endpoint", ""))),
@@ -297,6 +337,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Milvus Dense 索引类型必须是 AUTOINDEX 或 HNSW")
     if result.rag.milvus.rrf_k <= 0 or result.rag.milvus.candidate_limit <= 0:
         raise ValueError("Milvus RRF 参数必须为正整数")
+    if result.rag.reranker.enabled and (result.rag.reranker.provider not in ("local", "dashscope") or not result.rag.reranker.model_name or result.rag.reranker.batch_size <= 0 or result.rag.reranker.max_length <= 0 or result.rag.reranker.timeout <= 0 or not 20 <= result.rag.reranker.recall_top_k <= 50 or (result.rag.reranker.provider == "dashscope" and (not result.rag.reranker.base_url or not result.rag.reranker.api_key))):
+        raise ValueError("启用父子重排时 Reranker 配置必须完整，recall_top_k 必须在 20 到 50 之间")
     if result.rag.embedding.dimensions <= 0 or result.rag.embedding.dimensions > 2000:
         raise ValueError("Embedding dimensions 必须在 1 到 2000 之间")
     if result.rag.embedding.provider == "bge-m3" and not result.rag.embedding.model_name:
