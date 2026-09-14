@@ -100,8 +100,13 @@ class ParentChildRetrieverTest(unittest.TestCase):
 
     # 初召回数量超出约定范围时应在启动阶段快速失败。
     def test_rejects_invalid_recall_top_k(self):
-        with self.assertRaisesRegex(ValueError, "20 到 50"):
+        with self.assertRaisesRegex(ValueError, "20 到 100"):
             MilvusParentChildRetriever(FakeBaseRetriever(), FakeParentClient(), "chunks", FakeReranker(), recall_top_k=10)
+
+    # 验证扩大到 100 个首轮候选后仍可构造父子检索器。
+    def test_accepts_recall_top_k_100(self):
+        retriever = MilvusParentChildRetriever(FakeBaseRetriever(), FakeParentClient(), "chunks", FakeReranker(), recall_top_k=100)
+        self.assertIsNotNone(retriever)
 
 
 if __name__ == "__main__":

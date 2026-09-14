@@ -337,8 +337,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("Milvus Dense 索引类型必须是 AUTOINDEX 或 HNSW")
     if result.rag.milvus.rrf_k <= 0 or result.rag.milvus.candidate_limit <= 0:
         raise ValueError("Milvus RRF 参数必须为正整数")
-    if result.rag.reranker.enabled and (result.rag.reranker.provider not in ("local", "dashscope") or not result.rag.reranker.model_name or result.rag.reranker.batch_size <= 0 or result.rag.reranker.max_length <= 0 or result.rag.reranker.timeout <= 0 or not 20 <= result.rag.reranker.recall_top_k <= 50 or (result.rag.reranker.provider == "dashscope" and (not result.rag.reranker.base_url or not result.rag.reranker.api_key))):
-        raise ValueError("启用父子重排时 Reranker 配置必须完整，recall_top_k 必须在 20 到 50 之间")
+    if result.rag.reranker.enabled and (result.rag.reranker.provider not in ("local", "dashscope") or not result.rag.reranker.model_name or result.rag.reranker.batch_size <= 0 or result.rag.reranker.max_length <= 0 or result.rag.reranker.timeout <= 0 or not 20 <= result.rag.reranker.recall_top_k <= 100 or (result.rag.reranker.provider == "dashscope" and (not result.rag.reranker.base_url or not result.rag.reranker.api_key))):
+        raise ValueError("启用父子重排时 Reranker 配置必须完整，recall_top_k 必须在 20 到 100 之间")
     if result.rag.embedding.dimensions <= 0 or result.rag.embedding.dimensions > 2000:
         raise ValueError("Embedding dimensions 必须在 1 到 2000 之间")
     if result.rag.embedding.provider == "bge-m3" and not result.rag.embedding.model_name:

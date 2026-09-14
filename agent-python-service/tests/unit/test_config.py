@@ -43,7 +43,7 @@ class ConfigTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Milvus"):
             self._load(VALID_CONFIG.replace("http://127.0.0.1:19530", ""))
 
-    # 启用父子重排时必须提供模型，并将首轮召回约束在 20～50。
+    # 启用父子重排时必须提供模型，并将首轮召回约束在 20～100。
     def test_validates_parent_child_reranker(self) -> None:
         enabled = VALID_CONFIG.replace("  milvus:", "  reranker: {enabled: true, model_name: 'reranker', recall_top_k: 30}\n  milvus:")
         config = self._load(enabled)
@@ -51,7 +51,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(config.rag.reranker.recall_top_k, 30)
 
         invalid = enabled.replace("recall_top_k: 30", "recall_top_k: 10")
-        with self.assertRaisesRegex(ValueError, "20 到 50"):
+        with self.assertRaisesRegex(ValueError, "20 到 100"):
             self._load(invalid)
 
     # DashScope Provider 必须配置 API 地址、密钥和模型名称。

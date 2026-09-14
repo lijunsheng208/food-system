@@ -87,8 +87,8 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         """在 Agent 决策前生成 RetrievalPlan，再执行向量、图或混合检索。"""
         if controlled_retriever is None:
             return {"documents": [], "retrieval_context": ""}
-        # 路由器必须接收原始问题，确保纯 Vector 与旧评估口径一致；Hybrid 在计划内部单独生成 vector_query。
-        query = str(state.get("original_query", "")).strip()
+        # 改写节点先澄清指代和省略，检索必须使用改写结果；缺失时才回退原始问题。
+        query = str(state.get("rewritten_query", "")).strip() or str(state.get("original_query", "")).strip()
         try:
             result = await asyncio.wait_for(asyncio.to_thread(controlled_retriever.retrieve, query, int(state["user_id"]), int(state["knowledge_base_id"])), timeout=tool_timeout)
         except Exception:

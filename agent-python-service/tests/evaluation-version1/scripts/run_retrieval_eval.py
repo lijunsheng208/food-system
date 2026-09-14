@@ -320,6 +320,7 @@ def main():
     parser.add_argument("--core-methods-only", action="store_true", help="只评估 Dense、Sparse 和 RRF k=60")
     parser.add_argument("--with-parent-reranker", action="store_true", help="增加三种父子扩展与 Cross-Encoder 重排实验")
     parser.add_argument("--rerank-methods", default="all", choices=("all", "hybrid"), help="选择需要做父子重排的初召回方法；hybrid 适用于线上生产路径")
+    parser.add_argument("--candidate-limit", type=int, default=0, help="覆盖每路 Dense/Sparse ANN 候选数；父子召回实验应至少设置为 recall_top_k")
     parser.add_argument("--max-queries", type=int, default=0, help="仅用于冒烟验证；0 表示评估全部 Query")
     parser.add_argument("--query-offset", type=int, default=0, help="评估分片起始 Query 下标")
     args = parser.parse_args()
@@ -327,6 +328,8 @@ def main():
         raise ValueError("max_queries 不能为负数")
     if args.query_offset < 0:
         raise ValueError("query_offset 不能为负数")
+    if args.candidate_limit < 0:
+        raise ValueError("candidate_limit 不能为负数")
     config = load_config(args.config)
     eval_config = yaml.safe_load(Path(args.eval_config).read_text(encoding="utf-8"))
     queries = _load_queries(Path(args.queries))
@@ -344,7 +347,9 @@ def main():
     collection = eval_config["collection"]
     expression = f"user_id == {eval_config['user_id']} and knowledge_base_id == {eval_config['knowledge_base_id']} and index_version == {eval_config['index_version']} and active == true"
     limit = max(eval_config["top_k"])
-    candidate_limit = eval_config["candidate_limit"]
+    candidate_limit = args.candidate_limit or eval_config["candidate_limit"]
+    if candidate_limit <= 0:
+        raise ValueError("candidate_limit 必须为正数")
 
     def dense(index):
         """执行 Dense Child 初召回。"""

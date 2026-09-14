@@ -66,10 +66,10 @@ class MilvusHybridRetriever:
 class MilvusParentChildRetriever:
     """先召回 Child，再扩展同 Parent 的 Child 并使用 Cross-Encoder 重排。"""
 
-    # 初始化两阶段检索器；recall_top_k 限定为 20～50，控制父块扩展的时延和候选规模。
+    # 初始化两阶段检索器；recall_top_k 限定为 20～100，平衡父块扩展的召回率和重排开销。
     def __init__(self, base: HybridRetriever, client: Any, collection: str, reranker: ChunkReranker, recall_top_k: int = 50) -> None:
-        if not collection or not 20 <= recall_top_k <= 50:
-            raise ValueError("父子检索 recall_top_k 必须在 20 到 50 之间")
+        if not collection or not 20 <= recall_top_k <= 100:
+            raise ValueError("父子检索 recall_top_k 必须在 20 到 100 之间")
         self._base = base
         self._client = client
         self._collection = collection

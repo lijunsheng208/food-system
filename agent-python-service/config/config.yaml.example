@@ -102,7 +102,7 @@ rag:
     use_fp16: false
     batch_size: 16
     max_length: 512
-    # 首轮 RRF Child 召回数量，必须在 20～50 之间。
+    # 首轮 RRF Child 召回数量，必须在 20～100 之间。
     recall_top_k: 50
   opensearch:
     enabled: false
