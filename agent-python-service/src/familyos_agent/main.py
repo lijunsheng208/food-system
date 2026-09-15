@@ -74,7 +74,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     chat_model = AsyncOpenAIChatModel(config.chat)
     rewrite_model = None
     if config.chat.enable_query_rewrite:
-        rewrite_model = AsyncOpenAIChatModel(type("RewriteConfig", (), {"base_url": config.chat.rewrite_base_url, "api_key": config.chat.rewrite_api_key, "model": config.chat.rewrite_model, "timeout": config.chat.rewrite_timeout, "max_tokens": config.chat.rewrite_max_tokens})())
+        # 查询改写的 JSON 是内部中间结果，禁止通过 LangGraph 流式回调发送给客户端。
+        rewrite_model = AsyncOpenAIChatModel(type("RewriteConfig", (), {"base_url": config.chat.rewrite_base_url, "api_key": config.chat.rewrite_api_key, "model": config.chat.rewrite_model, "timeout": config.chat.rewrite_timeout, "max_tokens": config.chat.rewrite_max_tokens})(), enable_streaming=False)
     async def search_knowledge(state, arguments):
         """使用服务端身份执行知识库 Hybrid 检索。"""
         import asyncio
@@ -82,7 +83,20 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         from .retrieval import RetrievalQuery
         rows = await asyncio.to_thread(retriever.retrieve, RetrievalQuery(str(arguments.get("query", "")), int(state["knowledge_base_id"]), int(state["user_id"]), 5))
         return json.dumps({"documents": [{"chunk_id": row.chunk_id, "document_id": row.document_id, "content": row.content} for row in rows]}, ensure_ascii=False)
-    registry = ToolRegistry({"search_knowledge_base": AgentTool("search_knowledge_base", "检索当前用户有权限访问的知识库", search_knowledge, {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]})})
+
+    async def get_user_dietary_preferences(state, _arguments):
+        """使用服务端认证身份查询当前用户保存的个人饮食偏好。"""
+        import asyncio
+        import json
+        type_names = {1: "口味", 2: "菜系", 3: "饮食习惯", 4: "忌口食材", 5: "过敏食材"}
+        rows = await asyncio.to_thread(logic.list_dietary_preferences, int(state["user_id"]))
+        preferences = [{**row, "preference_type_name": type_names.get(int(row["preference_type"]), "未知类型")} for row in rows]
+        return json.dumps({"preferences": preferences}, ensure_ascii=False)
+
+    registry = ToolRegistry({
+        "search_knowledge_base": AgentTool("search_knowledge_base", "检索当前用户有权限访问的知识库。需要菜谱步骤、用量、时间、温度或文档事实时调用。", search_knowledge, {"type": "object", "properties": {"query": {"type": "string"}}, "required": ["query"]}),
+        "get_user_dietary_preferences": AgentTool("get_user_dietary_preferences", "查询当前用户已保存的口味、菜系、饮食习惯、忌口和过敏信息。进行个性化菜谱推荐、菜单规划、食材替换或饮食适配判断前必须调用。", get_user_dietary_preferences, {"type": "object", "properties": {}, "additionalProperties": False}),
+    })
     # 生产默认复用 Agent MySQL，但 checkpoint 使用独立表，避免仅依赖进程内存。
     metrics = PrometheusAgentMetrics()
     configure_tracing(config.chat.otel_endpoint)

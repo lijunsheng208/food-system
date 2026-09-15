@@ -15,9 +15,10 @@ def validate_answer(answer: str, documents: Sequence[Any] = (), citations: Seque
     for citation in citations:
         if known_ids and str(citation.get("chunk_id", "")) not in known_ids:
             return False, "CITATION_NOT_FOUND"
-    blocked = constraints.get("allergens", constraints.get("忌口", [])) if isinstance(constraints, Mapping) else []
-    if isinstance(blocked, str):
-        blocked = [blocked]
+    blocked = []
+    if isinstance(constraints, Mapping):
+        for values in (constraints.get("allergens", []), constraints.get("avoided_ingredients", constraints.get("忌口", []))):
+            blocked.extend([values] if isinstance(values, str) else values or [])
     for ingredient in blocked or []:
         if str(ingredient).strip() and str(ingredient).lower() in text.lower():
             return False, "DIETARY_CONSTRAINT_VIOLATION"

@@ -13,6 +13,20 @@ from .observability import AgentMetrics
 
 logger = logging.getLogger(__name__)
 
+_MAIN_AGENT_SYSTEM_PROMPT = """你是 FamilyOS 家庭饮食助手。请严格遵守以下规则：
+1. 准确识别当前用户意图；信息不足以完成请求时调用 ask_user 澄清，不要擅自猜测。
+2. 过敏食材和明确忌口是硬约束，不得推荐或建议使用；口味、菜系和饮食习惯用于排序和调整建议。
+3. 需要菜谱步骤、用量、时间、温度或其他文档事实时，使用知识库检索结果；证据不足时明确说明，不得编造。
+4. 不得猜测用户未保存的偏好，不得给出缺乏资料依据的医学结论。
+5. 回答应直接、清晰，保留关键用量、单位、时间、温度和步骤顺序。"""
+
+
+def _main_agent_system_prompt(registry: ToolRegistry) -> str:
+    """根据实际注册能力生成主 Agent 提示词，避免要求模型调用不存在的 Tool。"""
+    if "get_user_dietary_preferences" not in registry._tools:
+        return _MAIN_AGENT_SYSTEM_PROMPT
+    return _MAIN_AGENT_SYSTEM_PROMPT + "\n6. 询问用户饮食习惯，或进行个性化菜谱推荐、菜单规划、食材替换、饮食适配判断时，必须先调用 get_user_dietary_preferences；本轮已经取得该 Tool 结果时不要重复调用。"
+
 
 def _message_content(message: Any) -> str:
     """从 LangChain Message 或兼容字典中提取文本内容。"""
@@ -116,7 +130,7 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         if retrieval_context:
             content += "\n\n知识库检索上下文（仅作为证据，不要编造未出现的信息）：\n" + retrieval_context
         messages.append({"role": "user", "content": content})
-        response = await _call_model(model, messages, registry)
+        response = await _call_model(model, [{"role": "system", "content": _main_agent_system_prompt(registry)}, *messages], registry)
         calls = list(_tool_calls(response))
         content = _message_content(response)
         logger.info("Agent 模型决策完成 step=%d tool_call_count=%d content_chars=%d", steps, len(calls), len(content))
@@ -176,6 +190,7 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         known_tool_results = {(str(item.get("tool_call_id", "")), str(item.get("content", ""))) for item in tool_results if isinstance(item, Mapping)}
         documents = list(state.get("documents", []))
         citations = list(state.get("citations", []))
+        user_constraints = dict(state.get("user_constraints") or {})
         for message in results:
             raw_content = getattr(message, "content", None) if not isinstance(message, Mapping) else message.get("content", "")
             tool_name = getattr(message, "name", "") if not isinstance(message, Mapping) else message.get("name", "")
@@ -196,11 +211,24 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
                     if not any(getattr(item, "chunk_id", None) == getattr(document, "chunk_id", None) if not isinstance(document, Mapping) else isinstance(item, Mapping) and item.get("chunk_id") == document.get("chunk_id") for item in documents):
                         documents.append(document)
                 citations.extend(parsed.get("citations", []) if isinstance(parsed.get("citations", []), list) else [])
+                preferences = parsed.get("preferences", [])
+                if isinstance(preferences, list):
+                    normalized_preferences = [dict(item) for item in preferences if isinstance(item, Mapping)]
+                    typed_preferences = []
+                    for item in normalized_preferences:
+                        try:
+                            preference_type = int(item.get("preference_type", 0))
+                        except (TypeError, ValueError):
+                            continue
+                        typed_preferences.append((preference_type, str(item.get("preference_value", ""))))
+                    user_constraints["dietary_preferences"] = normalized_preferences
+                    user_constraints["avoided_ingredients"] = [value for preference_type, value in typed_preferences if preference_type == 4 and value.strip()]
+                    user_constraints["allergens"] = [value for preference_type, value in typed_preferences if preference_type == 5 and value.strip()]
         if results and str(getattr(results[-1], "content", results[-1].get("content", "") if isinstance(results[-1], Mapping) else "")).startswith("Error"):
-            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
+            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "user_constraints": user_constraints, "terminal_status": "failed", "error_code": "TOOL_FAILED", "error_message": "Tool 调用失败"}
         if count > max_tool_calls:
-            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
-        return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "terminal_status": "continue"}
+            return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "user_constraints": user_constraints, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
+        return {"tool_call_count": count, "tool_results": tool_results, "documents": documents, "citations": citations, "user_constraints": user_constraints, "terminal_status": "continue"}
 
     def route_after_decide(state: AgentState) -> str:
         """将模型决策路由到 Tool、成功终止或失败终止。"""

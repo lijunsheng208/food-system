@@ -5,4 +5,5 @@ DOCUMENT_INDEX_SCHEMA_VERSION = 1
 GET_DOCUMENT_DOWNLOAD_TICKET_METHOD = "/knowledge.v1.KnowledgeInternalService/GetDocumentDownloadTicket"
 COMPLETE_DOCUMENT_INDEX_METHOD = "/knowledge.v1.KnowledgeInternalService/CompleteDocumentIndex"
 FAIL_DOCUMENT_INDEX_METHOD = "/knowledge.v1.KnowledgeInternalService/FailDocumentIndex"
+LIST_DIETARY_PREFERENCES_METHOD = "/auth.v1.AuthService/ListDietaryPreferences"
 INTERNAL_TOKEN_HEADER = "x-familyos-internal-token"

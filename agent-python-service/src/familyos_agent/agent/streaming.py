@@ -95,17 +95,22 @@ async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Opti
                 graph_input = Command(resume=resume_value)
             except ImportError as exc:
                 raise RuntimeError("缺少 LangGraph resume 支持") from exc
-        async for raw in graph.astream_events(graph_input, config=dict(config or {}), version="v2"):
-            mapped = _map_event(raw)
-            if mapped is not None:
-                if mapped.type == "model_token":
+        graph_events = graph.astream_events(graph_input, config=dict(config or {}), version="v2")
+        try:
+            async for raw in graph_events:
+                mapped = _map_event(raw)
+                if mapped is not None:
+                    if mapped.type == "model_token":
+                        answer_streamed = True
+                    yield mapped
+                # 自定义模型通过 ainvoke 一次性返回答案时不会产生 on_chat_model_stream，需从已校验终态补发。
+                final_answer = _validated_final_answer(raw)
+                if final_answer and not answer_streamed:
                     answer_streamed = True
-                yield mapped
-            # 自定义模型通过 ainvoke 一次性返回答案时不会产生 on_chat_model_stream，需从已校验终态补发。
-            final_answer = _validated_final_answer(raw)
-            if final_answer and not answer_streamed:
-                answer_streamed = True
-                yield AgentEvent("model_token", final_answer, str(raw.get("name", "")), raw.get("data") or {})
+                    yield AgentEvent("model_token", final_answer, str(raw.get("name", "")), raw.get("data") or {})
+        finally:
+            # 取消 __anext__ 后在同一 Task 内关闭底层流，避免事件循环再次并发执行 aclose。
+            await graph_events.aclose()
 
     iterator = consume()
     task = asyncio.create_task(iterator.__anext__())
@@ -128,3 +133,12 @@ async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Opti
     except asyncio.CancelledError:
         task.cancel()
         raise
+    finally:
+        # 外层 gRPC 流可能在任意一个 yield 处关闭，必须主动回收 LangGraph 和 HTTP 流生成器。
+        if not task.done():
+            task.cancel()
+            try:
+                await task
+            except (asyncio.CancelledError, StopAsyncIteration):
+                pass
+        await iterator.aclose()

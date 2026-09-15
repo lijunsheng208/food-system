@@ -62,6 +62,7 @@ class ChatStreamService:
                     logger.exception("读取 Agent 等待态失败 conversation_id=%s", state.get("conversation_id"))
             answer_parts, citations = [], []
             awaiting_input = False
+            awaiting_content = ""
             failed = False
             first_token_seen = False
             node_started: dict[str, float] = {}
@@ -90,6 +91,7 @@ class ChatStreamService:
                         yield agent_pb2.ChatStreamEvent(type="citation", request_id=request_id, citation=agent_pb2.ChatCitation(**dict(citation)))
                 elif event.type == "awaiting_input":
                     awaiting_input = True
+                    awaiting_content = event.content
                     yield agent_pb2.ChatStreamEvent(type="awaiting_input", request_id=request_id, content=event.content)
                 elif event.type == "error":
                     failed = True
@@ -101,8 +103,10 @@ class ChatStreamService:
                         failed = True
                         await asyncio.to_thread(self._conversations.fail_chat, request_id, "CITATION_NOT_FOUND", "引用校验失败")
                         yield agent_pb2.ChatStreamEvent(type="error", request_id=request_id, error_code="CITATION_NOT_FOUND", error_message="引用校验失败")
-            if self._conversations is not None and not awaiting_input and not failed:
-                await asyncio.to_thread(self._conversations.complete_chat, request_id, "".join(answer_parts), citations)
+            if self._conversations is not None and not failed:
+                # 等待用户补充也代表本轮助手消息已经完整产生，必须结束数据库中的流式状态。
+                content = awaiting_content if awaiting_input else "".join(answer_parts)
+                await asyncio.to_thread(self._conversations.complete_chat, request_id, content, citations)
             elif self._conversations is not None and failed:
                 await asyncio.to_thread(self._conversations.fail_chat, request_id, "AGENT_FAILED", "Agent 执行失败")
             if not awaiting_input and not failed:
@@ -112,6 +116,12 @@ class ChatStreamService:
                 self._metrics.finish(request_id, "failed")
             else:
                 self._metrics.finish(request_id, "awaiting_input")
+        except TimeoutError:
+            # 超时是本轮请求的失败终态，必须同步落库，避免助手占位消息长期停留在流式状态。
+            if self._conversations is not None:
+                await asyncio.to_thread(self._conversations.fail_chat, request_id, "MODEL_TIMEOUT", "Agent 请求超时")
+            self._metrics.finish(request_id, "timeout")
+            raise
         finally:
             # gRPC 会跨多个 asyncio Task 拉取生成器，显式结束 span 可避免 ContextVar token 跨 Context 重置。
             span.end()
@@ -162,9 +172,15 @@ class _AgentChatServicer(agent_pb2_grpc.AgentChatServiceServicer):
                         break
                     yield event
             finally:
-                if iterator is not None:
-                    loop.run_until_complete(iterator.aclose())
-                loop.close()
+                try:
+                    if iterator is not None:
+                        loop.run_until_complete(iterator.aclose())
+                finally:
+                    # 关闭事件循环前完成嵌套 LangGraph/httpx 异步生成器的清理任务。
+                    try:
+                        loop.run_until_complete(loop.shutdown_asyncgens())
+                    finally:
+                        loop.close()
         except TimeoutError:
             yield agent_pb2.ChatStreamEvent(type="error", request_id=request.request_id, error_code="MODEL_TIMEOUT", error_message="Agent 请求超时")
         except asyncio.CancelledError:

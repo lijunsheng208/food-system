@@ -12,12 +12,14 @@ import httpx
 
 from ..config import EmbeddingConfig, LogicConfig, OpenSearchConfig
 from ..domain import ChildChunk, DownloadTicket, PermanentDocumentError
+from ..generated.auth.v1 import auth_pb2
 from ..generated.knowledge.v1 import knowledge_pb2
 from ..transport.contracts import (
     COMPLETE_DOCUMENT_INDEX_METHOD,
     FAIL_DOCUMENT_INDEX_METHOD,
     GET_DOCUMENT_DOWNLOAD_TICKET_METHOD,
     INTERNAL_TOKEN_HEADER,
+    LIST_DIETARY_PREFERENCES_METHOD,
 )
 
 
@@ -44,6 +46,31 @@ class LogicClient:
             request_serializer=knowledge_pb2.FailDocumentIndexRequest.SerializeToString,
             response_deserializer=knowledge_pb2.FailDocumentIndexResponse.FromString,
         )
+        self._list_dietary_preferences = self._channel.unary_unary(
+            LIST_DIETARY_PREFERENCES_METHOD,
+            request_serializer=auth_pb2.ListDietaryPreferencesRequest.SerializeToString,
+            response_deserializer=auth_pb2.ListDietaryPreferencesResponse.FromString,
+        )
+
+    # 查询当前用户保存的口味、菜系、饮食习惯、忌口和过敏信息。
+    def list_dietary_preferences(self, user_id: int) -> List[Dict[str, Any]]:
+        if user_id <= 0:
+            raise ValueError("查询饮食偏好用户无效")
+        response = self._list_dietary_preferences(
+            auth_pb2.ListDietaryPreferencesRequest(user_id=user_id),
+            timeout=self._timeout,
+            metadata=((INTERNAL_TOKEN_HEADER, self._token),),
+        )
+        if response.code != 0:
+            raise RuntimeError("Logic 拒绝查询饮食偏好: code=%d message=%s" % (response.code, response.message))
+        return [
+            {
+                "preference_type": int(item.preference_type),
+                "preference_value": item.preference_value,
+                "note": item.note,
+            }
+            for item in response.preferences
+        ]
 
     # 请求与任务文档和索引版本严格一致的短期 OSS 下载票据。
     def get_download_ticket(self, document_id: int, index_version: int) -> DownloadTicket:

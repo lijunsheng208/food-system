@@ -88,6 +88,7 @@ class PrometheusAgentMetrics(AgentMetrics):
         self._run_timers[request_id] = self._duration.time()
         self._run_timers[request_id].__enter__()
         self._first_token_timers[request_id] = self._first_token.time()
+        self._first_token_timers[request_id].__enter__()
 
     def first_token(self, request_id: str) -> None:
         """结束首 token 计时，每个请求只记录一次。"""
