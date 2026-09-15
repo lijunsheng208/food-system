@@ -49,6 +49,17 @@ export default function AIScreen() {
     subscriptionRef.current = streamAgentChat({ knowledge_base_id: knowledgeBaseId, conversation_id: conversationId, message: query }, (event: AgentChatEvent) => {
       if (event.type === 'answer_delta') setMessages((items) => items.map((item) => item.id === assistantID ? { ...item, content: item.content + event.content } : item));
       else if (event.type === 'citation') setMessages((items) => items.map((item) => item.id === assistantID && !(item.citations || []).some((citation) => citation.document_id === event.citation.document_id) ? { ...item, citations: [...(item.citations || []), event.citation] } : item));
+      // 等待态结束当前一轮输出，但保留 conversationId，下一条消息将恢复同一 LangGraph Thread。
+      else if (event.type === 'awaiting_input') {
+        setMessages((items) => items.map((item) => {
+          if (item.id !== assistantID) return item;
+          const current = item.content.trim();
+          if (!current) return { ...item, content: event.content };
+          if (current.endsWith(event.content.trim())) return item;
+          return { ...item, content: `${item.content}\n\n${event.content}` };
+        }));
+        setLoading(false);
+      }
       else if (event.type === 'error') { setError(event.message); setLoading(false); }
       else if (event.type === 'completed') setLoading(false);
     });

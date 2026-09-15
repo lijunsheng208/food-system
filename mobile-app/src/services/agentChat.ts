@@ -14,6 +14,7 @@ export type AgentChatEvent =
   | { type: 'metadata'; request_id: string }
   | { type: 'answer_delta'; request_id: string; content: string }
   | { type: 'citation'; request_id: string; citation: AgentCitation }
+  | { type: 'awaiting_input'; request_id: string; content: string }
   | { type: 'completed'; request_id: string }
   | { type: 'error'; request_id?: string; message: string };
 
