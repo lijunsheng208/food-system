@@ -48,11 +48,6 @@ METHOD_TERMS = (
     "腌", "卤", "拌", "勾芡", "收汁", "冷藏",
 )
 COOKING_METHOD_TERMS = ("油炸", "炸", "煎", "炒", "蒸", "炖", "煮", "烧开", "烤", "微波", "拌", "勾芡", "收汁")
-FORBIDDEN_INGREDIENTS = (
-    "辣椒", "花生", "香菜", "芝麻", "牛奶", "鸡蛋", "葱", "蒜", "姜",
-    "黄油", "芥末", "椰浆", "番茄", "豆腐", "面粉", "香菇",
-)
-FORBIDDEN_METHODS = ("油炸", "煎", "蒸", "烤", "微波", "炖", "焯", "腌制", "勾芡")
 TASTE_TERMS = (
     "清淡", "鲜美", "鲜嫩", "香辣", "酸甜", "咸鲜", "浓郁", "酥脆", "软糯",
     "爽滑", "开胃", "下饭", "快手", "聚餐", "早餐", "下午茶", "夏日", "新手",
@@ -262,100 +257,6 @@ def semantic_query(profile, anchors):
     return f"先处理{anchors[0]}并完成切配，再{action}，直到{state}，这种{CATEGORY_LABELS[profile['category']]}的具体步骤是什么？"
 
 
-def numeric_measurements(profile):
-    """Extract values and the chunk that provides evidence for them."""
-    fields = []
-    range_patterns = (
-        ("temperature_c", re.compile(r"(\d+(?:\.\d+)?)\s*(?:-|~|～|至|到)\s*(\d+(?:\.\d+)?)\s*(?:℃|°C|摄氏度|度)", re.I), "celsius"),
-        ("minutes", re.compile(r"(\d+(?:\.\d+)?)\s*(?:-|~|～|至|到)\s*(\d+(?:\.\d+)?)\s*(分钟|分|小时|h)", re.I), "time"),
-    )
-    duration_pattern = re.compile(r"(\d+(?:\.\d+)?)\s*小时\s*(\d+(?:\.\d+)?)\s*(分钟|分)", re.I)
-    single_patterns = (
-        ("calories", re.compile(r"预估卡路里\s*[:：]?\s*(\d+(?:\.\d+)?)\s*(大卡|千卡|卡路里)", re.I), "calories"),
-        ("temperature_c", re.compile(r"(\d+(?:\.\d+)?)\s*(?:℃|°C|摄氏度|度)", re.I), "celsius"),
-        ("minutes", re.compile(r"(\d+(?:\.\d+)?)\s*(分钟|分|小时|h)", re.I), "time"),
-        ("grams", re.compile(r"(\d+(?:\.\d+)?)\s*(克|g|公斤|kg|斤)", re.I), "mass"),
-        ("milliliters", re.compile(r"(\d+(?:\.\d+)?)\s*(毫升|ml|升|l)", re.I), "volume"),
-    )
-    for profile_row in profile["rows"]:
-        content = profile_row.get("content", "")
-        for match in duration_pattern.finditer(content):
-            hours, minutes = float(match.group(1)), float(match.group(2))
-            fields.append({"field": "minutes", "operator": "<=", "value": hours * 60 + minutes, "unit": "minute", "source_value": match.group(0), "chunk": profile_row})
-        for field, pattern, kind in range_patterns:
-            for match in pattern.finditer(content):
-                left, right = float(match.group(1)), float(match.group(2))
-                if kind == "time" and match.group(3) in ("小时", "h"):
-                    left, right = left * 60, right * 60
-                source_unit = match.group(3) if match.lastindex and match.lastindex >= 3 else "度"
-                fields.append({"field": field, "operator": "between", "min": min(left, right), "max": max(left, right), "unit": "minute" if field == "minutes" else "celsius", "source_min": match.group(1), "source_max": match.group(2), "source_unit": source_unit, "chunk": profile_row})
-        for field, pattern, kind in single_patterns:
-            for match in pattern.finditer(content):
-                value = float(match.group(1))
-                unit = match.group(2) if match.lastindex and match.lastindex >= 2 else "度"
-                if kind == "time" and unit in ("小时", "h"):
-                    value *= 60
-                if kind == "mass" and unit in ("公斤", "kg"):
-                    value *= 1000
-                elif kind == "mass" and unit == "斤":
-                    value *= 500
-                elif kind == "volume" and unit in ("升", "l"):
-                    value *= 1000
-                operator = "<=" if field == "minutes" else "eq"
-                fields.append({"field": field, "operator": operator, "value": value, "unit": {"calories": "kcal", "temperature_c": "celsius", "minutes": "minute", "grams": "gram", "milliliters": "milliliter"}[field], "source_value": match.group(1), "source_unit": unit, "chunk": profile_row})
-    unique = {}
-    for item in fields:
-        unique.setdefault(item["field"], item)
-    return list(unique.values())
-
-
-def number_text(value):
-    return str(int(value)) if float(value).is_integer() else f"{value:g}"
-
-
-def numeric_query(profile, anchors, measurement):
-    field = measurement["field"]
-    anchor = anchors[0]
-    if measurement["operator"] == "between":
-        low, high = number_text(measurement["min"]), number_text(measurement["max"])
-        if field == "minutes":
-            return f"以{anchor}为主、总用时在{low}到{high}分钟之间的做法怎么安排？"
-        return f"处理{anchor}时，温度控制在{low}到{high}摄氏度的做法是什么？"
-    value = number_text(measurement["value"])
-    display_value = str(measurement.get("source_value", value)).replace(" ", "") if field == "minutes" else value
-    if field == "minutes" and not re.search(r"分钟|分|小时|h", display_value, re.I):
-        display_value += "分钟"
-    templates = {
-        "minutes": f"有没有以{anchor}为主、总用时不超过{display_value}的{CATEGORY_LABELS[profile['category']]}？步骤怎么做？",
-        "temperature_c": f"处理{anchor}时，需要控制在约{value}摄氏度的做法怎么做？",
-        "grams": f"{anchor}用量约为{value}克的做法，具体备料和步骤是什么？",
-        "milliliters": f"需要加入约{value}毫升液体、以{anchor}为主的做法怎么安排？",
-        "calories": f"有没有每份约{value}大卡、以{anchor}为主的{CATEGORY_LABELS[profile['category']]}？",
-    }
-    return templates[field]
-
-
-def choose_forbidden(profile, term_counts, prefer_method=False):
-    normalized = profile["normalized_text"]
-    if prefer_method:
-        method_candidates = [term for term in FORBIDDEN_METHODS if normalize(term) not in normalized]
-        if method_candidates:
-            term = max(method_candidates, key=lambda value: (term_counts[value], len(value)))
-            return term, "method_exclusion"
-    ingredient_candidates = [
-        term for term in FORBIDDEN_INGREDIENTS
-        if normalize(term) not in normalized and term not in profile["ingredients"]
-    ]
-    if ingredient_candidates:
-        term = max(ingredient_candidates, key=lambda value: (term_counts[value], len(value)))
-        return term, "ingredient_absence"
-    method_candidates = [term for term in FORBIDDEN_METHODS if normalize(term) not in normalized]
-    if method_candidates:
-        term = max(method_candidates, key=lambda value: (term_counts[value], len(value)))
-        return term, "method_exclusion"
-    return "花椒", "ingredient_absence"
-
-
 def query_record(profile, query, query_type, chunks, hard_negatives, **extra):
     row = {
         "query_id": stable_id(profile["source"], query),
@@ -389,7 +290,8 @@ def profile_tokens(profile):
     return tokens
 
 
-def choose_hard_negatives(profile, profiles, query_type, anchor=None, forbidden=None, measurement=None):
+def choose_hard_negatives(profile, profiles, query_type, anchor=None):
+    """按类别、锚点原料和共享烹饪词选择两个相似的错误文档。"""
     target_tokens = profile_tokens(profile)
     scored = []
     for candidate in profiles:
@@ -404,22 +306,11 @@ def choose_hard_negatives(profile, profiles, query_type, anchor=None, forbidden=
         if anchor and anchor in candidate["text"]:
             score += 5
             reasons.append(f"shared_ingredient:{anchor}")
-        if forbidden and forbidden in candidate["text"]:
-            score += 4
-            reasons.append(f"contains_forbidden:{forbidden}")
         if shared:
             reasons.append("shared_terms:" + ",".join(shared[:3]))
-        if query_type == "numeric" and measurement:
-            if any(item["field"] == measurement["field"] for item in numeric_measurements(candidate)):
-                score += 1
-                reasons.append(f"same_numeric_field:{measurement['field']}")
         scored.append((score, candidate["category"] != profile["category"], candidate["source"], candidate, reasons or ["nearest_profile"]))
     scored.sort(key=lambda item: (-item[0], item[1], item[2]))
     return [{"document_id": item[3]["document_id"], "reason": ";".join(item[4])} for item in scored[:2]]
-
-
-def source_richness(profile):
-    return (bool(profile["ingredients"]), bool(profile["operations"]), bool(profile["overview"]), len(numeric_measurements(profile)), len(profile["text"]))
 
 
 def load_profiles(mapping):
@@ -437,22 +328,17 @@ def load_profiles(mapping):
 
 
 def build_records(profiles, sources_per_category):
-    term_counts = Counter()
-    for profile in profiles:
-        for term in FORBIDDEN_INGREDIENTS + FORBIDDEN_METHODS:
-            if normalize(term) in profile["normalized_text"]:
-                term_counts[term] += 1
+    """按文本证据完整度选取菜谱，并为每篇生成四类通用检索问题。"""
     selected = []
     for category in CATEGORY_ORDER:
         candidates = [profile for profile in profiles if profile["category"] == category]
-        candidates.sort(key=lambda item: (-source_richness(item)[3], -len(item["text"]), item["source"]))
+        candidates.sort(key=lambda item: (not bool(item["ingredients"]), not bool(item["operations"]), not bool(item["overview"]), -len(item["text"]), item["source"]))
         selected.extend(candidates[:sources_per_category])
     if len(selected) < sources_per_category * len(CATEGORY_ORDER):
         raise ValueError("not enough sources in one of the requested categories")
 
     records = []
-    field_order = ("minutes", "temperature_c", "grams", "milliliters", "calories")
-    for profile_index, profile in enumerate(selected):
+    for profile in selected:
         anchors = choose_anchors(profile)
         anchor_text = "、".join(anchors)
         dish_query = f"请给出{profile['title']}的完整用料和关键步骤。"
@@ -467,29 +353,15 @@ def build_records(profiles, sources_per_category):
         semantic = semantic_query(profile, anchors)
         records.append(query_record(profile, semantic, "semantic_description", [operation_chunk(profile), overview_chunk(profile)], choose_hard_negatives(profile, profiles, "semantic_description", anchor=anchors[0])))
 
-        forbidden, constraint_type = choose_forbidden(profile, term_counts, prefer_method=profile_index % 4 == 0)
-        negative_query = f"用{anchors[0]}做一道不含{forbidden}的{taste_phrase(profile)}{CATEGORY_LABELS[profile['category']]}，步骤怎么安排？"
-        records.append(query_record(profile, negative_query, "negative", [ingredient_chunk(profile, anchors[0]), operation_chunk(profile, anchors[0])], choose_hard_negatives(profile, profiles, "negative", anchor=anchors[0], forbidden=forbidden), query_tags=["negative", constraint_type], forbidden_terms=[forbidden], constraint_type=constraint_type))
-
-        measurements = numeric_measurements(profile)
-        if not measurements:
-            raise ValueError(f"source has no numeric evidence: {profile['source']}")
-        available = {item["field"]: item for item in measurements}
-        measurement = next(
-            (available[field_order[(profile_index + offset) % len(field_order)]] for offset in range(len(field_order)) if field_order[(profile_index + offset) % len(field_order)] in available),
-            measurements[0],
-        )
-        numeric_constraints = [{key: value for key, value in measurement.items() if key != "chunk"}]
-        numeric = numeric_query(profile, anchors, measurement)
-        records.append(query_record(profile, numeric, "numeric", [measurement["chunk"], ingredient_chunk(profile, anchors[0])], choose_hard_negatives(profile, profiles, "numeric", anchor=anchors[0], measurement=measurement), query_tags=["numeric", measurement["field"]], numeric_constraints=numeric_constraints))
     return records, selected
 
 
 def validate(records, profiles):
+    """校验四类通用检索问题的覆盖率、类型均衡和正例归属。"""
     sources = {row["source"] for row in records}
     categories = {row["source_category"] for row in records}
     counts = Counter(row["query_type"] for row in records)
-    expected_types = {"dish_name", "ingredient", "taste_scene", "semantic_description", "negative", "numeric"}
+    expected_types = {"dish_name", "ingredient", "taste_scene", "semantic_description"}
     if len(sources) < 100 or len(categories) < 6:
         raise ValueError(f"coverage check failed: sources={len(sources)} categories={len(categories)}")
     if set(counts) != expected_types or len(set(counts.values())) != 1:
@@ -509,30 +381,6 @@ def validate(records, profiles):
                 raise ValueError(f"chunk label mismatch: {row['query_id']}")
         if set(row["positive_documents"]) & set(row["hard_negative_documents"]):
             raise ValueError(f"hard negative overlaps positive: {row['query_id']}")
-        if row["query_type"] == "negative" and any(normalize(term) in profile["normalized_text"] for term in row["forbidden_terms"]):
-            raise ValueError(f"forbidden term appears in positive source: {row['query_id']}")
-        if row["query_type"] == "numeric":
-            for constraint in row["numeric_constraints"]:
-                value = constraint.get("value")
-                source_value = str(constraint.get("source_value", ""))
-                normalized_contents = [
-                    re.sub(r"\s+", "", by_chunk[chunk_id]["content"])
-                    for chunk_id in row["positive_chunks"]
-                ]
-                evidence_found = any(
-                    (source_value and source_value.replace(" ", "") in content)
-                    or (value is not None and number_text(value) in content)
-                    for content in normalized_contents
-                )
-                if constraint.get("operator") == "between":
-                    evidence_found = all(
-                        any(str(constraint.get(key, "")).replace(" ", "") in content for content in normalized_contents)
-                        for key in ("source_min", "source_max")
-                    )
-                if value is not None and not evidence_found:
-                    raise ValueError(f"numeric evidence missing: {row['query_id']}")
-                if constraint.get("operator") == "between" and not evidence_found:
-                    raise ValueError(f"numeric range evidence missing: {row['query_id']}")
     print(f"validated sources={len(sources)} categories={len(categories)} queries={len(records)} types={dict(counts)}")
 
 

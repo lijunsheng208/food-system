@@ -101,6 +101,12 @@ go run ./agent-index-event-adapter
 
 父块和子块都保存到 MySQL，子块通过 `parent_id` 指向父块；父块不写入向量和 BM25。父块元数据保留 Unstructured 的原始 `parent_id` 和元素 ID，子块继承这些结构信息。PDF 的 OCR 和版面解析能力由 Unstructured 的 `auto` 策略及其 PDF 依赖提供。
 
+启用 `rag.reranker.enabled` 后，在线向量检索执行父子两阶段排序：Milvus Dense/Sparse RRF 先召回 20～50 个 Child，提取其中的 `parent_id`，在相同用户、知识库、版本和文档权限过滤下查询这些 Parent 对应的全部 Child，按规范 `chunk_id` 去重后交给 BGE Cross-Encoder 重排，最终返回请求的 Child TopK（Agent 当前为 Top5）。Parent 正文仍以 MySQL 为事实来源，不重复写入向量索引；线上扩展只依赖 Milvus Child 已保存的 `parent_id`。
+
+Cross-Encoder 默认使用本地 BGE 模型，应在部署阶段下载并挂载到 `rag.reranker.model_name` 指定路径。若不希望在 CPU 上运行本地模型，可将 `rag.reranker.provider` 改为 `dashscope`，配置 DashScope 专用文本重排 API（例如 `gte-rerank-v2`），并通过 `FAMILYOS_AGENT_RAG_RERANKER_API_KEY` 注入密钥。该 Provider 调用的是专用 Rerank 接口，不是让 Qwen 对话模型生成相关性分数；API 返回的 `index` 和 `relevance_score` 会经过严格校验后恢复为原 Child 顺序。
+
+可通过 `FAMILYOS_AGENT_RAG_RERANKER_ENABLED`、`FAMILYOS_AGENT_RAG_RERANKER_PROVIDER`、`FAMILYOS_AGENT_RAG_RERANKER_MODEL_NAME`、`FAMILYOS_AGENT_RAG_RERANKER_BASE_URL`、`FAMILYOS_AGENT_RAG_RERANKER_API_KEY` 和 `FAMILYOS_AGENT_RAG_RERANKER_RECALL_TOP_K` 覆盖配置；首轮召回值必须位于 20～50。DashScope API 的批量大小由 `RAG_RERANKER_BATCH_SIZE` 控制，超时由 `RAG_RERANKER_TIMEOUT` 控制。
+
 ## 启动
 
 使用 Python 3.10 或更高版本安装依赖并执行仓库迁移（生成的 gRPC 代码要求 protobuf 7）：
