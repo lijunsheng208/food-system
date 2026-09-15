@@ -8,7 +8,9 @@ grpc:
   target: "localhost:50051"
 
 agent:
-  target: "localhost:50052"
+  target: "127.0.0.1:50054"
+  # 必须与 Python Agent 的 FAMILYOS_AGENT_CHAT_TOKEN 一致。
+  token: "replace-with-the-same-agent-chat-token"
 
 jwt:
   # Must match the Logic Service JWT secret.

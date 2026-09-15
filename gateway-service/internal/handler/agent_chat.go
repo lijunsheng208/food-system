@@ -91,7 +91,7 @@ func (h *AgentChatHandler) ChatStream(c *gin.Context) {
 		return
 	}
 	requestID := uuid.NewString()
-	ctx, cancel := context.WithTimeout(c.Request.Context(), 90*time.Second)
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 120*time.Second)
 	defer cancel()
 	stream, err := h.agent.ChatStream(h.agentContext(ctx), &agentv1.ChatStreamRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID, ConversationId: body.ConversationID, Message: body.Message, RequestId: requestID})
 	if err != nil {
