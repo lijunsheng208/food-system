@@ -1,0 +1,70 @@
+{
+  "dataset_version": "retrieval-evaluation-v4",
+  "corpus_mapping": "tests/evaluation-version1/datasets/raw/chunks.jsonl",
+  "corpus_mapping_sha256": "129d712449c24ddbbbb0d34df436b48ed16579cdb5a745824b5305acb4363dd5",
+  "dataset_sha256": "7eda47486c2a2fe6c22bd7310f8171c1c80376bd686f43dcd0000d1c22306fda",
+  "chunk_gold_file": "tests/evaluation-version4/datasets/chunk_gold.jsonl",
+  "chunk_gold_sha256": "917a32fdb9d0d89bc661b05e084dc535c3bf46624a52129bbde1a7da51d9851e",
+  "quotas": {
+    "dish_lookup": 30,
+    "ingredient_fact": 45,
+    "calculation_fact": 45,
+    "procedure_fact": 45,
+    "cross_parent": 60,
+    "recommendation": 45,
+    "constraint": 20,
+    "unanswerable": 10
+  },
+  "query_count": 300,
+  "query_type_counts": {
+    "dish_lookup": 30,
+    "ingredient_fact": 45,
+    "calculation_fact": 45,
+    "procedure_fact": 45,
+    "cross_parent": 60,
+    "recommendation": 45,
+    "constraint": 20,
+    "unanswerable": 10
+  },
+  "source_count": 215,
+  "category_counts": {
+    "aquatic": 35,
+    "breakfast": 35,
+    "condiment": 27,
+    "dessert": 34,
+    "drink": 32,
+    "meat_dish": 32,
+    "semi-finished": 20,
+    "soup": 28,
+    "staple": 29,
+    "vegetable_dish": 28
+  },
+  "split_counts": {
+    "dev": 252,
+    "test": 48
+  },
+  "label_status_counts": {
+    "needs_review": 300
+  },
+  "query_style_counts": {
+    "standard": 156,
+    "colloquial": 137,
+    "typo": 7
+  },
+  "retrieval_scope_counts": {
+    "document_only": 105,
+    "single_parent": 135,
+    "cross_parent": 60
+  },
+  "parent_child_count_bucket_counts": {
+    "not_applicable": 105,
+    "1": 185,
+    ">1": 10
+  },
+  "chunk_gold_query_count": 195,
+  "chunk_gold_judgment_count": 260,
+  "chunk_gold_label_status_counts": {
+    "needs_review": 195
+  },
+  "review_policy": "自动结构校验已完成；正式基准测试前必须逐条人工确认并改为 reviewed"
+}
