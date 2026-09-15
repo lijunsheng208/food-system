@@ -8,6 +8,13 @@ from typing import Any, Mapping
 logger = logging.getLogger("familyos_agent.audit")
 
 
+class _NoopSpan:
+    """在 OpenTelemetry API 不可用时提供统一的 span 结束接口。"""
+
+    def end(self) -> None:
+        """结束空 span，不执行任何操作。"""
+
+
 def configure_tracing(endpoint: str = "") -> None:
     """配置 OTLP gRPC exporter；未配置 endpoint 时保留默认 no-op tracer。"""
     if not endpoint:
@@ -26,13 +33,12 @@ def configure_tracing(endpoint: str = "") -> None:
 
 
 def trace_run(request_id: str) -> Any:
-    """创建可选 OpenTelemetry span，未配置 SDK 时安全降级为空上下文。"""
+    """创建不绑定当前 Context 的 OpenTelemetry span，由调用方显式结束。"""
     try:
         from opentelemetry import trace
-        return trace.get_tracer("familyos-agent").start_as_current_span("agent.run", attributes={"request.id": request_id})
+        return trace.get_tracer("familyos-agent").start_span("agent.run", attributes={"request.id": request_id})
     except ImportError:
-        from contextlib import nullcontext
-        return nullcontext()
+        return _NoopSpan()
 
 
 class AgentMetrics:

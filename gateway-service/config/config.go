@@ -38,6 +38,7 @@ type GRPCConfig struct {
 // AgentConfig 描述 Gateway 到 Agent 问答 gRPC 的内部连接。
 type AgentConfig struct {
 	Target string `mapstructure:"target"`
+	Token  string `mapstructure:"token"`
 }
 
 type JWTConfig struct {
@@ -63,10 +64,11 @@ func Load(configPath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 	_ = v.BindEnv("jwt.secret", "FAMILYOS_JWT_SECRET", "FAMILYOS_GW_JWT_SECRET")
+	_ = v.BindEnv("agent.token", "FAMILYOS_GW_AGENT_TOKEN", "FAMILYOS_AGENT_CHAT_TOKEN")
 
 	v.SetDefault("server.http_port", 8080)
 	v.SetDefault("grpc.target", "localhost:50051")
-	v.SetDefault("agent.target", "localhost:50052")
+	v.SetDefault("agent.target", "127.0.0.1:50054")
 	v.SetDefault("jwt.issuer", "familyos")
 	v.SetDefault("jwt.audience", "familyos-mobile")
 
@@ -80,8 +82,8 @@ func Load(configPath string) (*Config, error) {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("解析配置失败: %w", err)
 	}
-	if cfg.JWT.Secret == "" || cfg.JWT.Issuer == "" || cfg.JWT.Audience == "" || cfg.GRPC.Target == "" || cfg.Agent.Target == "" {
-		return nil, fmt.Errorf("jwt secret、issuer 和 audience 必须配置")
+	if cfg.JWT.Secret == "" || cfg.JWT.Issuer == "" || cfg.JWT.Audience == "" || cfg.GRPC.Target == "" || cfg.Agent.Target == "" || cfg.Agent.Token == "" {
+		return nil, fmt.Errorf("jwt secret、issuer、audience、Agent target 和 Agent token 必须配置")
 	}
 
 	return &cfg, nil

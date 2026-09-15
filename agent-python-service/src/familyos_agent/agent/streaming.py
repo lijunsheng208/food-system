@@ -64,6 +64,19 @@ def _map_event(event: Mapping[str, Any]) -> Optional[AgentEvent]:
     return None
 
 
+def _validated_final_answer(event: Mapping[str, Any]) -> str:
+    """从通过最终校验的 Graph 输出中提取非流式回答，避免提前发送未校验内容。"""
+    if str(event.get("event", "")) != "on_chain_end":
+        return ""
+    data = event.get("data") or {}
+    output = data.get("output") if isinstance(data, Mapping) else None
+    if not isinstance(output, Mapping):
+        return ""
+    if output.get("terminal_status") != "completed" or output.get("answer_valid") is not True:
+        return ""
+    return _text(output.get("answer", "")).strip()
+
+
 async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Optional[Mapping[str, Any]] = None, total_timeout: float = 60.0) -> AsyncIterator[AgentEvent]:
     """消费 LangGraph v2 事件流，并在总超时或取消时停止当前运行。"""
     if graph is None or total_timeout <= 0:
@@ -74,6 +87,7 @@ async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Opti
     async def consume() -> AsyncIterator[AgentEvent]:
         """读取底层事件并转换为应用事件。"""
         graph_input: Any = dict(state)
+        answer_streamed = False
         resume_value = graph_input.pop("__resume__", None)
         if resume_value is not None:
             try:
@@ -84,7 +98,14 @@ async def stream_agent_events(graph: Any, state: Mapping[str, Any], config: Opti
         async for raw in graph.astream_events(graph_input, config=dict(config or {}), version="v2"):
             mapped = _map_event(raw)
             if mapped is not None:
+                if mapped.type == "model_token":
+                    answer_streamed = True
                 yield mapped
+            # 自定义模型通过 ainvoke 一次性返回答案时不会产生 on_chat_model_stream，需从已校验终态补发。
+            final_answer = _validated_final_answer(raw)
+            if final_answer and not answer_streamed:
+                answer_streamed = True
+                yield AgentEvent("model_token", final_answer, str(raw.get("name", "")), raw.get("data") or {})
 
     iterator = consume()
     task = asyncio.create_task(iterator.__anext__())

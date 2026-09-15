@@ -13,17 +13,26 @@ import (
 	agentv1 "github.com/lijunsheng/familyos/proto/gen/agent/v1"
 	knowledgev1 "github.com/lijunsheng/familyos/proto/gen/knowledge/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
+
+const agentInternalTokenHeader = "x-familyos-internal-token"
 
 // AgentChatHandler 校验知识库权限并将 Agent gRPC 流转换为 SSE。
 type AgentChatHandler struct {
-	agent     agentv1.AgentChatServiceClient
-	knowledge knowledgev1.KnowledgeServiceClient
+	agent      agentv1.AgentChatServiceClient
+	knowledge  knowledgev1.KnowledgeServiceClient
+	agentToken string
 }
 
 // NewAgentChatHandler 创建 Agent SSE 处理器。
-func NewAgentChatHandler(agentConn, logicConn *grpc.ClientConn) *AgentChatHandler {
-	return &AgentChatHandler{agent: agentv1.NewAgentChatServiceClient(agentConn), knowledge: knowledgev1.NewKnowledgeServiceClient(logicConn)}
+func NewAgentChatHandler(agentConn, logicConn *grpc.ClientConn, agentToken string) *AgentChatHandler {
+	return &AgentChatHandler{agent: agentv1.NewAgentChatServiceClient(agentConn), knowledge: knowledgev1.NewKnowledgeServiceClient(logicConn), agentToken: agentToken}
+}
+
+// agentContext 将内部认证令牌附加到 Agent gRPC 请求，且不影响 Logic 服务的调用上下文。
+func (h *AgentChatHandler) agentContext(ctx context.Context) context.Context {
+	return metadata.AppendToOutgoingContext(ctx, agentInternalTokenHeader, h.agentToken)
 }
 
 // CreateConversation 校验个人知识库归属后创建 Agent 多轮会话。
@@ -47,7 +56,7 @@ func (h *AgentChatHandler) CreateConversation(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"code": 4003, "message": "无权访问该知识库"})
 		return
 	}
-	response, err := h.agent.CreateConversation(ctx, &agentv1.CreateConversationRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID})
+	response, err := h.agent.CreateConversation(h.agentContext(ctx), &agentv1.CreateConversationRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID})
 	if err != nil {
 		log.Printf("创建Agent会话失败: user_id=%d err=%v", userID, err)
 		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "Agent服务暂不可用"})
@@ -84,7 +93,7 @@ func (h *AgentChatHandler) ChatStream(c *gin.Context) {
 	requestID := uuid.NewString()
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 90*time.Second)
 	defer cancel()
-	stream, err := h.agent.ChatStream(ctx, &agentv1.ChatStreamRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID, ConversationId: body.ConversationID, Message: body.Message, RequestId: requestID})
+	stream, err := h.agent.ChatStream(h.agentContext(ctx), &agentv1.ChatStreamRequest{UserId: userID, KnowledgeBaseId: body.KnowledgeBaseID, ConversationId: body.ConversationID, Message: body.Message, RequestId: requestID})
 	if err != nil {
 		log.Printf("Agent SSE 连接 gRPC 失败: request_id=%q err=%v", requestID, err)
 		c.JSON(http.StatusServiceUnavailable, gin.H{"code": 1999, "message": "Agent 服务暂不可用"})

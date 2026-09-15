@@ -75,7 +75,7 @@ func main() {
 	dishHandler := handler.NewDishHandler(conn)
 	uploadHandler := handler.NewUploadHandler(ossClient)
 	knowledgeHandler := handler.NewKnowledgeHandler(conn)
-	agentChatHandler := handler.NewAgentChatHandler(agentConn, conn)
+	agentChatHandler := handler.NewAgentChatHandler(agentConn, conn, cfg.Agent.Token)
 	familyHandler := handler.NewFamilyHandler(conn)
 
 	api := r.Group("/api/v1")
