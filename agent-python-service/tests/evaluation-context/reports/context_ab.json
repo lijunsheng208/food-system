@@ -1,0 +1,143 @@
+{
+  "generated_at": "2026-10-14T03:07:02.665034+00:00",
+  "model": "qwen3.7-plus",
+  "history_turns": 20,
+  "recent_window_turns": 6,
+  "summary_chars": 401,
+  "summary_cursor": {
+    "created_at": null,
+    "message_id": "da5"
+  },
+  "methods": {
+    "fixed_window": {
+      "hits": 0,
+      "total": 8,
+      "recall": 0.0,
+      "input_tokens": 304,
+      "output_tokens": 692,
+      "estimated_input_tokens": 199
+    },
+    "rolling_summary": {
+      "hits": 8,
+      "total": 8,
+      "recall": 1.0,
+      "input_tokens": 964,
+      "output_tokens": 2550,
+      "answer_input_tokens": 556,
+      "answer_output_tokens": 1501,
+      "compression_input_tokens": 408,
+      "compression_output_tokens": 1049,
+      "estimated_input_tokens": 479
+    }
+  },
+  "cases": [
+    {
+      "id": "allergy_peanut",
+      "expected_terms": [
+        [
+          "花生"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "花生及花生油",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "avoid_cilantro",
+      "expected_terms": [
+        [
+          "香菜"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "香菜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "serving_count",
+      "expected_terms": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人份",
+          "人"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "4人",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "spice_preference",
+      "expected_terms": [
+        [
+          "微辣"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "只能吃微辣，优先推荐微辣或不辣的菜品",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "cuisine_preference",
+      "expected_terms": [
+        [
+          "粤菜"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "粤菜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "dietary_constraint",
+      "expected_terms": [
+        [
+          "素食"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "近期遵循素食，不推荐任何肉类和海鲜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "correction_latest",
+      "expected_terms": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "4人",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    },
+    {
+      "id": "pending_item",
+      "expected_terms": [
+        [
+          "周五"
+        ],
+        [
+          "晚餐"
+        ]
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "周五晚餐",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true
+    }
+  ]
+}

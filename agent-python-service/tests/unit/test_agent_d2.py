@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import patch
 
 from familyos_agent.agent import stream_agent_events
+from familyos_agent.agent.context import prepare_conversation_context
 from familyos_agent.transport.grpc.chat import ChatStreamService
 
 
@@ -114,6 +115,121 @@ class ResumeRecordingGraph:
         }
 
 
+class ContextRecordingGraph:
+    """记录普通新轮次收到的压缩上下文。"""
+
+    def __init__(self):
+        """初始化 Graph 输入记录。"""
+        self.received_state = None
+
+    async def astream_events(self, state, config, version):
+        """保留请求状态并返回有效完成态。"""
+        self.received_state = state
+        yield {"event": "on_chain_end", "name": "LangGraph", "data": {"output": {"answer": "回答", "answer_valid": True, "terminal_status": "completed"}}}
+
+
+class ContextRecordingConversations(RecordingConversations):
+    """提供测试历史并记录摘要游标写入和历史读取次数。"""
+
+    def __init__(self):
+        """初始化历史、摘要和读取记录。"""
+        super().__init__()
+        self.context_reads = 0
+        self.saved_summaries = []
+
+    def get_chat_context(self, conversation_id, request_id):
+        """返回七轮已完成历史，触发一次旧消息压缩。"""
+        self.context_reads += 1
+        messages = []
+        for index in range(7):
+            messages.extend([
+                {"role": "user", "content": "用户%d" % index, "created_at": index, "message_id": "u%d" % index},
+                {"role": "assistant", "content": "助手%d" % index, "created_at": index, "message_id": "a%d" % index},
+            ])
+        return {"summary": "", "messages": messages}
+
+    def save_chat_summary(self, conversation_id, summary, through_created_at, through_message_id):
+        """记录成功摘要及其覆盖位置。"""
+        self.saved_summaries.append((conversation_id, summary, through_created_at, through_message_id))
+
+
+class ContextSummaryModel:
+    """返回固定摘要，避免测试依赖外部模型。"""
+
+    async def ainvoke(self, messages):
+        """返回摘要模型响应。"""
+        return type("Response", (), {"content": "长期记忆"})()
+
+
+class MemoryRecordingConversations(RecordingConversations):
+    """模拟跨会话长期记忆仓储并记录本轮新增事实。"""
+
+    def __init__(self):
+        """初始化已有事实和保存调用记录。"""
+        super().__init__()
+        self.saved_memories = []
+
+    def list_long_term_memories(self, user_id):
+        """返回当前用户已有的家庭人数事实。"""
+        return [{"category": "household", "memory_key": "family_size", "memory_value": "4人", "confidence": 0.9}]
+
+    def upsert_long_term_memory(self, user_id, category, key, value, confidence, conversation_id, request_id):
+        """记录模型提取结果及其来源。"""
+        self.saved_memories.append((user_id, category, key, value, confidence, conversation_id, request_id))
+
+
+class MemoryExtractionModel:
+    """模拟现有 OpenAI-compatible 模型返回结构化长期事实。"""
+
+    async def ainvoke(self, messages):
+        """返回用户常用设备这一稳定事实。"""
+        return type("Response", (), {"content": '[{"category":"equipment","key":"available_appliances","value":["oven"],"confidence":0.9}]'})()
+
+
+class FailingMemoryConversations(MemoryRecordingConversations):
+    """模拟长期记忆读写均不可用的降级场景。"""
+
+    def list_long_term_memories(self, user_id):
+        """模拟读取长期记忆失败。"""
+        raise RuntimeError("memory read failed")
+
+    def upsert_long_term_memory(self, user_id, category, key, value, confidence, conversation_id, request_id):
+        """模拟保存长期记忆失败。"""
+        raise RuntimeError("memory write failed")
+
+
+class SemanticMemoryStore:
+    """记录语义记忆召回和写入调用。"""
+
+    def __init__(self):
+        """初始化调用记录。"""
+        self.recalled = []
+        self.remembered = []
+
+    def recall(self, user_id, query):
+        """返回与本轮问题相关的历史操作反馈。"""
+        self.recalled.append((user_id, query))
+        return [{"memory_id": "m1", "memory_type": "feedback", "content": "用户希望火候说明更详细", "importance": 0.8, "score": 0.9}]
+
+    def remember(self, user_id, memory_type, content, importance, conversation_id, request_id):
+        """记录回答成功后保存的开放式经历。"""
+        self.remembered.append((user_id, memory_type, content, importance, conversation_id, request_id))
+        return True
+
+
+class DualMemoryModel:
+    """按系统提示分别返回结构化记忆或语义记忆候选。"""
+
+    async def ainvoke(self, messages):
+        """识别提取任务类型并返回合法 JSON。"""
+        system = messages[0]["content"]
+        if "开放式长期记忆" in system:
+            content = '[{"memory_type":"experience","content":"用户曾在炒糖色时失败。","importance":0.9}]'
+        else:
+            content = "[]"
+        return type("Response", (), {"content": content})()
+
+
 class ClosableGraph:
     """记录异步事件生成器是否在客户端中断后及时关闭。"""
 
@@ -221,10 +337,11 @@ class AgentD2Test(unittest.TestCase):
     def test_resumes_checkpoint_with_same_conversation_id(self):
         """验证后续消息通过同一 conversation_id 恢复等待态 Checkpoint。"""
         graph = ResumeRecordingGraph()
+        conversations = ContextRecordingConversations()
 
         async def run():
             """发送用户补充内容并消费恢复后的回答。"""
-            service = ChatStreamService(graph, "token")
+            service = ChatStreamService(graph, "token", conversations=conversations, context_model=ContextSummaryModel())
             return [event async for event in service.stream({"request_id": "r2", "conversation_id": "c1", "message": "三人份"})]
 
         events = asyncio.run(run())
@@ -232,6 +349,85 @@ class AgentD2Test(unittest.TestCase):
         self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
         self.assertEqual(getattr(graph.received_state, "resume", None), "三人份")
         self.assertEqual(graph.received_config["configurable"]["thread_id"], "c1")
+        self.assertEqual(conversations.context_reads, 0)
+
+    # 普通新轮次应将滚动摘要和近期原文传给 Graph，并保存本次摘要覆盖游标。
+    def test_prepares_and_persists_compressed_context_for_new_turn(self):
+        graph = ContextRecordingGraph()
+        conversations = ContextRecordingConversations()
+
+        async def run():
+            """消费普通新轮次的 Chat 事件流。"""
+            service = ChatStreamService(graph, "token", conversations=conversations, context_model=ContextSummaryModel())
+            return [event async for event in service.stream({"request_id": "r3", "conversation_id": "c1", "message": "新问题"})]
+
+        events = asyncio.run(run())
+
+        self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
+        self.assertEqual(graph.received_state["conversation_summary"], "长期记忆")
+        self.assertEqual(len(graph.received_state["messages"]), 12)
+        self.assertEqual(conversations.saved_summaries, [("c1", "长期记忆", 0, "a0")])
+
+    def test_loads_and_extracts_long_term_memories_with_existing_model(self):
+        """验证已有长期事实进入 Graph，成功回答后再从用户原话提取新事实。"""
+        graph = ContextRecordingGraph()
+        conversations = MemoryRecordingConversations()
+
+        async def run():
+            """使用现有模型实例执行长期记忆读取和提取。"""
+            service = ChatStreamService(graph, "token", conversations=conversations, context_model=MemoryExtractionModel())
+            return [event async for event in service.stream({
+                "request_id": "r-memory", "conversation_id": "c1", "user_id": 7,
+                "message": "我家里有烤箱", "original_query": "我家里有烤箱",
+            })]
+
+        events = asyncio.run(run())
+
+        self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
+        self.assertEqual(graph.received_state["long_term_memories"][0]["memory_value"], "4人")
+        self.assertEqual(conversations.saved_memories, [(7, "equipment", "available_appliances", '["oven"]', 0.9, "c1", "r-memory")])
+
+    def test_long_term_memory_failure_does_not_fail_answer(self):
+        """验证长期记忆读写异常只记录降级，不改变问答成功终态。"""
+        graph = ContextRecordingGraph()
+        conversations = FailingMemoryConversations()
+
+        async def run():
+            """消费长期记忆异常下的正常问答事件。"""
+            service = ChatStreamService(graph, "token", conversations=conversations, context_model=MemoryExtractionModel())
+            return [event async for event in service.stream({
+                "request_id": "r-fallback", "conversation_id": "c1", "user_id": 7,
+                "message": "我家里有烤箱", "original_query": "我家里有烤箱",
+            })]
+
+        with self.assertLogs("familyos_agent.transport.grpc.chat", level="ERROR"):
+            events = asyncio.run(run())
+
+        self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
+
+    def test_recalls_and_saves_user_scoped_semantic_memory(self):
+        """验证开放式经历在回答前按用户召回，并在成功回答后提取保存。"""
+        graph = ContextRecordingGraph()
+        conversations = RecordingConversations()
+        semantic_memory = SemanticMemoryStore()
+
+        async def run():
+            """执行包含语义记忆增强的一轮问答。"""
+            service = ChatStreamService(
+                graph, "token", conversations=conversations,
+                context_model=DualMemoryModel(), semantic_memory=semantic_memory,
+            )
+            return [event async for event in service.stream({
+                "request_id": "r-semantic", "conversation_id": "c1", "user_id": 7,
+                "message": "上次炒糖色失败了", "original_query": "上次炒糖色失败了",
+            })]
+
+        events = asyncio.run(run())
+
+        self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
+        self.assertEqual(semantic_memory.recalled, [(7, "上次炒糖色失败了")])
+        self.assertEqual(graph.received_state["semantic_memories"][0]["memory_id"], "m1")
+        self.assertEqual(semantic_memory.remembered[0][1:3], ("experience", "用户曾在炒糖色时失败。"))
 
     def test_closes_graph_generator_when_event_stream_stops_early(self):
         """验证外层停止消费时会关闭底层 LangGraph 异步生成器。"""

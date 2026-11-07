@@ -1,0 +1,1135 @@
+{
+  "generated_at": "2026-10-14T05:14:37.793248+00:00",
+  "model": "qwen3.7-plus",
+  "history_turns": 38,
+  "recent_window_turns": 6,
+  "source_context_tokens": 429,
+  "source_information_units": 107,
+  "full_history_information_density": 249.41724941724942,
+  "context_compression_rate": 0.289044289044289,
+  "density_gain_over_full_history": 0.40655737704918016,
+  "additional_tokens_over_window": 206,
+  "information_gain_over_window": 60,
+  "marginal_information_density": 291.2621359223301,
+  "summary_chars": 617,
+  "summary_text": "**家庭与人员**\n- 家庭人数：4人（已更正）。本周日有客按6人份做饭，平时按4人份。\n- 孩子：晚9:30睡觉，9点后家里需保持安静；对虾过敏（起疹子），菜单禁虾。\n- 奶奶：每天晚饭后需吃降压药，需提醒确认是否按时服药。\n- 爸爸：下周二下午3点去社区医院复诊，需提前提醒。\n- 外婆：周一、周四来家里帮忙照看孩子。\n\n**饮食与宠物**\n- 忌口与偏好：孩子对虾过敏；近期控制脂肪，牛奶改推荐低脂；本周遵医嘱清淡饮食，暂禁油炸食品。\n- 烹饪约束：工作日推荐30分钟内能做完的晚餐。\n- 宠物：猫叫团团，只能吃鸡肉口味猫粮。\n\n**日程与计划**\n- 每周三下午5点去学校接孩子。\n- 办证时间由周四更正为周五上午，按新时间记录。\n- 计划11月去杭州旅行，安排两天一夜。\n\n**生活与约束**\n- 地址：3个月前由城西搬至城北，找附近服务按城北定位。\n- 财务：每周家庭买菜预算控制在800元以内。\n- 交互偏好：做计划时用简短清单，不写长解释。\n- 环境：卧室晚上用暖色小夜灯，不开太亮的灯。\n- 健康：膝盖不舒服，运动时不安排跑步或跳跃动作。\n\n**待办与日常琐事**\n- 待办事项：周末记得下单买净水器滤芯；清洗厨房炒锅；更换客厅灯泡；整理储物柜；给家里植物浇水。\n- 日常记录：昨天买了西红柿和鸡蛋；今天午餐吃米饭、收到快递；明天上午有普通日程；下周可能去超市采购；周末打算在家吃饭；最近在尝试新早餐搭配、看历史书。",
+  "summary_cursor": {
+    "created_at": null,
+    "message_id": "da11"
+  },
+  "categories": {
+    "饮食与健康": {
+      "total": 19,
+      "fixed_information_retained": 16,
+      "compressed_information_retained": 19,
+      "fixed_information_recall": 0.8421052631578947,
+      "compressed_information_recall": 1.0
+    },
+    "家庭信息": {
+      "total": 16,
+      "fixed_information_retained": 8,
+      "compressed_information_retained": 16,
+      "fixed_information_recall": 0.5,
+      "compressed_information_recall": 1.0
+    },
+    "饮食偏好": {
+      "total": 2,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 2,
+      "fixed_information_recall": 1.0,
+      "compressed_information_recall": 1.0
+    },
+    "更正与冲突": {
+      "total": 10,
+      "fixed_information_retained": 6,
+      "compressed_information_retained": 10,
+      "fixed_information_recall": 0.6,
+      "compressed_information_recall": 1.0
+    },
+    "日程与待办": {
+      "total": 29,
+      "fixed_information_retained": 9,
+      "compressed_information_retained": 29,
+      "fixed_information_recall": 0.3103448275862069,
+      "compressed_information_recall": 1.0
+    },
+    "作息与习惯": {
+      "total": 6,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 6,
+      "fixed_information_recall": 0.3333333333333333,
+      "compressed_information_recall": 1.0
+    },
+    "生活偏好": {
+      "total": 9,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 9,
+      "fixed_information_recall": 0.1111111111111111,
+      "compressed_information_recall": 1.0
+    },
+    "健康与约束": {
+      "total": 4,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_information_recall": 0.0,
+      "compressed_information_recall": 1.0
+    },
+    "约束与计划": {
+      "total": 3,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_information_recall": 0.0,
+      "compressed_information_recall": 1.0
+    },
+    "时效性信息": {
+      "total": 9,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 9,
+      "fixed_information_recall": 0.3333333333333333,
+      "compressed_information_recall": 1.0
+    }
+  },
+  "methods": {
+    "fixed_window": {
+      "entities_retained": 24,
+      "entities_total": 55,
+      "entity_recall": 0.43636363636363634,
+      "details_retained": 23,
+      "details_total": 52,
+      "detail_recall": 0.4423076923076923,
+      "information_retained": 47,
+      "information_total": 107,
+      "information_recall": 0.4392523364485981,
+      "latest_values_retained": 2,
+      "corrections_total": 4,
+      "latest_value_recall": 0.5,
+      "stale_values_retained": 0,
+      "facts_complete": 12,
+      "facts_total": 31,
+      "fact_complete_rate": 0.3870967741935484,
+      "fact_complete_ci95": [
+        0.23732875351271562,
+        0.5617619885886803
+      ],
+      "corrections_safe": 2,
+      "correction_safety_rate": 0.5,
+      "correction_safety_ci95": [
+        0.15003570882017148,
+        0.8499642911798285
+      ],
+      "context_tokens": 99,
+      "distractions_retained": 0,
+      "distractions_total": 12,
+      "information_density": 474.74747474747477
+    },
+    "rolling_summary": {
+      "entities_retained": 55,
+      "entities_total": 55,
+      "entity_recall": 1.0,
+      "details_retained": 52,
+      "details_total": 52,
+      "detail_recall": 1.0,
+      "information_retained": 107,
+      "information_total": 107,
+      "information_recall": 1.0,
+      "latest_values_retained": 4,
+      "corrections_total": 4,
+      "latest_value_recall": 1.0,
+      "stale_values_retained": 2,
+      "facts_complete": 31,
+      "facts_total": 31,
+      "fact_complete_rate": 1.0,
+      "fact_complete_ci95": [
+        0.889740999265246,
+        0.9999999999999999
+      ],
+      "corrections_safe": 2,
+      "correction_safety_rate": 0.5,
+      "correction_safety_ci95": [
+        0.15003570882017148,
+        0.8499642911798285
+      ],
+      "context_tokens": 305,
+      "distractions_retained": 3,
+      "distractions_total": 12,
+      "information_density": 350.8196721311475,
+      "compression_input_tokens": 837,
+      "compression_output_tokens": 2067,
+      "compression_latency_seconds": 36.15691954107024
+    }
+  },
+  "cases": [
+    {
+      "id": "allergy_peanut",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "花生"
+        ],
+        [
+          "花生油"
+        ]
+      ],
+      "details": [
+        [
+          "花生"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 1,
+      "information_total": 3,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "avoid_cilantro",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "香菜"
+        ]
+      ],
+      "details": [
+        [
+          "香菜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "serving_count",
+      "category": "家庭信息",
+      "entities": [
+        [
+          "家"
+        ],
+        [
+          "食谱"
+        ]
+      ],
+      "details": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "spice_preference",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "菜"
+        ]
+      ],
+      "details": [
+        [
+          "微辣"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "cuisine_preference",
+      "category": "饮食偏好",
+      "entities": [
+        [
+          "粤菜"
+        ]
+      ],
+      "details": [
+        [
+          "粤菜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "dietary_constraint",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "素食"
+        ],
+        [
+          "肉类"
+        ],
+        [
+          "海鲜"
+        ]
+      ],
+      "details": [
+        [
+          "素食"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 3,
+      "details_total": 1,
+      "information_total": 4,
+      "fixed_entities_retained": 3,
+      "compressed_entities_retained": 3,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "correction_latest",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "家"
+        ]
+      ],
+      "details": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人"
+        ]
+      ],
+      "forbidden_terms": [
+        "三个人",
+        "3个人"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "pending_item",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "菜单"
+        ],
+        [
+          "周五晚餐"
+        ]
+      ],
+      "details": [
+        [
+          "周五"
+        ],
+        [
+          "晚餐"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "child_age",
+      "category": "家庭信息",
+      "entities": [
+        [
+          "女儿"
+        ],
+        [
+          "小学"
+        ]
+      ],
+      "details": [
+        [
+          "八",
+          "8"
+        ],
+        [
+          "二年级"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "partner_lactose",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "伴侣"
+        ],
+        [
+          "牛奶"
+        ]
+      ],
+      "details": [
+        [
+          "无乳糖"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 1,
+      "information_total": 3,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "breakfast_time",
+      "category": "作息与习惯",
+      "entities": [
+        [
+          "早餐"
+        ]
+      ],
+      "details": [
+        [
+          "七点半",
+          "7点半",
+          "7:30"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "weekly_grocery",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "超市"
+        ],
+        [
+          "食材"
+        ]
+      ],
+      "details": [
+        [
+          "周六"
+        ],
+        [
+          "上午"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "medical_appointment",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "爸爸"
+        ],
+        [
+          "社区医院"
+        ]
+      ],
+      "details": [
+        [
+          "周二"
+        ],
+        [
+          "下午三点",
+          "3点",
+          "15:00"
+        ],
+        [
+          "复诊"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "school_pickup",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "学校"
+        ],
+        [
+          "孩子"
+        ]
+      ],
+      "details": [
+        [
+          "五点",
+          "5点",
+          "17:00"
+        ],
+        [
+          "接孩子"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "home_preference",
+      "category": "生活偏好",
+      "entities": [
+        [
+          "卧室"
+        ],
+        [
+          "灯"
+        ]
+      ],
+      "details": [
+        [
+          "暖色"
+        ],
+        [
+          "小夜灯"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "pet_food",
+      "category": "家庭信息",
+      "entities": [
+        [
+          "猫"
+        ],
+        [
+          "猫粮"
+        ]
+      ],
+      "details": [
+        [
+          "团团"
+        ],
+        [
+          "鸡肉"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "workout_limit",
+      "category": "健康与约束",
+      "entities": [
+        [
+          "膝盖"
+        ],
+        [
+          "运动"
+        ]
+      ],
+      "details": [
+        [
+          "跑步"
+        ],
+        [
+          "跳跃"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "budget_limit",
+      "category": "约束与计划",
+      "entities": [
+        [
+          "家庭买菜"
+        ],
+        [
+          "预算"
+        ]
+      ],
+      "details": [
+        [
+          "八百",
+          "800"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 1,
+      "information_total": 3,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "travel_plan",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "杭州"
+        ],
+        [
+          "旅行"
+        ]
+      ],
+      "details": [
+        [
+          "杭州"
+        ],
+        [
+          "两天一夜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "communication_style",
+      "category": "生活偏好",
+      "entities": [
+        [
+          "计划"
+        ],
+        [
+          "清单"
+        ]
+      ],
+      "details": [
+        [
+          "简短清单"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 1,
+      "information_total": 3,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "food_correction",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "牛奶"
+        ]
+      ],
+      "details": [
+        [
+          "低脂"
+        ]
+      ],
+      "forbidden_terms": [
+        "全脂"
+      ],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "schedule_correction",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "办证"
+        ]
+      ],
+      "details": [
+        [
+          "周五"
+        ],
+        [
+          "上午"
+        ]
+      ],
+      "forbidden_terms": [
+        "周四"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 1
+    },
+    {
+      "id": "temporary_diet",
+      "category": "时效性信息",
+      "entities": [
+        [
+          "饮食"
+        ],
+        [
+          "油炸食品"
+        ]
+      ],
+      "details": [
+        [
+          "清淡"
+        ],
+        [
+          "油炸"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "unresolved_purchase",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "净水器滤芯"
+        ]
+      ],
+      "details": [
+        [
+          "滤芯"
+        ],
+        [
+          "买",
+          "下单"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "allergy_severity",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "孩子"
+        ],
+        [
+          "虾"
+        ],
+        [
+          "菜单"
+        ]
+      ],
+      "details": [
+        [
+          "虾"
+        ],
+        [
+          "过敏"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 3,
+      "details_total": 2,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 3,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "quiet_hours",
+      "category": "作息与习惯",
+      "entities": [
+        [
+          "孩子"
+        ],
+        [
+          "睡觉"
+        ]
+      ],
+      "details": [
+        [
+          "九点半",
+          "9点半",
+          "21:30",
+          "9:30"
+        ],
+        [
+          "九点以后",
+          "9点以后",
+          "21点以后",
+          "9点后"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "caregiver_role",
+      "category": "家庭信息",
+      "entities": [
+        [
+          "外婆"
+        ],
+        [
+          "孩子"
+        ]
+      ],
+      "details": [
+        [
+          "周一"
+        ],
+        [
+          "周四"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "meal_preparation",
+      "category": "生活偏好",
+      "entities": [
+        [
+          "晚餐"
+        ]
+      ],
+      "details": [
+        [
+          "三十分钟",
+          "30分钟"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "medicine_reminder",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "奶奶"
+        ],
+        [
+          "降压药"
+        ]
+      ],
+      "details": [
+        [
+          "晚饭后"
+        ],
+        [
+          "降压药"
+        ],
+        [
+          "服药",
+          "吃药",
+          "吃降压药"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    },
+    {
+      "id": "old_address_correction",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "附近服务"
+        ]
+      ],
+      "details": [
+        [
+          "城北"
+        ]
+      ],
+      "forbidden_terms": [
+        "城西"
+      ],
+      "entities_total": 1,
+      "details_total": 1,
+      "information_total": 2,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 2,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 1
+    },
+    {
+      "id": "one_time_event",
+      "category": "时效性信息",
+      "entities": [
+        [
+          "周日"
+        ],
+        [
+          "客"
+        ],
+        [
+          "做饭"
+        ]
+      ],
+      "details": [
+        [
+          "六",
+          "6"
+        ],
+        [
+          "四",
+          "4"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 3,
+      "details_total": 2,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 3,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0
+    }
+  ]
+}

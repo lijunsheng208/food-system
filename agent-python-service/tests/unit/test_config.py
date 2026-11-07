@@ -37,6 +37,8 @@ class ConfigTest(unittest.TestCase):
         config = self._load(VALID_CONFIG)
         self.assertEqual(config.rag.milvus.collection, "familyos_document_chunks_v1")
         self.assertEqual(config.rag.milvus.dense_metric_type, "COSINE")
+        self.assertTrue(config.semantic_memory.enabled)
+        self.assertEqual(config.semantic_memory.collection, "familyos_user_semantic_memories_v1")
 
     # 空 URI 属于外部系统边界错误，服务不得带缺失配置启动。
     def test_rejects_missing_milvus_uri(self) -> None:
@@ -60,6 +62,15 @@ class ConfigTest(unittest.TestCase):
         config = self._load(content)
         self.assertEqual(config.rag.reranker.provider, "dashscope")
         self.assertEqual(config.rag.reranker.model_name, "gte-rerank-v2")
+
+    def test_validates_semantic_memory_threshold_order(self) -> None:
+        """语义去重阈值必须不低于召回阈值，避免相关记忆被错误当作重复项。"""
+        content = VALID_CONFIG.replace(
+            "rag:\n", "semantic_memory: {minimum_score: 0.9, duplicate_score: 0.8}\nrag:\n",
+        )
+
+        with self.assertRaisesRegex(ValueError, "语义记忆"):
+            self._load(content)
 
 
 if __name__ == "__main__":

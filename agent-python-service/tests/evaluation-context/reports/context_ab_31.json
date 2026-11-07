@@ -1,0 +1,708 @@
+{
+  "generated_at": "2026-10-14T03:30:53.608785+00:00",
+  "model": "qwen3.7-plus",
+  "history_turns": 43,
+  "recent_window_turns": 6,
+  "summary_chars": 721,
+  "summary_cursor": {
+    "created_at": null,
+    "message_id": "da5"
+  },
+  "categories": {
+    "饮食与健康": {
+      "total": 6,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 6,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "家庭信息": {
+      "total": 4,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 4,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "饮食偏好": {
+      "total": 1,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 1,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "更正与冲突": {
+      "total": 4,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 4,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "日程与待办": {
+      "total": 7,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 7,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "作息与习惯": {
+      "total": 2,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 2,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "生活偏好": {
+      "total": 3,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 3,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "健康与约束": {
+      "total": 1,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 1,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "约束与计划": {
+      "total": 1,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 1,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    },
+    "时效性信息": {
+      "total": 2,
+      "fixed_window_hits": 0,
+      "rolling_summary_hits": 2,
+      "fixed_window_recall": 0.0,
+      "rolling_summary_recall": 1.0
+    }
+  },
+  "methods": {
+    "fixed_window": {
+      "hits": 0,
+      "total": 31,
+      "recall": 0.0,
+      "stale_value_hits": 0,
+      "stale_value_total": 4,
+      "stale_value_rate": 0.0,
+      "input_tokens": 778,
+      "output_tokens": 1338,
+      "latency_seconds": 23.37946595903486,
+      "estimated_input_tokens": 636
+    },
+    "rolling_summary": {
+      "hits": 31,
+      "total": 31,
+      "recall": 1.0,
+      "stale_value_hits": 0,
+      "stale_value_total": 4,
+      "stale_value_rate": 0.0,
+      "input_tokens": 2334,
+      "output_tokens": 6101,
+      "answer_input_tokens": 1282,
+      "answer_output_tokens": 3462,
+      "compression_input_tokens": 1052,
+      "compression_output_tokens": 2639,
+      "latency_seconds": 59.76037216698751,
+      "compression_latency_seconds": 45.81441437499598,
+      "estimated_input_tokens": 1317,
+      "source_chars": 1232,
+      "summary_compression_ratio": 0.5852272727272727
+    }
+  },
+  "cases": [
+    {
+      "id": "allergy_peanut",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "花生"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "花生及花生油",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "avoid_cilantro",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "香菜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "香菜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "serving_count",
+      "category": "家庭信息",
+      "expected_terms": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "4人",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "spice_preference",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "微辣"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "微辣或不辣",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "cuisine_preference",
+      "category": "饮食偏好",
+      "expected_terms": [
+        [
+          "粤菜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "粤菜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "dietary_constraint",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "素食"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "遵循素食（禁肉和海鲜）",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "correction_latest",
+      "category": "更正与冲突",
+      "expected_terms": [
+        [
+          "四",
+          "4"
+        ],
+        [
+          "人"
+        ]
+      ],
+      "forbidden_terms": [
+        "三个人",
+        "3个人"
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "4人",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "pending_item",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "周五"
+        ],
+        [
+          "晚餐"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "周五晚餐菜单",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "child_age",
+      "category": "家庭信息",
+      "expected_terms": [
+        [
+          "八",
+          "8"
+        ],
+        [
+          "二年级"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "8岁，小学二年级",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "partner_lactose",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "无乳糖"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "伴侣乳糖不耐受，需无乳糖牛奶",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "breakfast_time",
+      "category": "作息与习惯",
+      "expected_terms": [
+        [
+          "七点半",
+          "7点半",
+          "7:30"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "早上7:30",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "weekly_grocery",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "周六"
+        ],
+        [
+          "上午"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "周六上午",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "medical_appointment",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "周二"
+        ],
+        [
+          "下午三点",
+          "3点",
+          "15:00"
+        ],
+        [
+          "复诊"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "下周二下午3点去社区医院复诊",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "school_pickup",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "五点",
+          "5点",
+          "17:00"
+        ],
+        [
+          "接孩子"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "下午5点去学校接孩子",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "home_preference",
+      "category": "生活偏好",
+      "expected_terms": [
+        [
+          "暖色"
+        ],
+        [
+          "小夜灯"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "不开太亮的灯，用暖色小夜灯",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "pet_food",
+      "category": "家庭信息",
+      "expected_terms": [
+        [
+          "团团"
+        ],
+        [
+          "鸡肉"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "猫叫团团，鸡肉口味猫粮",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "workout_limit",
+      "category": "健康与约束",
+      "expected_terms": [
+        [
+          "跑步"
+        ],
+        [
+          "跳跃"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "跑步或跳跃动作",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "budget_limit",
+      "category": "约束与计划",
+      "expected_terms": [
+        [
+          "八百",
+          "800"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "800元以内",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "travel_plan",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "杭州"
+        ],
+        [
+          "两天一夜"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "杭州，两天一夜",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "communication_style",
+      "category": "生活偏好",
+      "expected_terms": [
+        [
+          "简短清单"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "简短清单，不写长解释",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "food_correction",
+      "category": "更正与冲突",
+      "expected_terms": [
+        [
+          "低脂"
+        ]
+      ],
+      "forbidden_terms": [
+        "全脂"
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "低脂牛奶",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "schedule_correction",
+      "category": "更正与冲突",
+      "expected_terms": [
+        [
+          "周五"
+        ],
+        [
+          "上午"
+        ]
+      ],
+      "forbidden_terms": [
+        "周四"
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "周五上午",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "temporary_diet",
+      "category": "时效性信息",
+      "expected_terms": [
+        [
+          "清淡"
+        ],
+        [
+          "油炸"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "遵医嘱清淡饮食，禁油炸食品",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "unresolved_purchase",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "滤芯"
+        ],
+        [
+          "买",
+          "下单"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "下单买净水器滤芯（及更换客厅灯泡、整理储物柜、给植物浇水）",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "allergy_severity",
+      "category": "饮食与健康",
+      "expected_terms": [
+        [
+          "虾"
+        ],
+        [
+          "过敏"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "花生及花生油（严重花生过敏），虾（孩子虾过敏）",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "quiet_hours",
+      "category": "作息与习惯",
+      "expected_terms": [
+        [
+          "九点半",
+          "9点半",
+          "21:30",
+          "9:30"
+        ],
+        [
+          "九点以后",
+          "9点以后",
+          "21点以后",
+          "9点后"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "孩子9:30睡觉，晚上9点后保持安静",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "caregiver_role",
+      "category": "家庭信息",
+      "expected_terms": [
+        [
+          "周一"
+        ],
+        [
+          "周四"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "每周一、周四",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "meal_preparation",
+      "category": "生活偏好",
+      "expected_terms": [
+        [
+          "三十分钟",
+          "30分钟"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "30分钟内能做完",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "medicine_reminder",
+      "category": "日程与待办",
+      "expected_terms": [
+        [
+          "晚饭后"
+        ],
+        [
+          "降压药"
+        ],
+        [
+          "服药",
+          "吃药",
+          "吃降压药"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "每天晚饭后提醒确认奶奶是否按时吃降压药",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "old_address_correction",
+      "category": "更正与冲突",
+      "expected_terms": [
+        [
+          "城北"
+        ]
+      ],
+      "forbidden_terms": [
+        "城西"
+      ],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "城北",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    },
+    {
+      "id": "one_time_event",
+      "category": "时效性信息",
+      "expected_terms": [
+        [
+          "六",
+          "6"
+        ],
+        [
+          "四",
+          "4"
+        ]
+      ],
+      "forbidden_terms": [],
+      "fixed_window_answer": "",
+      "rolling_summary_answer": "周日6人份，平时4人份",
+      "fixed_window_hit": false,
+      "rolling_summary_hit": true,
+      "fixed_window_stale_value": false,
+      "rolling_summary_stale_value": false
+    }
+  ]
+}

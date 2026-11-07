@@ -1,0 +1,4101 @@
+{
+  "generated_at": "2026-10-14T06:29:11.724348+00:00",
+  "model": "qwen3.7-plus",
+  "history_turns": 112,
+  "recent_window_turns": 6,
+  "compression_cycles": 1,
+  "batch_turns": 0,
+  "source_context_tokens": 1953,
+  "source_information_units": 490,
+  "full_history_information_density": 250.89605734767025,
+  "context_compression_rate": 0.6620583717357911,
+  "density_gain_over_full_history": 1.5605194805194804,
+  "additional_tokens_over_window": 496,
+  "information_gain_over_window": 326,
+  "marginal_information_density": 657.258064516129,
+  "summary_chars": 1488,
+  "summary_text": "**【FamilyOS 对话记忆摘要】**\n\n**一、 饮食禁忌与过敏史（买菜/推荐菜需严格避开）**\n*   **小满/朵朵**：花生（起疹子）\n*   **安安/元宝**：虾（喉咙发痒）\n*   **晨晨/糖糖**：芒果（胃痛）\n*   **乐乐/豆豆**：芝麻（呼吸不适）\n*   **宁宁/木木**：腰果（嘴唇肿）\n*   **可可/天天**：牛肉（起疹子）\n*   **团团/阳阳**：乳糖（喉咙发痒）\n*   **悠悠/月月**：菠萝（胃痛）\n*   **果果/橙橙**：蟹（呼吸不适）\n*   **星星/米粒**：蜂蜜（嘴唇肿）\n\n**二、 家庭成员年龄与常驻地（用于接送与日程安排）**\n*   **女儿**（小满/朵朵）：8岁，小学\n*   **儿子**（安安/元宝）：12岁，中学\n*   **爸爸**（晨晨/糖糖）：68岁，社区医院\n*   **妈妈**（乐乐/豆豆）：63岁，家里\n*   **奶奶**（宁宁/木木）：70岁，家里\n*   **外婆**（可可/天天）：55岁，公司\n*   **伴侣**（团团/阳阳）：34岁，公司\n*   **弟弟**（悠悠/月月）：28岁，大学\n*   **姐姐**（果果/橙橙）：30岁，公司\n*   **爷爷**（星星/米粒）：72岁，家里\n\n**三、 待办日程与提醒（未完成，需提前提醒）**\n*   **周一 10:00**：爸爸去社区医院复诊（小满/朵朵）\n*   **周二 15:00**：妈妈去政务大厅办证（安安/元宝）\n*   **周三 19:00**：去学校接孩子（晨晨/糖糖）\n*   **周四 09:00**：去药房取药（乐乐/豆豆）\n*   **周五 14:00**：伴侣去公司开会（宁宁/木木）\n*   **周六 11:00**：奶奶去银行缴费（可可/天天）\n*   **周日 18:00**：女儿去诊所做检查（团团/阳阳）\n*   **下周一 16:00**：儿子去药房买药（悠悠/月月）\n*   **下周三 08:00**：外婆去牙科看牙（果果/橙橙）\n*   **下周五 20:00**：爷爷去驿站取快递（星星/米粒）\n\n**四、 家居环境偏好（日常安排需保持）**\n*   **卧室**：使用暖色小夜灯\n*   **客厅**：保持安静，不放音乐\n*   **厨房**：少油少盐\n*   **餐厅**：使用四人份餐具\n*   **书房**：桌面保持整洁\n*   **阳台**：早上通风\n*   **卫生间**：夜间不开强光\n*   **玄关**：鞋子分类摆放\n*   **儿童房**：21:00后保持安静\n*   **储物间**：每月整理一次\n\n**五、 各项预算上限（超支需征得同意）**\n*   **买菜**：800元/月 | **交通**：1200元/月 | **孩子兴趣班**：600元/月\n*   **宠物**：500元/月 | **药品**：1000元/月 | **日用品**：700元/月\n*   **旅行**：3000元/月 | **网购**：900元/月 | **水电**：400元/月\n*   **家政**：1500元/月\n\n**六、 近期生活状态与琐事记录**\n*   **饮食/采购**：昨日购买西红柿和鸡蛋；今日午餐吃米饭；近期在尝试新早餐搭配；周末打算在家吃饭；下周可能去超市采购。\n*   **家务/维护**：厨房炒锅需清洗；客厅灯泡需更换；家里植物需浇水；周末可能整理储物柜；今日已收到快递。\n*   **其他**：近期在看历史书；明日上午有普通日程。",
+  "summary_cursor": {
+    "created_at": null,
+    "message_id": "ra3"
+  },
+  "categories": {
+    "饮食与健康": {
+      "total": 100,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 80,
+      "fixed_information_recall": 0.02,
+      "compressed_information_recall": 0.8
+    },
+    "家庭与成员": {
+      "total": 80,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 60,
+      "fixed_information_recall": 0.025,
+      "compressed_information_recall": 0.75
+    },
+    "日程与待办": {
+      "total": 100,
+      "fixed_information_retained": 6,
+      "compressed_information_retained": 80,
+      "fixed_information_recall": 0.06,
+      "compressed_information_recall": 0.8
+    },
+    "家庭偏好": {
+      "total": 80,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 76,
+      "fixed_information_recall": 0.025,
+      "compressed_information_recall": 0.95
+    },
+    "财务与计划": {
+      "total": 100,
+      "fixed_information_retained": 56,
+      "compressed_information_retained": 98,
+      "fixed_information_recall": 0.56,
+      "compressed_information_recall": 0.98
+    },
+    "更正与冲突": {
+      "total": 30,
+      "fixed_information_retained": 30,
+      "compressed_information_retained": 30,
+      "fixed_information_recall": 1.0,
+      "compressed_information_recall": 1.0
+    }
+  },
+  "methods": {
+    "fixed_window": {
+      "entities_retained": 30,
+      "entities_total": 210,
+      "entity_recall": 0.14285714285714285,
+      "details_retained": 68,
+      "details_total": 280,
+      "detail_recall": 0.24285714285714285,
+      "information_retained": 98,
+      "information_total": 490,
+      "information_recall": 0.2,
+      "latest_values_retained": 10,
+      "corrections_total": 10,
+      "latest_value_recall": 1.0,
+      "stale_values_retained": 10,
+      "facts_complete": 12,
+      "facts_total": 110,
+      "fact_complete_rate": 0.10909090909090909,
+      "fact_complete_ci95": [
+        0.06351398138853154,
+        0.18105039578114984
+      ],
+      "corrections_safe": 0,
+      "correction_safety_rate": 0.0,
+      "correction_safety_ci95": [
+        0.0,
+        0.2775401687666166
+      ],
+      "context_tokens": 164,
+      "distractions_retained": 0,
+      "distractions_total": 12,
+      "information_density": 597.560975609756,
+      "relations_complete": 12,
+      "relation_complete_rate": 0.10909090909090909
+    },
+    "rolling_summary": {
+      "entities_retained": 208,
+      "entities_total": 210,
+      "entity_recall": 0.9904761904761905,
+      "details_retained": 216,
+      "details_total": 280,
+      "detail_recall": 0.7714285714285715,
+      "information_retained": 424,
+      "information_total": 490,
+      "information_recall": 0.8653061224489796,
+      "latest_values_retained": 10,
+      "corrections_total": 10,
+      "latest_value_recall": 1.0,
+      "stale_values_retained": 10,
+      "facts_complete": 44,
+      "facts_total": 110,
+      "fact_complete_rate": 0.4,
+      "fact_complete_ci95": [
+        0.3133177568006176,
+        0.493431269917208
+      ],
+      "corrections_safe": 0,
+      "correction_safety_rate": 0.0,
+      "correction_safety_ci95": [
+        0.0,
+        0.2775401687666166
+      ],
+      "context_tokens": 660,
+      "distractions_retained": 3,
+      "distractions_total": 12,
+      "information_density": 642.4242424242424,
+      "compression_input_tokens": 3734,
+      "compression_output_tokens": 4067,
+      "compression_latency_seconds": 70.344596958,
+      "relations_complete": 32,
+      "relation_complete_rate": 0.2909090909090909
+    }
+  },
+  "cases": [
+    {
+      "id": "stress_001",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "小满"
+        ],
+        [
+          "花生"
+        ]
+      ],
+      "details": [
+        [
+          "花生"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_002",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "安安"
+        ],
+        [
+          "虾"
+        ]
+      ],
+      "details": [
+        [
+          "虾"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_003",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "晨晨"
+        ],
+        [
+          "芒果"
+        ]
+      ],
+      "details": [
+        [
+          "芒果"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_004",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "乐乐"
+        ],
+        [
+          "芝麻"
+        ]
+      ],
+      "details": [
+        [
+          "芝麻"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_005",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "宁宁"
+        ],
+        [
+          "腰果"
+        ]
+      ],
+      "details": [
+        [
+          "腰果"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_006",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "可可"
+        ],
+        [
+          "牛肉"
+        ]
+      ],
+      "details": [
+        [
+          "牛肉"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_007",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "团团"
+        ],
+        [
+          "乳糖"
+        ]
+      ],
+      "details": [
+        [
+          "乳糖"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_008",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "悠悠"
+        ],
+        [
+          "菠萝"
+        ]
+      ],
+      "details": [
+        [
+          "菠萝"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_009",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "果果"
+        ],
+        [
+          "蟹"
+        ]
+      ],
+      "details": [
+        [
+          "蟹"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_010",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "星星"
+        ],
+        [
+          "蜂蜜"
+        ]
+      ],
+      "details": [
+        [
+          "蜂蜜"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_011",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "小满"
+        ],
+        [
+          "女儿"
+        ]
+      ],
+      "details": [
+        [
+          "八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_012",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "安安"
+        ],
+        [
+          "儿子"
+        ]
+      ],
+      "details": [
+        [
+          "十二岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_013",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "晨晨"
+        ],
+        [
+          "爸爸"
+        ]
+      ],
+      "details": [
+        [
+          "六十八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_014",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "乐乐"
+        ],
+        [
+          "妈妈"
+        ]
+      ],
+      "details": [
+        [
+          "六十三岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_015",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "宁宁"
+        ],
+        [
+          "奶奶"
+        ]
+      ],
+      "details": [
+        [
+          "七十岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_016",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "可可"
+        ],
+        [
+          "外婆"
+        ]
+      ],
+      "details": [
+        [
+          "五十五岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_017",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "团团"
+        ],
+        [
+          "伴侣"
+        ]
+      ],
+      "details": [
+        [
+          "三十四岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_018",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "悠悠"
+        ],
+        [
+          "弟弟"
+        ]
+      ],
+      "details": [
+        [
+          "二十八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_019",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "果果"
+        ],
+        [
+          "姐姐"
+        ]
+      ],
+      "details": [
+        [
+          "三十岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_020",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "星星"
+        ],
+        [
+          "爷爷"
+        ]
+      ],
+      "details": [
+        [
+          "七十二岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_021",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "小满"
+        ],
+        [
+          "爸爸"
+        ]
+      ],
+      "details": [
+        [
+          "周一上午十点"
+        ],
+        [
+          "复诊"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_022",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "安安"
+        ],
+        [
+          "妈妈"
+        ]
+      ],
+      "details": [
+        [
+          "周二下午三点"
+        ],
+        [
+          "办证"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_023",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "晨晨"
+        ],
+        [
+          "孩子"
+        ]
+      ],
+      "details": [
+        [
+          "周三晚上七点"
+        ],
+        [
+          "接孩子"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_024",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "乐乐"
+        ],
+        [
+          "我"
+        ]
+      ],
+      "details": [
+        [
+          "周四上午九点"
+        ],
+        [
+          "取药"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_025",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "宁宁"
+        ],
+        [
+          "伴侣"
+        ]
+      ],
+      "details": [
+        [
+          "周五下午两点"
+        ],
+        [
+          "开会"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_026",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "可可"
+        ],
+        [
+          "奶奶"
+        ]
+      ],
+      "details": [
+        [
+          "周六上午十一点"
+        ],
+        [
+          "缴费"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_027",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "团团"
+        ],
+        [
+          "女儿"
+        ]
+      ],
+      "details": [
+        [
+          "周日晚上六点"
+        ],
+        [
+          "做检查"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_028",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "悠悠"
+        ],
+        [
+          "儿子"
+        ]
+      ],
+      "details": [
+        [
+          "下周一下午四点"
+        ],
+        [
+          "买药"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_029",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "果果"
+        ],
+        [
+          "外婆"
+        ]
+      ],
+      "details": [
+        [
+          "下周三上午八点"
+        ],
+        [
+          "看牙"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_030",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "星星"
+        ],
+        [
+          "爷爷"
+        ]
+      ],
+      "details": [
+        [
+          "下周五晚上八点"
+        ],
+        [
+          "取快递"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_031",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "小满"
+        ],
+        [
+          "卧室"
+        ]
+      ],
+      "details": [
+        [
+          "暖色小夜灯"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_032",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "安安"
+        ],
+        [
+          "客厅"
+        ]
+      ],
+      "details": [
+        [
+          "安静不放音乐"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_033",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "晨晨"
+        ],
+        [
+          "厨房"
+        ]
+      ],
+      "details": [
+        [
+          "少油少盐"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_034",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "乐乐"
+        ],
+        [
+          "餐厅"
+        ]
+      ],
+      "details": [
+        [
+          "四人份餐具"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_035",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "宁宁"
+        ],
+        [
+          "书房"
+        ]
+      ],
+      "details": [
+        [
+          "桌面保持整洁"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_036",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "可可"
+        ],
+        [
+          "阳台"
+        ]
+      ],
+      "details": [
+        [
+          "早上通风"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_037",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "团团"
+        ],
+        [
+          "卫生间"
+        ]
+      ],
+      "details": [
+        [
+          "夜间不开强光"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_038",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "悠悠"
+        ],
+        [
+          "玄关"
+        ]
+      ],
+      "details": [
+        [
+          "鞋子分类摆放"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_039",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "果果"
+        ],
+        [
+          "儿童房"
+        ]
+      ],
+      "details": [
+        [
+          "九点后保持安静"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_040",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "星星"
+        ],
+        [
+          "储物间"
+        ]
+      ],
+      "details": [
+        [
+          "每月整理一次"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_041",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "小满"
+        ],
+        [
+          "家庭买菜"
+        ]
+      ],
+      "details": [
+        [
+          "800",
+          "800元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_042",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "安安"
+        ],
+        [
+          "交通"
+        ]
+      ],
+      "details": [
+        [
+          "1200",
+          "1200元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_043",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "晨晨"
+        ],
+        [
+          "孩子兴趣班"
+        ]
+      ],
+      "details": [
+        [
+          "600",
+          "600元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_044",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "乐乐"
+        ],
+        [
+          "宠物"
+        ]
+      ],
+      "details": [
+        [
+          "500",
+          "500元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_045",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "宁宁"
+        ],
+        [
+          "药品"
+        ]
+      ],
+      "details": [
+        [
+          "1000",
+          "1000元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_046",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "可可"
+        ],
+        [
+          "日用品"
+        ]
+      ],
+      "details": [
+        [
+          "700",
+          "700元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_047",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "团团"
+        ],
+        [
+          "旅行"
+        ]
+      ],
+      "details": [
+        [
+          "3000",
+          "3000元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_048",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "悠悠"
+        ],
+        [
+          "网购"
+        ]
+      ],
+      "details": [
+        [
+          "900",
+          "900元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_049",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "果果"
+        ],
+        [
+          "水电"
+        ]
+      ],
+      "details": [
+        [
+          "400",
+          "400元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_050",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "星星"
+        ],
+        [
+          "家政"
+        ]
+      ],
+      "details": [
+        [
+          "1500",
+          "1500元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_051",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "朵朵"
+        ],
+        [
+          "花生"
+        ]
+      ],
+      "details": [
+        [
+          "花生"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_052",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "元宝"
+        ],
+        [
+          "虾"
+        ]
+      ],
+      "details": [
+        [
+          "虾"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_053",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "糖糖"
+        ],
+        [
+          "芒果"
+        ]
+      ],
+      "details": [
+        [
+          "芒果"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_054",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "豆豆"
+        ],
+        [
+          "芝麻"
+        ]
+      ],
+      "details": [
+        [
+          "芝麻"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_055",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "木木"
+        ],
+        [
+          "腰果"
+        ]
+      ],
+      "details": [
+        [
+          "腰果"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_056",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "天天"
+        ],
+        [
+          "牛肉"
+        ]
+      ],
+      "details": [
+        [
+          "牛肉"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_057",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "阳阳"
+        ],
+        [
+          "乳糖"
+        ]
+      ],
+      "details": [
+        [
+          "乳糖"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_058",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "月月"
+        ],
+        [
+          "菠萝"
+        ]
+      ],
+      "details": [
+        [
+          "菠萝"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_059",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "橙橙"
+        ],
+        [
+          "蟹"
+        ]
+      ],
+      "details": [
+        [
+          "蟹"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_060",
+      "category": "饮食与健康",
+      "entities": [
+        [
+          "米粒"
+        ],
+        [
+          "蜂蜜"
+        ]
+      ],
+      "details": [
+        [
+          "蜂蜜"
+        ],
+        [
+          "过敏"
+        ],
+        [
+          "不要出现"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_061",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "朵朵"
+        ],
+        [
+          "女儿"
+        ]
+      ],
+      "details": [
+        [
+          "八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_062",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "元宝"
+        ],
+        [
+          "儿子"
+        ]
+      ],
+      "details": [
+        [
+          "十二岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_063",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "糖糖"
+        ],
+        [
+          "爸爸"
+        ]
+      ],
+      "details": [
+        [
+          "六十八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_064",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "豆豆"
+        ],
+        [
+          "妈妈"
+        ]
+      ],
+      "details": [
+        [
+          "六十三岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_065",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "木木"
+        ],
+        [
+          "奶奶"
+        ]
+      ],
+      "details": [
+        [
+          "七十岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_066",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "天天"
+        ],
+        [
+          "外婆"
+        ]
+      ],
+      "details": [
+        [
+          "五十五岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_067",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "阳阳"
+        ],
+        [
+          "伴侣"
+        ]
+      ],
+      "details": [
+        [
+          "三十四岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_068",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "月月"
+        ],
+        [
+          "弟弟"
+        ]
+      ],
+      "details": [
+        [
+          "二十八岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_069",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "橙橙"
+        ],
+        [
+          "姐姐"
+        ]
+      ],
+      "details": [
+        [
+          "三十岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_070",
+      "category": "家庭与成员",
+      "entities": [
+        [
+          "米粒"
+        ],
+        [
+          "爷爷"
+        ]
+      ],
+      "details": [
+        [
+          "七十二岁"
+        ],
+        [
+          "岁"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_071",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "朵朵"
+        ],
+        [
+          "爸爸"
+        ]
+      ],
+      "details": [
+        [
+          "周一上午十点"
+        ],
+        [
+          "复诊"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_072",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "元宝"
+        ],
+        [
+          "妈妈"
+        ]
+      ],
+      "details": [
+        [
+          "周二下午三点"
+        ],
+        [
+          "办证"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 1,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_073",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "糖糖"
+        ],
+        [
+          "孩子"
+        ]
+      ],
+      "details": [
+        [
+          "周三晚上七点"
+        ],
+        [
+          "接孩子"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_074",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "豆豆"
+        ],
+        [
+          "我"
+        ]
+      ],
+      "details": [
+        [
+          "周四上午九点"
+        ],
+        [
+          "取药"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_075",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "木木"
+        ],
+        [
+          "伴侣"
+        ]
+      ],
+      "details": [
+        [
+          "周五下午两点"
+        ],
+        [
+          "开会"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_076",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "天天"
+        ],
+        [
+          "奶奶"
+        ]
+      ],
+      "details": [
+        [
+          "周六上午十一点"
+        ],
+        [
+          "缴费"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_077",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "阳阳"
+        ],
+        [
+          "女儿"
+        ]
+      ],
+      "details": [
+        [
+          "周日晚上六点"
+        ],
+        [
+          "做检查"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_078",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "月月"
+        ],
+        [
+          "儿子"
+        ]
+      ],
+      "details": [
+        [
+          "下周一下午四点"
+        ],
+        [
+          "买药"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_079",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "橙橙"
+        ],
+        [
+          "外婆"
+        ]
+      ],
+      "details": [
+        [
+          "下周三上午八点"
+        ],
+        [
+          "看牙"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_080",
+      "category": "日程与待办",
+      "entities": [
+        [
+          "米粒"
+        ],
+        [
+          "爷爷"
+        ]
+      ],
+      "details": [
+        [
+          "下周五晚上八点"
+        ],
+        [
+          "取快递"
+        ],
+        [
+          "提醒"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_081",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "朵朵"
+        ],
+        [
+          "卧室"
+        ]
+      ],
+      "details": [
+        [
+          "暖色小夜灯"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_082",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "元宝"
+        ],
+        [
+          "客厅"
+        ]
+      ],
+      "details": [
+        [
+          "安静不放音乐"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_083",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "糖糖"
+        ],
+        [
+          "厨房"
+        ]
+      ],
+      "details": [
+        [
+          "少油少盐"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_084",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "豆豆"
+        ],
+        [
+          "餐厅"
+        ]
+      ],
+      "details": [
+        [
+          "四人份餐具"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_085",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "木木"
+        ],
+        [
+          "书房"
+        ]
+      ],
+      "details": [
+        [
+          "桌面保持整洁"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_086",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "天天"
+        ],
+        [
+          "阳台"
+        ]
+      ],
+      "details": [
+        [
+          "早上通风"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_087",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "阳阳"
+        ],
+        [
+          "卫生间"
+        ]
+      ],
+      "details": [
+        [
+          "夜间不开强光"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_088",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "月月"
+        ],
+        [
+          "玄关"
+        ]
+      ],
+      "details": [
+        [
+          "鞋子分类摆放"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 0,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_089",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "橙橙"
+        ],
+        [
+          "儿童房"
+        ]
+      ],
+      "details": [
+        [
+          "九点后保持安静"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 1,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_090",
+      "category": "家庭偏好",
+      "entities": [
+        [
+          "米粒"
+        ],
+        [
+          "储物间"
+        ]
+      ],
+      "details": [
+        [
+          "每月整理一次"
+        ],
+        [
+          "保持"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 2,
+      "information_total": 4,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 0,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 1,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_091",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "朵朵"
+        ],
+        [
+          "家庭买菜"
+        ]
+      ],
+      "details": [
+        [
+          "800",
+          "800元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 4,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_092",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "元宝"
+        ],
+        [
+          "交通"
+        ]
+      ],
+      "details": [
+        [
+          "1200",
+          "1200元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_093",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "糖糖"
+        ],
+        [
+          "孩子兴趣班"
+        ]
+      ],
+      "details": [
+        [
+          "600",
+          "600元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_094",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "豆豆"
+        ],
+        [
+          "宠物"
+        ]
+      ],
+      "details": [
+        [
+          "500",
+          "500元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 4,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_095",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "木木"
+        ],
+        [
+          "药品"
+        ]
+      ],
+      "details": [
+        [
+          "1000",
+          "1000元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_096",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "天天"
+        ],
+        [
+          "日用品"
+        ]
+      ],
+      "details": [
+        [
+          "700",
+          "700元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_097",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "阳阳"
+        ],
+        [
+          "旅行"
+        ]
+      ],
+      "details": [
+        [
+          "3000",
+          "3000元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_098",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "月月"
+        ],
+        [
+          "网购"
+        ]
+      ],
+      "details": [
+        [
+          "900",
+          "900元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 0,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 2,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": false,
+      "compressed_relation_complete": false
+    },
+    {
+      "id": "stress_099",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "橙橙"
+        ],
+        [
+          "水电"
+        ]
+      ],
+      "details": [
+        [
+          "400",
+          "400元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 5,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_100",
+      "category": "财务与计划",
+      "entities": [
+        [
+          "米粒"
+        ],
+        [
+          "家政"
+        ]
+      ],
+      "details": [
+        [
+          "1500",
+          "1500元"
+        ],
+        [
+          "预算",
+          "上限"
+        ],
+        [
+          "同意"
+        ]
+      ],
+      "forbidden_terms": [],
+      "entities_total": 2,
+      "details_total": 3,
+      "information_total": 5,
+      "fixed_entities_retained": 2,
+      "compressed_entities_retained": 2,
+      "fixed_details_retained": 3,
+      "compressed_details_retained": 3,
+      "fixed_information_retained": 5,
+      "compressed_information_retained": 5,
+      "fixed_stale_values": 0,
+      "compressed_stale_values": 0,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_101",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "家庭人数"
+        ]
+      ],
+      "details": [
+        [
+          "五个人"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "三个人"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_102",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "常住区域"
+        ]
+      ],
+      "details": [
+        [
+          "城北"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "城西"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_103",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "牛奶偏好"
+        ]
+      ],
+      "details": [
+        [
+          "低脂"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "全脂"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_104",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "旅行月份"
+        ]
+      ],
+      "details": [
+        [
+          "十一月"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "十月"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_105",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "接送时间"
+        ]
+      ],
+      "details": [
+        [
+          "下午五点"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "下午四点"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_106",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "晚餐人数"
+        ]
+      ],
+      "details": [
+        [
+          "六人份"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "四人份"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_107",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "办证日期"
+        ]
+      ],
+      "details": [
+        [
+          "周五上午"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "周四"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_108",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "药物剂量"
+        ]
+      ],
+      "details": [
+        [
+          "半片"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "一片"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_109",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "宠物粮口味"
+        ]
+      ],
+      "details": [
+        [
+          "鸡肉"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "鱼肉"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    },
+    {
+      "id": "stress_110",
+      "category": "更正与冲突",
+      "entities": [
+        [
+          "预算上限"
+        ]
+      ],
+      "details": [
+        [
+          "八百元"
+        ],
+        [
+          "更正",
+          "新值"
+        ]
+      ],
+      "forbidden_terms": [
+        "六百元"
+      ],
+      "entities_total": 1,
+      "details_total": 2,
+      "information_total": 3,
+      "fixed_entities_retained": 1,
+      "compressed_entities_retained": 1,
+      "fixed_details_retained": 2,
+      "compressed_details_retained": 2,
+      "fixed_information_retained": 3,
+      "compressed_information_retained": 3,
+      "fixed_stale_values": 1,
+      "compressed_stale_values": 1,
+      "fixed_relation_complete": true,
+      "compressed_relation_complete": true
+    }
+  ]
+}
