@@ -53,6 +53,14 @@ graph_retrieval:
   database: "neo4j"
   timeout: "5s"
 
+semantic_memory:
+  enabled: true
+  # 用户语义记忆与菜谱 Chunk 必须使用不同 Collection。
+  collection: "familyos_user_semantic_memories_v1"
+  recall_top_k: 5
+  minimum_score: 0.45
+  duplicate_score: 0.95
+
 worker:
   poll_interval: "1s"
   lock_timeout: "5m"

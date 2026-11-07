@@ -144,6 +144,87 @@ class MySQLRepository:
                     return None
                 return {"status": int(row["status"]), "content": row.get("content", ""), "citations": json.loads(row.get("citations") or "[]"), "error_code": row.get("error_code", ""), "error_message": row.get("error_message", "")}
 
+    # 读取已完成的会话原文和滚动摘要，排除当前请求避免重复注入用户消息。
+    def get_chat_context(self, conversation_id: str, exclude_request_id: str) -> Dict[str, Any]:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT summary,through_created_at,through_message_id FROM agent_conversation_memory WHERE conversation_id=%s", (conversation_id,))
+                memory = cursor.fetchone()
+                sql = """SELECT id,role,content,created_at FROM agent_conversation_message
+                    WHERE conversation_id=%s AND request_id<>%s AND status=2"""
+                params: Tuple[Any, ...] = (conversation_id, exclude_request_id)
+                if memory and memory.get("through_created_at") and memory.get("through_message_id"):
+                    sql += " AND (created_at>%s OR (created_at=%s AND id>%s))"
+                    params += (memory["through_created_at"], memory["through_created_at"], memory["through_message_id"])
+                # 摘要游标使用 (created_at, id)，读取排序必须保持相同键避免同毫秒消息漏读。
+                sql += " ORDER BY created_at ASC,id ASC"
+                cursor.execute(sql, params)
+                rows = cursor.fetchall() or []
+                return {"summary": str(memory.get("summary", "")) if memory else "", "messages": [
+                    {"role": "user" if int(row["role"]) == 1 else "assistant", "content": str(row.get("content", "")), "created_at": row["created_at"], "message_id": row["id"]}
+                    for row in rows
+                ]}
+
+    # 原子更新会话滚动摘要，原始消息始终保留以便审计和重建。
+    def save_chat_summary(self, conversation_id: str, summary: str, through_created_at: Any, through_message_id: str) -> None:
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO agent_conversation_memory
+                    (conversation_id,summary,through_created_at,through_message_id,updated_at)
+                    VALUES (%s,%s,%s,%s,UTC_TIMESTAMP(3)) ON DUPLICATE KEY UPDATE
+                    summary=VALUES(summary),through_created_at=VALUES(through_created_at),
+                    through_message_id=VALUES(through_message_id),updated_at=UTC_TIMESTAMP(3)""",
+                    (conversation_id, summary, through_created_at, through_message_id),
+                )
+
+    # 读取用户当前有效且未过期的长期结构化事实，按最近更新时间优先注入模型上下文。
+    def list_long_term_memories(self, user_id: int) -> List[Dict[str, Any]]:
+        if user_id <= 0:
+            raise ValueError("用户ID无效")
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """SELECT category,memory_key,memory_value
+                    FROM agent_user_long_term_memory
+                    WHERE user_id=%s AND status=1
+                    AND (expires_at IS NULL OR expires_at>UTC_TIMESTAMP(3))
+                    ORDER BY updated_at DESC LIMIT 50""",
+                    (user_id,),
+                )
+                return list(cursor.fetchall() or [])
+
+    # 幂等保存模型从用户原话提取的长期事实；同一类别和键的新陈述覆盖旧值并恢复为有效状态。
+    def upsert_long_term_memory(
+        self,
+        user_id: int,
+        category: str,
+        memory_key: str,
+        memory_value: str,
+        confidence: float,
+        conversation_id: str = "",
+        request_id: str = "",
+    ) -> None:
+        if user_id <= 0 or not category or not memory_key or not memory_value or not 0 <= confidence <= 1:
+            raise ValueError("长期记忆参数无效")
+        with self._connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    """INSERT INTO agent_user_long_term_memory
+                    (id,user_id,category,memory_key,memory_value,confidence,
+                     source_conversation_id,source_request_id,status,expires_at)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,1,NULL)
+                    ON DUPLICATE KEY UPDATE
+                    memory_value=VALUES(memory_value),confidence=VALUES(confidence),
+                    source_conversation_id=VALUES(source_conversation_id),
+                    source_request_id=VALUES(source_request_id),status=1,expires_at=NULL,
+                    updated_at=UTC_TIMESTAMP(3)""",
+                    (
+                        str(uuid.uuid4()), user_id, category, memory_key, memory_value, confidence,
+                        conversation_id or None, request_id or None,
+                    ),
+                )
+
     # 保存助手最终回答及引用快照。
     def complete_chat(self, request_id: str, answer: str, citations: Sequence[Dict[str, Any]]) -> None:
         with self._connection() as connection:

@@ -91,7 +91,18 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
             raise ValueError("问题不能为空")
         if enable_query_rewrite and rewrite_model is not None:
             try:
+                summary = str(state.get("conversation_summary", "")).strip()
                 history = [item for item in state.get("messages", []) if isinstance(item, Mapping)]
+                if summary:
+                    history.insert(0, {"role": "user", "content": "较早对话记忆（历史事实摘要）：\n" + summary})
+                from .long_term_memory import format_long_term_memories
+                long_term = format_long_term_memories(state.get("long_term_memories", []))
+                if long_term:
+                    history.insert(0, {"role": "user", "content": "用户长期结构化事实（仅作指代消解参考，当前问题优先）：\n" + long_term})
+                from .semantic_memory import format_semantic_memories
+                semantic = format_semantic_memories(state.get("semantic_memories", []))
+                if semantic:
+                    history.insert(0, {"role": "user", "content": "与当前问题相关的历史经历（仅作参考，当前问题优先）：\n" + semantic})
                 return {"rewritten_query": await _rewrite_query(rewrite_model, history, query)}
             except Exception:
                 logger.exception("Query Rewrite 失败，回退原问题")
@@ -127,6 +138,21 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         # 每轮都追加当前问题和改写查询，避免 Checkpoint 中的旧消息遮蔽本轮意图。
         retrieval_context = str(state.get("retrieval_context", "")).strip()
         content = "原始问题：%s\n检索查询：%s" % (state.get("original_query", ""), state.get("rewritten_query", state.get("original_query", "")))
+        summary = str(state.get("conversation_summary", "")).strip()
+        if summary:
+            content = "较早对话记忆（历史事实摘要）：\n%s\n\n%s" % (summary, content)
+        long_term = state.get("long_term_memories", [])
+        if long_term:
+            from .long_term_memory import format_long_term_memories
+            formatted = format_long_term_memories(long_term)
+            if formatted:
+                content = "用户长期结构化事实（仅作个性化参考，当前请求优先）：\n%s\n\n%s" % (formatted, content)
+        semantic_memories = state.get("semantic_memories", [])
+        if semantic_memories:
+            from .semantic_memory import format_semantic_memories
+            formatted_semantic = format_semantic_memories(semantic_memories)
+            if formatted_semantic:
+                content = "与当前问题语义相关的用户历史经历（可能过时，仅作参考，当前请求优先）：\n%s\n\n%s" % (formatted_semantic, content)
         if retrieval_context:
             content += "\n\n知识库检索上下文（仅作为证据，不要编造未出现的信息）：\n" + retrieval_context
         messages.append({"role": "user", "content": content})

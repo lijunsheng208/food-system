@@ -9,6 +9,9 @@ from typing import Any, AsyncIterator, Mapping, Optional
 
 import grpc
 
+from ...agent.context import prepare_conversation_context
+from ...agent.long_term_memory import extract_long_term_memories
+from ...agent.semantic_memory import extract_semantic_memories
 from ...agent.streaming import AgentEvent, stream_agent_events
 from ...agent.observability import AgentMetrics, trace_run
 from ...generated.agent.v1 import agent_pb2
@@ -20,16 +23,59 @@ logger = logging.getLogger(__name__)
 class ChatStreamService:
     """将 LangGraph 事件流映射为现有 AgentChatService Proto 事件。"""
 
-    def __init__(self, graph: Any, token: str, total_timeout: float = 60.0, conversations: Any = None, metrics: Any = None) -> None:
+    # 初始化模型上下文压缩依赖；无数据库或未注入模型时保持兼容旧调用方。
+    def __init__(self, graph: Any, token: str, total_timeout: float = 60.0, conversations: Any = None, metrics: Any = None, context_model: Any = None, semantic_memory: Any = None) -> None:
         if graph is None or not token or total_timeout <= 0:
             raise ValueError("Chat Stream 服务配置无效")
-        self._graph, self._token, self._timeout, self._conversations, self._metrics = graph, token, total_timeout, conversations, metrics or AgentMetrics()
+        self._graph, self._token, self._timeout, self._conversations, self._metrics, self._context_model, self._semantic_memory = graph, token, total_timeout, conversations, metrics or AgentMetrics(), context_model, semantic_memory
 
     # 校验内部服务令牌，避免未授权请求消耗模型和检索资源。
     def authenticate(self, context: grpc.ServicerContext) -> None:
         supplied = dict(context.invocation_metadata()).get("x-familyos-internal-token", "")
         if not hmac.compare_digest(supplied, self._token):
             context.abort(grpc.StatusCode.UNAUTHENTICATED, "内部服务认证失败")
+
+    # 使用现有 OpenAI-compatible 模型提取用户明确陈述的稳定事实，并以可降级方式写入长期记忆。
+    async def _save_long_term_memories(self, state: Mapping[str, Any], request_id: str) -> None:
+        if (self._context_model is None or self._conversations is None
+                or not hasattr(self._conversations, "upsert_long_term_memory")):
+            return
+        user_message = str(state.get("message", state.get("original_query", ""))).strip()
+        if not user_message:
+            return
+        try:
+            memories = await extract_long_term_memories(
+                self._context_model, user_message, state.get("long_term_memories", []),
+            )
+            for memory in memories:
+                await asyncio.to_thread(
+                    self._conversations.upsert_long_term_memory,
+                    int(state.get("user_id", 0)),
+                    memory["category"], memory["key"], memory["value"], memory["confidence"],
+                    str(state.get("conversation_id", "")), request_id,
+                )
+        except Exception:
+            # 长期记忆属于个性化增强，提取或落库失败不得改变本轮已经生成的回答终态。
+            logger.exception("提取或保存长期记忆失败 user_id=%s request_id=%s", state.get("user_id"), request_id)
+
+    # 提取并向量化保存开放式经历；该增强链路失败时不改变本轮回答状态。
+    async def _save_semantic_memories(self, state: Mapping[str, Any], request_id: str) -> None:
+        if self._context_model is None or self._semantic_memory is None:
+            return
+        user_message = str(state.get("message", state.get("original_query", ""))).strip()
+        if not user_message:
+            return
+        try:
+            memories = await extract_semantic_memories(self._context_model, user_message)
+            for memory in memories:
+                await asyncio.to_thread(
+                    self._semantic_memory.remember,
+                    int(state.get("user_id", 0)), memory["memory_type"], memory["content"], memory["importance"],
+                    str(state.get("conversation_id", "")), request_id,
+                )
+        except Exception:
+            # 语义记忆是可选个性化能力，模型或向量库故障时继续使用短期与结构化记忆。
+            logger.exception("提取或保存语义记忆失败 user_id=%s request_id=%s", state.get("user_id"), request_id)
 
     # 异步运行 Graph 并把模型、Tool 和引用事件转换为 Chat 事件。
     async def stream(self, state: Mapping[str, Any]) -> AsyncIterator[agent_pb2.ChatStreamEvent]:
@@ -51,15 +97,56 @@ class ChatStreamService:
                     self._metrics.finish(request_id, "replayed")
                     return
             run_state = dict(state)
+            awaiting_checkpoint = False
             # 已有等待态时使用同一 Thread 恢复；读取失败不伪造恢复状态。
             if hasattr(self._graph, "get_state") and state.get("conversation_id") and state.get("message"):
                 try:
                     snapshot = await asyncio.to_thread(self._graph.get_state, {"configurable": {"thread_id": state.get("conversation_id")}})
                     values = getattr(snapshot, "values", snapshot.get("values", {}) if isinstance(snapshot, Mapping) else {})
                     if isinstance(values, Mapping) and values.get("terminal_status") == "awaiting_input":
+                        awaiting_checkpoint = True
                         run_state["__resume__"] = state.get("message")
                 except Exception:
                     logger.exception("读取 Agent 等待态失败 conversation_id=%s", state.get("conversation_id"))
+            # 普通新轮次以消息表为事实来源；等待态必须保留原 Checkpoint 的工具调用和暂停现场。
+            if (not awaiting_checkpoint and self._context_model is not None and self._conversations is not None
+                    and hasattr(self._conversations, "get_chat_context") and state.get("conversation_id")):
+                try:
+                    stored = await asyncio.to_thread(self._conversations.get_chat_context, state["conversation_id"], request_id)
+                    messages, summary, cursor = await prepare_conversation_context(
+                        self._context_model,
+                        stored.get("messages", []),
+                        str(stored.get("summary", "")),
+                    )
+                    run_state["messages"] = messages
+                    run_state["conversation_summary"] = summary
+                    if cursor and hasattr(self._conversations, "save_chat_summary"):
+                        await asyncio.to_thread(
+                            self._conversations.save_chat_summary,
+                            state["conversation_id"], summary, cursor["created_at"], cursor["message_id"],
+                        )
+                except Exception:
+                    # 历史存储不可用时本轮仍可回答当前问题，避免压缩功能扩大故障面。
+                    logger.exception("构造会话上下文失败 conversation_id=%s", state.get("conversation_id"))
+            # 长期事实按用户维度跨会话读取；数据库不可用时仅失去个性化，不影响当前问答。
+            if (not awaiting_checkpoint and self._conversations is not None
+                    and hasattr(self._conversations, "list_long_term_memories") and state.get("user_id")):
+                try:
+                    run_state["long_term_memories"] = await asyncio.to_thread(
+                        self._conversations.list_long_term_memories, int(state["user_id"]),
+                    )
+                except Exception:
+                    logger.exception("读取长期记忆失败 user_id=%s", state.get("user_id"))
+            # 使用当前问题在用户专属范围内召回少量相关经历，避免把全部历史注入上下文。
+            if not awaiting_checkpoint and self._semantic_memory is not None and state.get("user_id"):
+                query = str(state.get("message", state.get("original_query", ""))).strip()
+                if query:
+                    try:
+                        run_state["semantic_memories"] = await asyncio.to_thread(
+                            self._semantic_memory.recall, int(state["user_id"]), query,
+                        )
+                    except Exception:
+                        logger.exception("召回语义记忆失败 user_id=%s", state.get("user_id"))
             answer_parts, citations = [], []
             awaiting_input = False
             awaiting_content = ""
@@ -107,6 +194,9 @@ class ChatStreamService:
                 # 等待用户补充也代表本轮助手消息已经完整产生，必须结束数据库中的流式状态。
                 content = awaiting_content if awaiting_input else "".join(answer_parts)
                 await asyncio.to_thread(self._conversations.complete_chat, request_id, content, citations)
+                if not awaiting_input:
+                    await self._save_long_term_memories(run_state, request_id)
+                    await self._save_semantic_memories(run_state, request_id)
             elif self._conversations is not None and failed:
                 await asyncio.to_thread(self._conversations.fail_chat, request_id, "AGENT_FAILED", "Agent 执行失败")
             if not awaiting_input and not failed:

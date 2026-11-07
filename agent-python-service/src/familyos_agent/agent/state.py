@@ -15,6 +15,9 @@ class AgentState(TypedDict, total=False):
     retrieval_intent: str
     retrieval_plan: Dict[str, Any]
     messages: List[Dict[str, Any]]
+    conversation_summary: str
+    long_term_memories: List[Dict[str, Any]]
+    semantic_memories: List[Dict[str, Any]]
     tool_calls: List[Dict[str, Any]]
     tool_results: List[Dict[str, Any]]
     documents: List[Any]

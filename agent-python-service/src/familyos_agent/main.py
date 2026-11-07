@@ -12,7 +12,7 @@ from .clients import AsyncOpenAIChatModel, BGEM3EmbeddingClient, DocumentDownloa
 from .config import load_config
 from .indexing import DocumentIndexer, DocumentWorker
 from .parsing import ParserRegistry
-from .repositories import MilvusCollectionManager, MilvusVectorRepository, MySQLRepository
+from .repositories import MilvusCollectionManager, MilvusSemanticMemoryRepository, MilvusVectorRepository, MySQLRepository
 from .retrieval import BGEChunkReranker, DashScopeReranker, HybridRetriever, MilvusHybridRetriever, MilvusParentChildRetriever
 from .graph_rag import ControlledRetriever, LLMGraphExtractor, LLMIntentClassifier
 from .graph_rag.llm_client import SyncOpenAIModel
@@ -37,6 +37,14 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         embeddings = BGEM3EmbeddingClient(config.rag.embedding.model_name, config.rag.embedding.batch_size, config.rag.embedding.use_fp16, config.rag.embedding.device)
     else:
         raise ValueError("阶段 B 仅支持 embedding.provider=bge-m3")
+    semantic_memory = None
+    if config.semantic_memory.enabled:
+        # 用户开放式经历使用独立 Collection，复用现有 BGE-M3 并保持 user_id 强隔离。
+        semantic_memory = MilvusSemanticMemoryRepository(
+            milvus._client, config.rag.milvus, config.semantic_memory,
+            embeddings, config.rag.embedding.dimensions,
+        )
+        semantic_memory.ensure_ready()
     base_retriever = MilvusHybridRetriever(milvus._client, config.rag.milvus.collection, embeddings, config.rag.embedding.dimensions, config.rag.milvus.rrf_k, config.rag.milvus.candidate_limit)
     reranker = None
     retriever: HybridRetriever = base_retriever
@@ -104,7 +112,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     start_http_server(config.chat.metrics_port)
     checkpointer = build_checkpointer(config.chat.checkpointer_dsn or config.database.dsn)
     chat_graph = build_agent_graph(chat_model, registry, config.chat.max_steps, config.chat.max_tool_calls, enable_query_rewrite=config.chat.enable_query_rewrite, checkpointer=checkpointer, max_user_interrupts=config.chat.max_user_interrupts, metrics=metrics, rewrite_model=rewrite_model, controlled_retriever=controlled_retriever)
-    chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql, metrics), mysql, config.chat.max_workers)
+    chat_server = AgentChatGrpcServer(config.chat.port, ChatStreamService(chat_graph, config.chat.token, config.chat.timeout, mysql, metrics, chat_model, semantic_memory), mysql, config.chat.max_workers)
     opensearch = OpenSearchRepository(config.rag.opensearch) if config.rag.opensearch.enabled else None
     chunker = ParentChildChunker(config.rag.child_size, config.rag.child_overlap, config.rag.parent_size)
     indexer = DocumentIndexer(mysql, vectors, opensearch, logic, downloader, embeddings, ParserRegistry(), chunker, graph_repository=graph_repository, graph_extractor=graph_extractor)

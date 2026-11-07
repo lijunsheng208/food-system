@@ -4,11 +4,12 @@ from typing import TYPE_CHECKING, Any
 
 from .interfaces import VectorRepository
 from .milvus import MilvusCollectionManager, MilvusVectorRepository
+from .semantic_memory import MilvusSemanticMemoryRepository
 
 if TYPE_CHECKING:
     from .implementations import MySQLRepository
 
-__all__ = ["MilvusCollectionManager", "MilvusVectorRepository", "MySQLRepository", "VectorRepository", "parse_mysql_dsn"]
+__all__ = ["MilvusCollectionManager", "MilvusVectorRepository", "MilvusSemanticMemoryRepository", "MySQLRepository", "VectorRepository", "parse_mysql_dsn"]
 
 
 # __getattr__ 延迟加载数据库驱动，使领域和协议单测无需连接器也能导入。

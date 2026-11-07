@@ -95,6 +95,17 @@ class GraphRetrievalConfig:
 
 
 @dataclass(frozen=True)
+class SemanticMemoryConfig:
+    """描述用户长期语义记忆的独立 Collection 和召回边界。"""
+
+    enabled: bool = True
+    collection: str = "familyos_user_semantic_memories_v1"
+    recall_top_k: int = 5
+    minimum_score: float = 0.45
+    duplicate_score: float = 0.95
+
+
+@dataclass(frozen=True)
 class EmbeddingConfig:
     """描述 OpenAI-compatible Embedding 接口。"""
 
@@ -180,6 +191,7 @@ class AppConfig:
     chat: ChatConfig
     graph_extraction: GraphExtractionConfig
     graph_retrieval: GraphRetrievalConfig
+    semantic_memory: SemanticMemoryConfig
     rag: RAGConfig
 
 
@@ -223,6 +235,7 @@ def load_config(path: Optional[str] = None) -> AppConfig:
     chat = _section(data, "chat")
     graph_extraction = _section(data, "graph_extraction")
     graph_retrieval = _section(data, "graph_retrieval")
+    semantic_memory = _section(data, "semantic_memory")
     rag = _section(data, "rag")
     embedding = _section(rag, "embedding")
     milvus = _section(rag, "milvus")
@@ -258,6 +271,13 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         chat=ChatConfig(int(_env("CHAT_PORT", chat.get("port", 50054))), str(_env("CHAT_TOKEN", chat.get("token", ""))), int(_env("CHAT_MAX_WORKERS", chat.get("max_workers", 8))), str(_env("CHAT_BASE_URL", chat.get("base_url", "https://api.openai.com/v1"))), str(_env("CHAT_API_KEY", chat.get("api_key", ""))), str(_env("CHAT_MODEL", chat.get("model", ""))), _duration(_env("CHAT_TIMEOUT", chat.get("timeout", "90s"))), int(_env("CHAT_MAX_TOKENS", chat.get("max_tokens", 2048))), int(_env("CHAT_MAX_STEPS", chat.get("max_steps", 8))), int(_env("CHAT_MAX_TOOL_CALLS", chat.get("max_tool_calls", 6))), int(_env("CHAT_MAX_USER_INTERRUPTS", chat.get("max_user_interrupts", 3))), str(_env("CHAT_CHECKPOINTER_DSN", chat.get("checkpointer_dsn", ""))), int(_env("CHAT_METRICS_PORT", chat.get("metrics_port", 9108))), str(_env("CHAT_OTEL_ENDPOINT", chat.get("otel_endpoint", ""))), str(_env("CHAT_ENABLE_QUERY_REWRITE", chat.get("enable_query_rewrite", False))).lower() in ("1", "true", "yes"), str(_env("CHAT_REWRITE_BASE_URL", chat.get("rewrite_base_url", ""))), str(_env("CHAT_REWRITE_API_KEY", chat.get("rewrite_api_key", ""))), str(_env("CHAT_REWRITE_MODEL", chat.get("rewrite_model", ""))), _duration(_env("CHAT_REWRITE_TIMEOUT", chat.get("rewrite_timeout", "15s"))), int(_env("CHAT_REWRITE_MAX_TOKENS", chat.get("rewrite_max_tokens", 256)))),
         graph_extraction=GraphExtractionConfig(str(_env("GRAPH_EXTRACTION_ENABLED", graph_extraction.get("enabled", False))).lower() in ("1", "true", "yes"), str(_env("GRAPH_EXTRACTION_BASE_URL", graph_extraction.get("base_url", ""))), str(_env("GRAPH_EXTRACTION_API_KEY", graph_extraction.get("api_key", ""))), str(_env("GRAPH_EXTRACTION_MODEL", graph_extraction.get("model", ""))), _duration(_env("GRAPH_EXTRACTION_TIMEOUT", graph_extraction.get("timeout", "30s"))), int(_env("GRAPH_EXTRACTION_MAX_TOKENS", graph_extraction.get("max_tokens", 1200))), float(_env("GRAPH_EXTRACTION_CONFIDENCE_THRESHOLD", graph_extraction.get("confidence_threshold", 0.7)))),
         graph_retrieval=GraphRetrievalConfig(str(_env("GRAPH_RETRIEVAL_ENABLED", graph_retrieval.get("enabled", False))).lower() in ("1", "true", "yes"), str(_env("GRAPH_RETRIEVAL_URI", graph_retrieval.get("uri", ""))), str(_env("GRAPH_RETRIEVAL_USER", graph_retrieval.get("user", ""))), str(_env("GRAPH_RETRIEVAL_PASSWORD", graph_retrieval.get("password", ""))), str(_env("GRAPH_RETRIEVAL_DATABASE", graph_retrieval.get("database", "neo4j"))), _duration(_env("GRAPH_RETRIEVAL_TIMEOUT", graph_retrieval.get("timeout", "5s")))),
+        semantic_memory=SemanticMemoryConfig(
+            str(_env("SEMANTIC_MEMORY_ENABLED", semantic_memory.get("enabled", True))).lower() in ("1", "true", "yes"),
+            str(_env("SEMANTIC_MEMORY_COLLECTION", semantic_memory.get("collection", "familyos_user_semantic_memories_v1"))),
+            int(_env("SEMANTIC_MEMORY_RECALL_TOP_K", semantic_memory.get("recall_top_k", 5))),
+            float(_env("SEMANTIC_MEMORY_MINIMUM_SCORE", semantic_memory.get("minimum_score", 0.45))),
+            float(_env("SEMANTIC_MEMORY_DUPLICATE_SCORE", semantic_memory.get("duplicate_score", 0.95))),
+        ),
         rag=RAGConfig(
             int(_env("RAG_CHILD_SIZE", rag.get("child_size", 500))),
             int(_env("RAG_CHILD_OVERLAP", rag.get("child_overlap", 50))),
@@ -324,6 +344,8 @@ def load_config(path: Optional[str] = None) -> AppConfig:
         raise ValueError("启用图实体抽取时模型配置必须完整")
     if result.graph_retrieval.enabled and (not result.graph_retrieval.uri or not result.graph_retrieval.user or not result.graph_retrieval.password or result.graph_retrieval.timeout <= 0):
         raise ValueError("启用图检索时 Neo4j 配置必须完整")
+    if result.semantic_memory.enabled and (result.semantic_memory.collection != "familyos_user_semantic_memories_v1" or result.semantic_memory.recall_top_k <= 0 or not 0 <= result.semantic_memory.minimum_score <= result.semantic_memory.duplicate_score <= 1):
+        raise ValueError("语义记忆 Collection 或召回参数无效")
     embedding_ready = result.rag.embedding.model_name if result.rag.embedding.provider == "bge-m3" else (result.rag.embedding.api_key and result.rag.embedding.model)
     if not embedding_ready:
         raise ValueError("Embedding 模型配置必须完整")
