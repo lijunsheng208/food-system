@@ -72,6 +72,14 @@ class ParentChildChunker:
                 "unstructured_parent_id": tree_parent_id if not tree_parent_id.startswith("fallback:") else None,
                 "element_ids": [block.element_id for block in blocks if block.element_id],
             }
+            # 每个元素的真实来源单独保存，混排 PDF 的坐标不会被父块页码范围替代。
+            parent_metadata["source_elements"] = [
+                {"element_id": block.element_id, "page_number": block.page_number,
+                 **{key: block.metadata[key] for key in ("coordinates", "coordinate_scope", "ocr_enabled", "ocr_engine", "ocr_languages", "ocr_source_type", "image_id", "image_source_xpath") if key in block.metadata}}
+                for block in blocks
+            ]
+            if len(blocks) == 1 and blocks[0].metadata.get("ocr_source_type") == "docx_image":
+                parent_metadata.update(blocks[0].metadata)
             table = blocks[0] if len(blocks) == 1 and blocks[0].block_type == "table" else None
             if table is not None:
                 parent_metadata.update(table.metadata)
@@ -96,8 +104,9 @@ class ParentChildChunker:
 
     # 按直接 parent_id 聚合元素；没有树关系的顶层元素按长度回退聚合。
     def _group_parent_blocks(self, blocks: Sequence[DocumentBlock]) -> List[Tuple[str, List[DocumentBlock]]]:
-        tables = [("table:%d" % block.order, [block]) for block in blocks if block.block_type == "table"]
-        blocks = [block for block in blocks if block.block_type != "table"]
+        # 图片 OCR 正文独立成块，避免与普通段落聚合后丢失图片来源及 XML 锚点。
+        tables = [("source:%d" % block.order, [block]) for block in blocks if block.block_type == "table" or block.metadata.get("ocr_source_type") == "docx_image"]
+        blocks = [block for block in blocks if block.block_type != "table" and block.metadata.get("ocr_source_type") != "docx_image"]
         by_id = {block.element_id: block for block in blocks if block.element_id}
         referenced_ids = {block.parent_id for block in blocks if block.parent_id}
         grouped: Dict[str, List[DocumentBlock]] = {}

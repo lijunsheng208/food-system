@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Protocol, Sequence, Tuple
 
+from .document_ocr import OCR_AGENT, OCR_LANGUAGES, expand_docx_images, prepare_docx_images
 from .domain import DocumentBlock, ParsedDocument, PermanentDocumentError, SourceDocument
 
 
@@ -103,19 +104,30 @@ class UnstructuredParser:
     def parse(self, source: SourceDocument) -> ParsedDocument:
         try:
             elements = self._partition(source)
+            blocks = self._convert_elements(elements)
         except PermanentDocumentError:
             raise
         except Exception as exc:
             raise PermanentDocumentError("DOCUMENT_PARSE_FAILED", "文档解析失败", str(exc)) from exc
-        blocks = self._convert_elements(elements)
         if not blocks:
             raise PermanentDocumentError("DOCUMENT_EMPTY", "文档未提取到有效文本")
         title = next((block.text for block in blocks if block.block_type == "heading"), Path(source.filename).stem)
         page_count = max((block.page_number or 0 for block in blocks), default=0)
         metadata: Dict[str, Any] = {
             "source_format": self._source_format,
-            "parser_version": "unstructured-tables-v4",
+            "parser_version": "unstructured-document-ocr-v5",
         }
+        # 无文字的装饰图片允许忽略，但必须在解析结果中留下明确的识别状态。
+        image_results = {
+            element.metadata.image_id: {
+                "image_id": element.metadata.image_id,
+                "status": element.metadata.ocr_status,
+                "source_xpath": element.metadata.image_source_xpath,
+            }
+            for element in elements if getattr(element.metadata, "ocr_source_type", None) == "docx_image"
+        }
+        if image_results:
+            metadata["image_ocr_results"] = list(image_results.values())
         if page_count:
             metadata["page_count"] = page_count
         return ParsedDocument(title, blocks, metadata)
@@ -174,7 +186,7 @@ class UnstructuredParser:
                     metadata["table_header_source"] = "markdown_first_row"
                 metadata["table_id"] = element_id
                 # 仅携带同章节紧邻的说明，保留表外单位和适用条件，不猜测数值含义。
-                if blocks and blocks[-1].block_type == "paragraph" and blocks[-1].heading_path == heading_path:
+                if not metadata.get("table_context") and blocks and blocks[-1].block_type == "paragraph" and blocks[-1].heading_path == heading_path:
                     metadata["table_context"] = blocks[-1].text
             blocks.append(DocumentBlock(
                 _CATEGORY_TYPES.get(category, category.lower()),
@@ -229,8 +241,10 @@ class DocxParser(UnstructuredParser):
         from docx.oxml.ns import qn
         from unstructured.partition.docx import partition_docx
 
-        elements = partition_docx(file=io.BytesIO(source.content), infer_table_structure=True)
-        tables = Document(io.BytesIO(source.content)).tables
+        document = Document(io.BytesIO(source.content))
+        content, images = prepare_docx_images(document)
+        elements = partition_docx(file=io.BytesIO(content), infer_table_structure=True)
+        tables = document.tables
         extracted = [element for element in elements if element.category == "Table"]
         if len(tables) != len(extracted):
             raise ValueError("Word 表格数量与解析输出不一致，无法可靠关联来源")
@@ -246,7 +260,7 @@ class DocxParser(UnstructuredParser):
                 element.metadata.table_header_source = "word_repeat_header"
             # Unstructured 的 HTML 是规范化表示，原始 OOXML 用于追溯合并单元格等来源信息。
             element.metadata.table_source_xml = table._tbl.xml
-        return elements
+        return expand_docx_images(elements, images)
 
 
 class PdfParser(UnstructuredParser):
@@ -266,9 +280,17 @@ class PdfParser(UnstructuredParser):
             strategy="hi_res",
             infer_table_structure=True,
             include_page_breaks=False,
-            languages=["chi_sim", "eng"],
+            languages=list(OCR_LANGUAGES),
+            ocr_agent=OCR_AGENT,
+            table_ocr_agent=OCR_AGENT,
+            ocr_mode="entire_page",
         )
         for element in elements:
+            # 高精度流程合并整页 OCR 和原生文字，不额外扫描图片再重复追加识别文本。
+            element.metadata.ocr_enabled = True
+            element.metadata.ocr_engine = "tesseract"
+            element.metadata.ocr_languages = list(OCR_LANGUAGES)
+            element.metadata.coordinate_scope = "pdf_page"
             if element.category == "Table":
                 element.metadata.table_parser = "unstructured-hi_res"
                 # 无明确表头语义时只重复首行上下文，不从数据范围中排除首行。

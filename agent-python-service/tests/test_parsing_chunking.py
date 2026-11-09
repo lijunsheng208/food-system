@@ -65,7 +65,7 @@ class ParsingChunkingTest(unittest.TestCase):
         self.assertEqual([block.block_type for block in parsed.blocks], ["heading", "heading", "paragraph", "table"])
         self.assertEqual(parsed.blocks[2].heading_path, ("主标题", "子标题"))
         self.assertEqual(parsed.blocks[2].parent_id, "section")
-        self.assertEqual(parsed.metadata["parser_version"], "unstructured-tables-v4")
+        self.assertEqual(parsed.metadata["parser_version"], "unstructured-document-ocr-v5")
 
     # Word 解析器应走同一 Unstructured 元素转换逻辑。
     def test_docx_uses_unstructured_elements(self) -> None:
