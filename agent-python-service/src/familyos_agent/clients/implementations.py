@@ -218,6 +218,7 @@ class OpenSearchRepository:
             "user_id": {"type": "long"}, "index_version": {"type": "integer"},
             "active": {"type": "boolean"}, "filename": {"type": "keyword"},
             "heading_path": {"type": "keyword"},
+            "metadata": {"type": "object", "enabled": False},
             "content": {"type": "text", "analyzer": "familyos_index", "search_analyzer": "familyos_search"},
             "content_sha256": {"type": "keyword"},
         }
@@ -233,7 +234,7 @@ class OpenSearchRepository:
                 "knowledge_base_id": chunk.knowledge_base_id, "user_id": chunk.user_id,
                 "index_version": chunk.index_version, "active": True,
                 "filename": chunk.metadata.get("filename", ""), "heading_path": chunk.metadata.get("heading_path", []),
-                "content": chunk.content, "content_sha256": chunk.content_sha256,
+                "content": chunk.content, "content_sha256": chunk.content_sha256, "metadata": chunk.metadata,
             }, ensure_ascii=False, separators=(",", ":")))
         response = self._client.post("/_bulk", content=("\n".join(lines) + "\n").encode("utf-8"), headers={"Content-Type": "application/x-ndjson"})
         response.raise_for_status()

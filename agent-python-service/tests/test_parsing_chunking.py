@@ -1,5 +1,6 @@
 """解析器和父子切片器的无外部服务测试。"""
 
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -64,7 +65,7 @@ class ParsingChunkingTest(unittest.TestCase):
         self.assertEqual([block.block_type for block in parsed.blocks], ["heading", "heading", "paragraph", "table"])
         self.assertEqual(parsed.blocks[2].heading_path, ("主标题", "子标题"))
         self.assertEqual(parsed.blocks[2].parent_id, "section")
-        self.assertEqual(parsed.metadata["parser_version"], "unstructured-elements-v1")
+        self.assertEqual(parsed.metadata["parser_version"], "structured-tables-v3")
 
     # Word 解析器应走同一 Unstructured 元素转换逻辑。
     def test_docx_uses_unstructured_elements(self) -> None:
@@ -103,6 +104,63 @@ class ParsingChunkingTest(unittest.TestCase):
         parents, _ = ParentChildChunker(20, 2, 40, splitter=FakeSplitter()).chunk(source("ignored"), parsed)
         self.assertEqual(len(parents), 2)
         self.assertTrue(all(parent.metadata["unstructured_parent_id"] is None for parent in parents))
+
+    # 真实 Markdown 样本验证识别、结构、表外条件和检索文本的完整链路。
+    def test_real_markdown_table(self) -> None:
+        content = (Path(__file__).parent / "fixtures/tables/nutrition.md").read_text()
+        parsed = MarkdownParser().parse(source(content))
+        table = next(block for block in parsed.blocks if block.block_type == "table")
+        self.assertEqual(table.metadata["table_structure_status"], "parsed")
+        _, children = ParentChildChunker(300, 20, 1000, splitter=FakeSplitter()).chunk(source(content), parsed)
+        child = next(child for child in children if child.metadata.get("block_type") == "table")
+        self.assertIn("鸡蛋 | 144 | 13.3", child.content)
+        self.assertIn("适用于生鲜可食部分", child.content)
+        self.assertEqual((child.metadata["row_start"], child.metadata["row_end"]), (2, 3))
+        self.assertNotIn("table_rows", child.metadata)
+
+    # 规则表格按行切分时，单位、数据行和引用序号必须完整保留。
+    def test_table_rows_preserve_headers_and_provenance(self) -> None:
+        html = "<table><caption>每100克</caption><tr><th>食材</th><th>热量（kcal）</th></tr>" + "".join("<tr><td>食材%d</td><td>%d</td></tr>" % (i, i) for i in range(12)) + "</table>"
+        elements = [FakeElement("section", "Title", "营养"), FakeElement("table", "Table", "扁平文本", parent_id="section", text_as_html=html, page_number=2)]
+        with patch.object(MarkdownParser, "_partition", return_value=elements):
+            parsed = MarkdownParser().parse(source("ignored"))
+        parents, children = ParentChildChunker(85, 5, 200, splitter=FakeSplitter()).chunk(source("ignored"), parsed)
+        tables = [child for child in children if child.metadata.get("block_type") == "table"]
+        self.assertGreater(len(tables), 1)
+        covered = []
+        for child in tables:
+            self.assertIn("热量（kcal）", child.content)
+            self.assertIn("每100克", child.content)
+            self.assertIn("营养", child.content)
+            self.assertLessEqual(len(child.content), 85)
+            self.assertEqual(child.metadata["page_start"], 2)
+            self.assertEqual(child.metadata["table_id"], "table")
+            covered.extend(range(child.metadata["row_start"], child.metadata["row_end"] + 1))
+        self.assertEqual(covered, list(range(2, 14)))
+        parent = next(parent for parent in parents if parent.metadata.get("block_type") == "table")
+        self.assertEqual(parent.metadata["text_as_html"], html)
+        self.assertTrue(all("扁平文本" not in parent.content for parent in parents if parent.metadata.get("block_type") != "table"))
+
+    # 合并单元格展开后保持列关系，短表只生成一个子块。
+    def test_short_table_and_merged_cells(self) -> None:
+        html = '<table><tr><th>类别</th><th>数值（g）</th></tr><tr><td rowspan="2">蔬菜</td><td>1</td></tr><tr><td>2</td></tr></table>'
+        with patch.object(MarkdownParser, "_partition", return_value=[FakeElement("t", "Table", "原文", text_as_html=html)]):
+            parsed = MarkdownParser().parse(source("ignored"))
+        self.assertEqual(parsed.blocks[0].metadata["table_rows"], [["类别", "数值（g）"], ["蔬菜", "1"], ["蔬菜", "2"]])
+        _, children = ParentChildChunker(100, 5, 200, splitter=FakeSplitter()).chunk(source("ignored"), parsed)
+        self.assertEqual(len(children), 1)
+        self.assertIn("蔬菜 | 2", children[0].content)
+
+    # 缺失结构不能伪造行号，超长行必须完整保存并明确标记预算例外。
+    def test_unavailable_structure_and_oversized_row(self) -> None:
+        for html in [None, '<table><tr><td>' + "甲" * 150 + '</td></tr></table>']:
+            with patch.object(DocxParser, "_partition", return_value=[FakeElement("t", "Table", "甲" * 150, text_as_html=html)]):
+                parsed = DocxParser().parse(source("ignored"))
+            _, children = ParentChildChunker(40, 5, 200, splitter=FakeSplitter()).chunk(source("ignored"), parsed)
+            self.assertEqual(len(children), 1)
+            self.assertEqual(children[0].content, "甲" * 150)
+            self.assertTrue(children[0].metadata["table_budget_exceeded"])
+            self.assertEqual(children[0].metadata["row_start"], 1 if html else None)
 
     # 注册表应支持 Markdown、Word 和 PDF，并拒绝未知扩展名。
     def test_registry_supports_unstructured_formats(self) -> None:

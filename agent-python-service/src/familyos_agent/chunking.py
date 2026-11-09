@@ -72,18 +72,32 @@ class ParentChildChunker:
                 "unstructured_parent_id": tree_parent_id if not tree_parent_id.startswith("fallback:") else None,
                 "element_ids": [block.element_id for block in blocks if block.element_id],
             }
+            table = blocks[0] if len(blocks) == 1 and blocks[0].block_type == "table" else None
+            if table is not None:
+                parent_metadata.update(table.metadata)
+                parent_metadata.update({"block_type": "table", "table_id": table.metadata.get("table_id") or table.element_id or "table:%d" % table.order})
+            parent_metadata["chunker_version"] = "table-rows-v2"
             parent = ParentChunk(parent_id, source.document_id, source.knowledge_base_id, source.user_id, source.index_version, parent_index, content, _digest(content), parent_metadata)
             parents.append(parent)
-            for local_index, child_text in enumerate(self._split_child_text(content)):
+            pieces = self._split_table(table) if table is not None else [(text, {}) for text in self._split_child_text(content)]
+            for local_index, (child_text, table_metadata) in enumerate(pieces):
                 child_index = len(children)
                 child_id = str(uuid.uuid5(_CHUNK_NAMESPACE, "%d:%d:child:%d:%s" % (source.document_id, source.index_version, child_index, _digest(child_text))))
                 child_metadata = dict(parent_metadata)
+                # 原始 HTML 与完整网格只保存在父块，避免每个子块重复整个长表。
+                if table is not None:
+                    child_metadata.pop("text_as_html", None)
+                    child_metadata.pop("table_rows", None)
+                    child_metadata.pop("table_source_xml", None)
+                child_metadata.update(table_metadata)
                 child_metadata.update({"parent_id": parent_id, "parent_index": parent_index, "child_index_in_parent": local_index})
                 children.append(ChildChunk(child_id, parent_id, source.document_id, source.knowledge_base_id, source.user_id, source.index_version, child_index, child_text, _digest(child_text), child_metadata))
         return parents, children
 
     # 按直接 parent_id 聚合元素；没有树关系的顶层元素按长度回退聚合。
     def _group_parent_blocks(self, blocks: Sequence[DocumentBlock]) -> List[Tuple[str, List[DocumentBlock]]]:
+        tables = [("table:%d" % block.order, [block]) for block in blocks if block.block_type == "table"]
+        blocks = [block for block in blocks if block.block_type != "table"]
         by_id = {block.element_id: block for block in blocks if block.element_id}
         referenced_ids = {block.parent_id for block in blocks if block.parent_id}
         grouped: Dict[str, List[DocumentBlock]] = {}
@@ -96,7 +110,7 @@ class ParentChildChunker:
                 grouped[block.parent_id] = []
             grouped[block.parent_id].append(block)
 
-        result: List[Tuple[str, List[DocumentBlock]]] = []
+        result: List[Tuple[str, List[DocumentBlock]]] = list(tables)
         for parent_id in order:
             members = grouped[parent_id]
             parent = by_id.get(parent_id)
@@ -119,6 +133,46 @@ class ParentChildChunker:
         if fallback:
             result.append(("fallback:%d" % fallback_index, fallback))
         return sorted(result, key=lambda item: min(block.order for block in item[1]))
+
+    # 按完整数据行分组，重复真实表头和章节；超长行保持完整并显式记录预算例外。
+    def _split_table(self, block: DocumentBlock) -> List[Tuple[str, Dict[str, Any]]]:
+        metadata = block.metadata
+        context = []
+        if block.heading_path:
+            context.append("所属章节：" + " / ".join(block.heading_path))
+        if metadata.get("table_title"):
+            context.append("表格：" + metadata["table_title"])
+        if metadata.get("table_context"):
+            context.append(metadata["table_context"])
+        prefix = "\n".join(context)
+        if prefix:
+            prefix += "\n\n"
+        if metadata.get("table_structure_status") != "parsed":
+            text = prefix + block.text
+            return [(text, {"row_start": None, "row_end": None, "table_budget_exceeded": len(text) > self.child_size})]
+        rows = metadata["table_rows"]
+        count = metadata["table_header_row_count"]
+        headers = [" | ".join(row) for row in rows[:count]]
+        if not count and metadata.get("table_header_source") == "unconfirmed_first_row":
+            headers = ["首行上下文（表头未确认）：" + " | ".join(rows[0])]
+        prefix += "\n".join(headers)
+        if headers:
+            prefix += "\n"
+        pieces: List[Tuple[str, Dict[str, Any]]] = []
+        current: List[str] = []
+        start = count + 1
+        for number, row in enumerate(rows[count:], count + 1):
+            rendered = " | ".join(row)
+            if current and len(prefix + "\n".join(current + [rendered])) > self.child_size:
+                text = prefix + "\n".join(current)
+                pieces.append((text, {"row_start": start, "row_end": number - 1, "table_budget_exceeded": len(text) > self.child_size}))
+                current = []
+                start = number
+            current.append(rendered)
+        text = (prefix + "\n".join(current)).rstrip()
+        if current or not pieces:
+            pieces.append((text, {"row_start": start if current else None, "row_end": len(rows) if current else None, "table_budget_exceeded": len(text) > self.child_size}))
+        return pieces
 
     # 调用 LangChain 递归字符切分器生成带配置重叠的子块。
     def _split_child_text(self, content: str) -> List[str]:
