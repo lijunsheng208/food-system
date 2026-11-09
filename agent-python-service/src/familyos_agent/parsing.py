@@ -2,7 +2,6 @@
 
 import io
 import json
-from html import escape
 from pathlib import Path
 from typing import Any, Dict, List, Protocol, Sequence, Tuple
 
@@ -115,7 +114,7 @@ class UnstructuredParser:
         page_count = max((block.page_number or 0 for block in blocks), default=0)
         metadata: Dict[str, Any] = {
             "source_format": self._source_format,
-            "parser_version": "structured-tables-v3",
+            "parser_version": "unstructured-tables-v4",
         }
         if page_count:
             metadata["page_count"] = page_count
@@ -251,65 +250,30 @@ class DocxParser(UnstructuredParser):
 
 
 class PdfParser(UnstructuredParser):
-    """使用 pdfplumber 提取文字型 PDF 的有线表格和正文，不执行 OCR。"""
+    """使用 Unstructured 高精度策略解析 PDF 版面和表格结构。"""
 
     # 初始化 PDF 来源标识。
     def __init__(self) -> None:
         super().__init__("pdf")
 
-    # 以表格边界分离正文，避免同一行表格数据再次作为普通段落进入索引。
+    # 表格 HTML 依赖 hi_res 模型推理，不使用无法保证结构的 fast 策略。
     def _partition(self, source: SourceDocument) -> Sequence[Any]:
-        import pdfplumber
-        from unstructured.documents.elements import ElementMetadata, NarrativeText, Table
+        from unstructured.partition.pdf import partition_pdf
 
-        elements: List[Any] = []
-        with pdfplumber.open(io.BytesIO(source.content)) as pdf:
-            for page_number, page in enumerate(pdf.pages, 1):
-                tables = [
-                    table for table in page.find_tables()
-                    if len(table.rows) >= 2 and len(table.columns) >= 2
-                    and any(cell and cell.strip() for row in table.extract() for cell in row)
-                ]
-                items = []
-                for index, table in enumerate(tables):
-                    html = _pdf_table_html(table)
-                    metadata = ElementMetadata(page_number=page_number, text_as_html=html)
-                    metadata.table_bbox = list(table.bbox)
-                    metadata.table_parser = "pdfplumber-lines"
-                    # PDF 没有可靠的表头语义，只作为候选上下文重复首行，不从数据行范围中删除。
-                    metadata.table_header_source = "unconfirmed_first_row"
-                    element = Table(text="\n".join(" | ".join(cell or "" for cell in row) for row in table.extract()), element_id="pdf:%d:table:%d" % (page_number, index), metadata=metadata)
-                    items.append((table.bbox[1], table.bbox[0], element))
-                words = page.extract_words()
-                lines: Dict[float, List[Dict[str, Any]]] = {}
-                for word in words:
-                    x, y = (word["x0"] + word["x1"]) / 2, (word["top"] + word["bottom"]) / 2
-                    if any(left <= x <= right and top <= y <= bottom for left, top, right, bottom in (table.bbox for table in tables)):
-                        continue
-                    key = round(word["top"] / 3) * 3
-                    lines.setdefault(key, []).append(word)
-                for top, line in lines.items():
-                    line.sort(key=lambda word: word["x0"])
-                    items.append((top, line[0]["x0"], NarrativeText(text=" ".join(word["text"] for word in line), metadata=ElementMetadata(page_number=page_number))))
-                elements.extend(item[2] for item in sorted(items, key=lambda item: (item[0], item[1])))
-        if not elements:
-            raise PermanentDocumentError("PDF_TEXT_UNAVAILABLE", "PDF 未提取到文字，扫描件需单独进行 OCR")
+        elements = partition_pdf(
+            file=io.BytesIO(source.content),
+            metadata_filename=source.filename,
+            strategy="hi_res",
+            infer_table_structure=True,
+            include_page_breaks=False,
+            languages=["chi_sim", "eng"],
+        )
+        for element in elements:
+            if element.category == "Table":
+                element.metadata.table_parser = "unstructured-hi_res"
+                # 无明确表头语义时只重复首行上下文，不从数据范围中排除首行。
+                element.metadata.table_header_source = "unconfirmed_first_row"
         return elements
-
-
-# 根据实际单元格坐标重建跨度，不将合并单元格误当作空白数据。
-def _pdf_table_html(table: Any) -> str:
-    xs = sorted({value for cell in table.cells for value in (cell[0], cell[2])})
-    ys = sorted({value for cell in table.cells for value in (cell[1], cell[3])})
-    rows: Dict[float, List[Tuple[float, str]]] = {y: [] for y in ys[:-1]}
-    for row, values in zip(table.rows, table.extract()):
-        for cell, value in zip(row.cells, values):
-            if cell is None:
-                continue
-            left, top, right, bottom = cell
-            colspan, rowspan = xs.index(right) - xs.index(left), ys.index(bottom) - ys.index(top)
-            rows[top].append((left, '<td colspan="%d" rowspan="%d">%s</td>' % (colspan, rowspan, escape(value or ""))))
-    return "<table>" + "".join("<tr>" + "".join(cell for _, cell in sorted(rows[y])) + "</tr>" for y in ys[:-1]) + "</table>"
 
 
 class ParserRegistry:

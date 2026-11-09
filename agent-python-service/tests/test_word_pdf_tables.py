@@ -1,6 +1,8 @@
-"""通过真实内存 Word/PDF 文件验证表格识别到行分块的链路。"""
+"""验证真实 Word、PDF 适配契约及可选的高精度模型识别链路。"""
 
 import io
+import os
+from unittest.mock import patch
 import unittest
 
 from docx import Document
@@ -55,7 +57,7 @@ def pdf_sample() -> bytes:
 
 
 class WordPdfTableTest(unittest.TestCase):
-    """验证可识别 Word 和有线 PDF，不依赖 OCR、视觉模型或网络。"""
+    """默认验证 Word 及 PDF 适配契约，真实 PDF 模型验收需显式开启。"""
 
     # Word 标题行和合并值在按行分块后仍可与数值对应。
     def test_word_headers_merged_cells_and_rows(self) -> None:
@@ -77,7 +79,59 @@ class WordPdfTableTest(unittest.TestCase):
         self.assertEqual(covered, list(range(2, 18)))
         self.assertEqual(sum(parent.metadata.get("block_type") == "table" for parent in parents), 1)
 
+    # 使用真实 Unstructured 元素验证高精度参数、HTML、来源信息和按行分块的贯通。
+    def test_pdf_partition_contract(self) -> None:
+        from unstructured.documents.elements import ElementMetadata, Table as ElementTable
+
+        source = document_source(pdf_sample(), ".pdf")
+        html = "<table><tr><th>Food</th><th>Energy(kcal)</th></tr><tr><td>Egg</td><td>144</td></tr></table>"
+        table = ElementTable("Food Energy(kcal) Egg 144", metadata=ElementMetadata(page_number=2, text_as_html=html))
+        with patch("unstructured.partition.pdf.partition_pdf", return_value=[table]) as partition:
+            parsed = PdfParser().parse(source)
+        kwargs = partition.call_args.kwargs
+        self.assertEqual(kwargs["strategy"], "hi_res")
+        self.assertTrue(kwargs["infer_table_structure"])
+        self.assertEqual(kwargs["languages"], ["chi_sim", "eng"])
+        self.assertEqual(kwargs["file"].getvalue(), source.content)
+        self.assertEqual(parsed.blocks[0].metadata["table_rows"][1], ["Egg", "144"])
+        parents, chunks = ParentChildChunker(200, 10, 500).chunk(source, parsed)
+        self.assertEqual(parents[0].metadata["text_as_html"], html)
+        self.assertEqual(chunks[0].metadata["page_start"], 2)
+        self.assertEqual(chunks[0].metadata["row_start"], 2)
+        self.assertIn("Egg | 144", chunks[0].content)
+
+    # PDF 首行无表头标记时保留数据行，缺失 HTML 时明确降级为无可靠结构。
+    def test_pdf_unconfirmed_header_and_missing_html(self) -> None:
+        from unstructured.documents.elements import ElementMetadata, Table as ElementTable
+
+        for html in [None, "<table><tr><td>Food</td><td>kcal</td></tr><tr><td>Egg</td><td>144</td></tr></table>"]:
+            table = ElementTable("Food kcal Egg 144", metadata=ElementMetadata(text_as_html=html))
+            with patch("unstructured.partition.pdf.partition_pdf", return_value=[table]):
+                source = document_source(b"pdf", ".pdf")
+                parsed = PdfParser().parse(source)
+            _, chunks = ParentChildChunker(100, 10, 200).chunk(source, parsed)
+            if html:
+                self.assertEqual(chunks[0].metadata["row_start"], 1)
+                self.assertIn("首行上下文（表头未确认）", chunks[0].content)
+            else:
+                self.assertEqual(chunks[0].metadata["table_structure_status"], "unavailable")
+                self.assertIsNone(chunks[0].metadata["row_start"])
+                self.assertIn("Food kcal Egg 144", chunks[0].content)
+
+    # 解析器异常必须回传明确错误，空结果不能伪造成功。
+    def test_pdf_failure_and_empty_result(self) -> None:
+        source = document_source(b"invalid", ".pdf")
+        with patch("unstructured.partition.pdf.partition_pdf", side_effect=RuntimeError("model unavailable")):
+            with self.assertRaises(PermanentDocumentError) as context:
+                PdfParser().parse(source)
+        self.assertEqual(context.exception.code, "DOCUMENT_PARSE_FAILED")
+        with patch("unstructured.partition.pdf.partition_pdf", return_value=[]):
+            with self.assertRaises(PermanentDocumentError) as context:
+                PdfParser().parse(source)
+        self.assertEqual(context.exception.code, "DOCUMENT_EMPTY")
+
     # PDF 的页码、实际坐标和网格应保留，正文不得再次包含表格数据。
+    @unittest.skipUnless(os.environ.get("FAMILYOS_TEST_PDF_HI_RES") == "1", "需预装 Unstructured 模型、Poppler 和 OCR 依赖")
     def test_pdf_tables_pages_and_no_duplicate_body(self) -> None:
         source = document_source(pdf_sample(), ".pdf")
         parsed = PdfParser().parse(source)
@@ -85,7 +139,7 @@ class WordPdfTableTest(unittest.TestCase):
         self.assertEqual(len(tables), 2)
         self.assertEqual([table.page_number for table in tables], [1, 2])
         self.assertEqual(tables[0].metadata["table_rows"][2], ["Vegetable", "P0Food1", "101"])
-        self.assertEqual(len(tables[0].metadata["table_bbox"]), 4)
+        self.assertIn("coordinates", tables[0].metadata)
         body = "\n".join(block.text for block in parsed.blocks if block.block_type != "table")
         self.assertNotIn("P0Food", body)
         self.assertIn("After table paragraph", body)
@@ -100,7 +154,7 @@ class WordPdfTableTest(unittest.TestCase):
                 self.assertEqual(chunk.metadata["page_start"], table.page_number)
                 self.assertLessEqual(len(chunk.content), 230)
                 covered.extend(range(chunk.metadata["row_start"], chunk.metadata["row_end"] + 1))
-            self.assertEqual(covered, list(range(1, 14)))
+            self.assertEqual(covered, list(range(table.metadata["table_header_row_count"] + 1, 14)))
 
     # 未设置 Word 重复表头标记时不得擅自消耗首行数据。
     def test_word_without_header_marker(self) -> None:
@@ -120,6 +174,7 @@ class WordPdfTableTest(unittest.TestCase):
         self.assertIn("Egg | 144", chunks[0].content)
 
     # 普通 PDF 保留正文；损坏文件必须返回解析失败，而非空成功结果。
+    @unittest.skipUnless(os.environ.get("FAMILYOS_TEST_PDF_HI_RES") == "1", "需预装 Unstructured 模型、Poppler 和 OCR 依赖")
     def test_pdf_plain_text_and_corruption(self) -> None:
         from reportlab.pdfgen.canvas import Canvas
 
@@ -135,6 +190,7 @@ class WordPdfTableTest(unittest.TestCase):
         self.assertEqual(context.exception.code, "DOCUMENT_PARSE_FAILED")
 
     # 空白 PDF 不得伪装为成功的表格解析结果。
+    @unittest.skipUnless(os.environ.get("FAMILYOS_TEST_PDF_HI_RES") == "1", "需预装 Unstructured 模型、Poppler 和 OCR 依赖")
     def test_blank_pdf_reports_missing_text(self) -> None:
         from reportlab.pdfgen.canvas import Canvas
 
@@ -144,7 +200,7 @@ class WordPdfTableTest(unittest.TestCase):
         canvas.save()
         with self.assertRaises(PermanentDocumentError) as context:
             PdfParser().parse(document_source(output.getvalue(), ".pdf"))
-        self.assertEqual(context.exception.code, "PDF_TEXT_UNAVAILABLE")
+        self.assertEqual(context.exception.code, "DOCUMENT_EMPTY")
 
 
 if __name__ == "__main__":
