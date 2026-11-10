@@ -8,6 +8,8 @@ from concurrent import futures
 from typing import Any, AsyncIterator, Mapping, Optional
 
 import grpc
+from langchain_core.messages import RemoveMessage
+from langgraph.graph.message import REMOVE_ALL_MESSAGES
 
 from ...agent.context import prepare_conversation_context
 from ...agent.long_term_memory import extract_long_term_memories
@@ -99,15 +101,23 @@ class ChatStreamService:
             run_state = dict(state)
             awaiting_checkpoint = False
             # 已有等待态时使用同一 Thread 恢复；读取失败不伪造恢复状态。
-            if hasattr(self._graph, "get_state") and state.get("conversation_id") and state.get("message"):
+            if (hasattr(self._graph, "get_state") and getattr(self._graph, "checkpointer", True) is not None
+                    and state.get("conversation_id") and state.get("message")):
                 try:
-                    snapshot = await asyncio.to_thread(self._graph.get_state, {"configurable": {"thread_id": state.get("conversation_id")}})
+                    checkpoint_config = {"configurable": {"thread_id": state["conversation_id"]}}
+                    if hasattr(self._graph, "aget_state"):
+                        snapshot = await self._graph.aget_state(checkpoint_config)
+                    else:
+                        snapshot = await asyncio.to_thread(self._graph.get_state, checkpoint_config)
                     values = getattr(snapshot, "values", snapshot.get("values", {}) if isinstance(snapshot, Mapping) else {})
                     if isinstance(values, Mapping) and values.get("terminal_status") == "awaiting_input":
                         awaiting_checkpoint = True
                         run_state["__resume__"] = state.get("message")
                 except Exception:
                     logger.exception("读取 Agent 等待态失败 conversation_id=%s", state.get("conversation_id"))
+                    raise
+            if not awaiting_checkpoint:
+                run_state.update(long_term_memories=[], semantic_memories=[])
             # 普通新轮次以消息表为事实来源；等待态必须保留原 Checkpoint 的工具调用和暂停现场。
             if (not awaiting_checkpoint and self._context_model is not None and self._conversations is not None
                     and hasattr(self._conversations, "get_chat_context") and state.get("conversation_id")):
@@ -118,7 +128,7 @@ class ChatStreamService:
                         stored.get("messages", []),
                         str(stored.get("summary", "")),
                     )
-                    run_state["messages"] = messages
+                    run_state["messages"] = [RemoveMessage(id=REMOVE_ALL_MESSAGES), *messages]
                     run_state["conversation_summary"] = summary
                     if cursor and hasattr(self._conversations, "save_chat_summary"):
                         await asyncio.to_thread(

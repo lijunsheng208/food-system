@@ -365,7 +365,8 @@ class AgentD2Test(unittest.TestCase):
 
         self.assertEqual([event.type for event in events], ["answer_delta", "completed"])
         self.assertEqual(graph.received_state["conversation_summary"], "长期记忆")
-        self.assertEqual(len(graph.received_state["messages"]), 12)
+        self.assertEqual(graph.received_state["messages"][0].id, "__remove_all__")
+        self.assertEqual(len(graph.received_state["messages"][1:]), 12)
         self.assertEqual(conversations.saved_summaries, [("c1", "长期记忆", 0, "a0")])
 
     def test_loads_and_extracts_long_term_memories_with_existing_model(self):

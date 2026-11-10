@@ -39,7 +39,8 @@ class QueryRewriteTest(unittest.TestCase):
         graph = build_agent_graph(chat, ToolRegistry({"noop": AgentTool("noop", "占位工具", lambda state, args: "ok")}), enable_query_rewrite=True, rewrite_model=RewriteModel())
         result = asyncio.run(graph.ainvoke({"original_query": "这个怎么做？", "messages": []}))
         self.assertEqual(result["rewritten_query"], "咖喱炒蟹怎么做？")
-        self.assertTrue(any(message.get("role") == "user" and "咖喱炒蟹怎么做？" in message.get("content", "") for message in chat.messages if isinstance(message, dict)))
+        self.assertIn("咖喱炒蟹怎么做？", chat.messages[0]["content"])
+        self.assertEqual([message.content for message in result["messages"] if message.type == "human"], ["这个怎么做？"])
 
     def test_rewritten_query_is_used_for_retrieval(self):
         chat = ChatModel()

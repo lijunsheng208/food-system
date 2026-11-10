@@ -5,6 +5,9 @@ import inspect
 import json
 import logging
 from typing import Any, Mapping, Sequence
+from uuid import uuid4
+
+from langchain_core.messages import AIMessage, HumanMessage
 
 from .state import AgentState
 from .tool_registry import ToolRegistry, decode_tool_arguments
@@ -44,7 +47,7 @@ def _tool_calls(message: Any) -> Sequence[Mapping[str, Any]]:
     return calls or ()
 
 
-async def _call_model(model: Any, messages: Sequence[Mapping[str, Any]], registry: ToolRegistry) -> Any:
+async def _call_model(model: Any, messages: Sequence[Any], registry: ToolRegistry) -> Any:
     """调用模型的异步 ainvoke 接口，D2 不再保留同步模型执行路径。"""
     definitions = registry.definitions() + [{"type": "function", "function": {"name": "ask_user", "description": "当缺少关键约束时向用户提问并暂停当前运行", "parameters": {"type": "object", "properties": {"question": {"type": "string"}, "field": {"type": "string"}}, "required": ["question", "field"]}}}]
     bound = model.bind_tools(definitions) if hasattr(model, "bind_tools") else model
@@ -53,7 +56,7 @@ async def _call_model(model: Any, messages: Sequence[Mapping[str, Any]], registr
     raise TypeError("D2 模型必须实现 ainvoke")
 
 
-async def _rewrite_query(model: Any, history: Sequence[Mapping[str, Any]], query: str) -> str:
+async def _rewrite_query(model: Any, history: Sequence[Any], query: str) -> str:
     """调用 Rewrite 模型澄清指代和省略，并在输出异常时由上层回退。"""
     prompt = [{"role": "system", "content": "你是检索查询改写器。结合对话历史，把当前问题改写成一个独立、完整、适合中文向量检索的查询。只使用历史明确事实，保留否定词、数字、单位、过敏原和人数；不要回答问题，不要添加事实。只输出 JSON：{\"standalone_query\":\"...\"}"}]
     prompt.extend(list(history)[-10:])
@@ -84,6 +87,22 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         raise RuntimeError("缺少 langgraph，请安装 agent-python-service 依赖") from exc
     metrics = metrics or AgentMetrics()
 
+    async def initialize_turn(state: AgentState) -> AgentState:
+        """新问题保留会话消息和记忆，清空本轮执行现场；中断恢复不经过此节点。"""
+        query = str(state.get("original_query", "")).strip()
+        if not query:
+            raise ValueError("问题不能为空")
+        return {
+            "messages": [HumanMessage(content=query, id="user:" + (state.get("request_id") or str(uuid4())))],
+            "rewritten_query": "", "retrieval_intent": "", "retrieval_plan": {},
+            "tool_calls": [], "tool_results": [], "documents": [], "retrieval_context": "",
+            "route_strategy": "", "retrieval_fallback_reason": "", "citations": [],
+            "answer": "", "answer_valid": False, "agent_steps": 0, "tool_call_count": 0,
+            "pending_tool_name": "", "pending_tool_arguments": {}, "terminal_status": "",
+            "error_code": "", "error_message": "", "user_constraints": {},
+            "pending_question": {}, "resume_count": 0, "retry_count": 0, "resume_id": "",
+        }
+
     async def rewrite_query(state: AgentState) -> AgentState:
         """按开关调用查询改写模型，失败时回退原问题保障检索可用。"""
         query = str(state.get("original_query", "")).strip()
@@ -92,7 +111,9 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         if enable_query_rewrite and rewrite_model is not None:
             try:
                 summary = str(state.get("conversation_summary", "")).strip()
-                history = [item for item in state.get("messages", []) if isinstance(item, Mapping)]
+                # 改写只需要用户原话与助手回答，不能截断并携带不成对的工具协议消息。
+                history = [message for message in state.get("messages", [])[:-1]
+                           if isinstance(message, HumanMessage) or isinstance(message, AIMessage) and not message.tool_calls]
                 if summary:
                     history.insert(0, {"role": "user", "content": "较早对话记忆（历史事实摘要）：\n" + summary})
                 from .long_term_memory import format_long_term_memories
@@ -135,7 +156,7 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
         if steps > max_steps:
             return {"agent_steps": steps, "terminal_status": "failed", "error_code": "AGENT_MAX_STEPS", "error_message": "Agent 超过最大步数"}
         messages = list(state.get("messages", []))
-        # 每轮都追加当前问题和改写查询，避免 Checkpoint 中的旧消息遮蔽本轮意图。
+        # 摘要、记忆和检索证据仅在模型调用时组装，不作为重复的用户消息落入历史。
         retrieval_context = str(state.get("retrieval_context", "")).strip()
         content = "原始问题：%s\n检索查询：%s" % (state.get("original_query", ""), state.get("rewritten_query", state.get("original_query", "")))
         summary = str(state.get("conversation_summary", "")).strip()
@@ -155,13 +176,12 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
                 content = "与当前问题语义相关的用户历史经历（可能过时，仅作参考，当前请求优先）：\n%s\n\n%s" % (formatted_semantic, content)
         if retrieval_context:
             content += "\n\n知识库检索上下文（仅作为证据，不要编造未出现的信息）：\n" + retrieval_context
-        messages.append({"role": "user", "content": content})
-        response = await _call_model(model, [{"role": "system", "content": _main_agent_system_prompt(registry)}, *messages], registry)
+        response = await _call_model(model, [{"role": "system", "content": _main_agent_system_prompt(registry) + "\n\n本轮参考上下文：\n" + content}, *messages], registry)
         calls = list(_tool_calls(response))
         content = _message_content(response)
         logger.info("Agent 模型决策完成 step=%d tool_call_count=%d content_chars=%d", steps, len(calls), len(content))
         if not calls:
-            return {"messages": messages + [{"role": "assistant", "content": content}], "answer": content, "agent_steps": steps, "terminal_status": "completed"}
+            return {"messages": [AIMessage(content=content)], "answer": content, "agent_steps": steps, "terminal_status": "completed"}
         call = calls[0]
         function = call.get("function", call) if isinstance(call, Mapping) else {}
         name = str(function.get("name", ""))
@@ -179,12 +199,18 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
                 interrupts = int(state.get("resume_count", 0))
                 if interrupts >= max_user_interrupts:
                     return {"agent_steps": steps, "terminal_status": "failed", "error_code": "MAX_USER_INTERRUPTS", "error_message": "用户补充次数超过上限"}
-                return {"agent_steps": steps, "terminal_status": "awaiting_input", "pending_question": {"type": "need_user_input", "question": question, "field": field}}
+                return {"messages": [AIMessage(content=question)], "agent_steps": steps, "terminal_status": "awaiting_input", "pending_question": {"type": "need_user_input", "question": question, "field": field}}
             return {"agent_steps": steps, "terminal_status": "failed", "error_code": "TOOL_NOT_ALLOWED", "error_message": "请求的 Tool 不在白名单中"}
-        normalized_call = {"name": name, "args": normalized_arguments, "id": str(call.get("id", "call_%d" % steps)), "type": "tool_call"}
-        from langchain_core.messages import AIMessage
+        # 在执行前检查预算，超限调用不得产生业务副作用。
+        if int(state.get("tool_call_count", 0)) >= max_tool_calls:
+            return {"agent_steps": steps, "terminal_status": "failed", "error_code": "AGENT_MAX_TOOL_CALLS", "error_message": "Agent 超过 Tool 调用上限"}
+        call_id = str(call.get("id") or uuid4())
+        # 模型可能在下一轮复用调用 ID，避免旧结果被误关联到新的工具调用。
+        if any(getattr(message, "tool_call_id", None) == call_id for message in messages):
+            call_id = str(uuid4())
+        normalized_call = {"name": name, "args": normalized_arguments, "id": call_id, "type": "tool_call"}
         assistant_message = AIMessage(content=content, tool_calls=[normalized_call])
-        return {"messages": messages + [assistant_message], "tool_calls": [normalized_call], "agent_steps": steps, "terminal_status": "tool_pending", "pending_tool_name": name, "pending_tool_arguments": normalized_arguments}
+        return {"messages": [assistant_message], "tool_calls": [normalized_call], "agent_steps": steps, "terminal_status": "tool_pending", "pending_tool_name": name, "pending_tool_arguments": normalized_arguments}
 
     def make_tool(agent_tool: Any) -> Any:
         """将内部 Tool 描述转换为官方 ToolNode 可执行工具。"""
@@ -209,11 +235,12 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
 
     async def after_tools(state: AgentState) -> AgentState:
         """统计官方 ToolNode 已执行的调用次数并继续 Agent 循环。"""
-        last = state.get("messages", [])[-1] if state.get("messages") else None
-        results = [message for message in state.get("messages", []) if getattr(message, "type", "") == "tool" or (isinstance(message, Mapping) and message.get("role") == "tool")]
-        count = len(results)
+        # 仅处理本次派发的调用结果，历史轮次和此前循环的工具消息不重复计数。
+        results = state["messages"][-len(state["tool_calls"]):]
+        if any(getattr(message, "type", "") != "tool" for message in results):
+            raise RuntimeError("工具节点未返回配对的工具结果")
+        count = int(state.get("tool_call_count", 0)) + len(results)
         tool_results = list(state.get("tool_results", []))
-        known_tool_results = {(str(item.get("tool_call_id", "")), str(item.get("content", ""))) for item in tool_results if isinstance(item, Mapping)}
         documents = list(state.get("documents", []))
         citations = list(state.get("citations", []))
         user_constraints = dict(state.get("user_constraints") or {})
@@ -227,10 +254,6 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
                 parsed = json.loads(content) if content.strip().startswith(("{", "[")) else None
             except json.JSONDecodeError:
                 parsed = None
-            result_key = (str(tool_call_id or ""), content)
-            if result_key in known_tool_results:
-                continue
-            known_tool_results.add(result_key)
             tool_results.append({"name": str(tool_name or ""), "tool_call_id": str(tool_call_id or ""), "content": content, "data": parsed})
             if isinstance(parsed, Mapping):
                 for document in parsed.get("documents", []) if isinstance(parsed.get("documents", []), list) else []:
@@ -292,12 +315,11 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
             constraints = dict(state.get("user_constraints") or {})
             constraints[question.get("field", "user_input")] = response
             answer = str(response)
-        messages = list(state.get("messages", []))
-        if answer:
-            messages.append({"role": "user", "content": answer})
+        messages = [HumanMessage(content=answer)] if answer else []
         return {"user_constraints": constraints, "messages": messages, "pending_question": {}, "resume_count": int(state.get("resume_count", 0)) + 1, "terminal_status": "continue"}
 
     graph = StateGraph(AgentState)
+    graph.add_node("initialize_turn", initialize_turn)
     graph.add_node("rewrite_query", rewrite_query)
     graph.add_node("controlled_retrieval", controlled_retrieval)
     graph.add_node("agent_decide", agent_decide)
@@ -306,7 +328,8 @@ def build_agent_graph(model: Any, registry: ToolRegistry, max_steps: int = 8, ma
     graph.add_node("finish", finish)
     graph.add_node("fail", fail)
     graph.add_node("ask_user", ask_user)
-    graph.add_edge(START, "rewrite_query")
+    graph.add_edge(START, "initialize_turn")
+    graph.add_edge("initialize_turn", "rewrite_query")
     graph.add_edge("rewrite_query", "controlled_retrieval")
     graph.add_edge("controlled_retrieval", "agent_decide")
     graph.add_conditional_edges("agent_decide", route_after_decide, {"execute_tool": "execute_tool", "finish": "finish", "fail": "fail", "ask_user": "ask_user"})

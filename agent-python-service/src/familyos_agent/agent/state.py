@@ -1,6 +1,9 @@
 """D1 LangGraph Agent 的可序列化状态。"""
 
-from typing import Any, Dict, List, TypedDict
+from typing import Annotated, Any, Dict, List, TypedDict
+
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
 
 class AgentState(TypedDict, total=False):
@@ -14,7 +17,7 @@ class AgentState(TypedDict, total=False):
     rewritten_query: str
     retrieval_intent: str
     retrieval_plan: Dict[str, Any]
-    messages: List[Dict[str, Any]]
+    messages: Annotated[List[BaseMessage], add_messages]
     conversation_summary: str
     long_term_memories: List[Dict[str, Any]]
     semantic_memories: List[Dict[str, Any]]
